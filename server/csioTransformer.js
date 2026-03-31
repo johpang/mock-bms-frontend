@@ -12,73 +12,11 @@
  * generating UUIDs, timestamps, and other envelope values server-side.
  */
 
-const crypto = require('crypto');
+const { uuid, isoNow, dateOnly, addOneYear, esc, randomNumericId } = require('./csioHelpers');
+const { INSURER_CONFIG, BILLING_METHOD_MAP, MARITAL_STATUS_MAP, PROVINCE_FULL_NAME } = require('./csioTypecodes');
 
-// ── Insurer CompanyCd lookup (verified from XSD) ──────────────
-const INSURER_CONFIG = {
-  aviva:      { companyCd: 'CGUI', insurerId: 'CGUI00001', csioNetId: 'csioxml-aviva@broker.edi.csio.com',      name: 'Aviva' },
-  intact:     { companyCd: 'HAL',  insurerId: 'HAL00001',  csioNetId: 'csioxml-intact@broker.edi.csio.com',     name: 'Intact' },
-  definity:   { companyCd: 'ECON', insurerId: 'ECON00001', csioNetId: 'csioxml-definity@broker.edi.csio.com',   name: 'Definity' },
-  wawanesa:   { companyCd: 'WAWA', insurerId: 'WAWA00001', csioNetId: 'csioxml-wawanesa@broker.edi.csio.com',   name: 'Wawanesa' },
-  caa:        { companyCd: 'CAA',  insurerId: 'CAA00001',  csioNetId: 'csioxml-caa@broker.edi.csio.com',        name: 'CAA' },
-  goreMutual: { companyCd: 'GORE', insurerId: 'GORE00001', csioNetId: 'csioxml-goremutual@broker.edi.csio.com', name: 'Gore Mutual' },
-};
+// -- Coverage XML builders -----------------------------------------------
 
-// ── Value mapping helpers ──────────────────────────────────────
-const BILLING_METHOD_MAP = {
-  directBilling: 'P',   // Company Policy Billed
-  brokerBilled:  'A',   // Agency/Brokerage Billed
-  insuredBilled: 'C',   // Company Account Billed
-};
-
-const MARITAL_STATUS_MAP = {
-  Married:     'M',
-  Single:      'S',
-  Divorced:    'D',
-  Widowed:     'W',
-  'Common Law': 'C',
-  Separated:   'P',
-};
-
-const PROVINCE_FULL_NAME = {
-  ON: 'Ontario', QC: 'Quebec', BC: 'British Columbia', AB: 'Alberta',
-  MB: 'Manitoba', SK: 'Saskatchewan', NS: 'Nova Scotia', NB: 'New Brunswick',
-  PE: 'Prince Edward Island', NL: 'Newfoundland and Labrador',
-  NT: 'Northwest Territories', YT: 'Yukon', NU: 'Nunavut',
-};
-
-// ── Helpers ────────────────────────────────────────────────────
-function uuid() {
-  return crypto.randomUUID();
-}
-
-function isoNow() {
-  return new Date().toISOString().replace('Z', '-05:00');
-}
-
-function dateOnly(dateStr) {
-  if (!dateStr) return '';
-  // Already YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
-  // Try parsing
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return dateStr;
-  return d.toISOString().split('T')[0];
-}
-
-function addOneYear(dateStr) {
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return '';
-  d.setFullYear(d.getFullYear() + 1);
-  return d.toISOString().split('T')[0];
-}
-
-function esc(str) {
-  if (str === null || str === undefined) return '';
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-// ── Coverage XML builder ───────────────────────────────────────
 function coverageWithLimit(code, amount) {
   return `
       <Coverage>
@@ -112,7 +50,7 @@ function coverageNoAmount(code) {
       </Coverage>`;
 }
 
-// ── Main transformer ───────────────────────────────────────────
+// -- Main transformer ----------------------------------------------------
 
 /**
  * Builds a CSIO-compliant XML string from the simplified BMS data model.
@@ -132,7 +70,7 @@ function buildCsioXml(data, insurerId, options = {}) {
   const now = isoNow();
   const sessKey = String(Math.floor(Math.random() * 99999999));
 
-  // ── Extract fields from simplified model ──
+  // -- Extract fields from simplified model --
   const customer = data.customer || {};
   const vehicles = data.vehicles || [];
   const drivers = data.drivers || [];
@@ -147,17 +85,16 @@ function buildCsioXml(data, insurerId, options = {}) {
   const province = customer.province || 'ON';
   const provinceFull = PROVINCE_FULL_NAME[province] || province;
 
-  // Build the request element name
   const rqElementName = isQuote ? 'PersAutoPolicyQuoteInqRq' : 'PersAutoPolicyAddRq';
 
-  // ── InsuredOrPrincipalRoleCd differs between quote and bind ──
+  // InsuredOrPrincipalRoleCd differs between quote and bind
   const roleCds = isQuote
     ? '          <InsuredOrPrincipalRoleCd>csio:5</InsuredOrPrincipalRoleCd>'
     : `          <InsuredOrPrincipalRoleCd>csio:999</InsuredOrPrincipalRoleCd>
           <InsuredOrPrincipalRoleCd>csio:5</InsuredOrPrincipalRoleCd>
           <InsuredOrPrincipalRoleCd>csio:999</InsuredOrPrincipalRoleCd>`;
 
-  // ── Build QuestionAnswer entries from cancellations ──
+  // Build QuestionAnswer entries from cancellations
   const yesNo = (val) => (val === 'Yes' || val === 'yes' || val === true) ? 'YES' : 'NO';
   const questionAnswers = `
         <QuestionAnswer>
@@ -173,8 +110,7 @@ function buildCsioXml(data, insurerId, options = {}) {
           <YesNoCd>${yesNo(cancellations.withoutCoverage)}</YesNoCd>
         </QuestionAnswer>`;
 
-  // ── Build DriverVeh assignments + PersDriver blocks ──
-  // Use first driver or customer as the driver
+  // -- Driver and vehicle references --
   const driverRef = 'Driver_' + Math.floor(100000 + Math.random() * 900000);
   const vehRef = 'Veh_' + Math.floor(10000 + Math.random() * 90000);
 
@@ -187,7 +123,7 @@ function buildCsioXml(data, insurerId, options = {}) {
   const licensedDt = dateOnly(licensing.gDate || licensing.g2Date || '2001-01-01');
   const licenseProvince = licensing.province || province;
 
-  // ── Build PersVeh block (first vehicle) ──
+  // -- Vehicle --
   const veh = vehicles[0] || {};
   const vehMake = veh.make || 'Toyota';
   const vehModel = veh.model || 'Corolla';
@@ -195,7 +131,7 @@ function buildCsioXml(data, insurerId, options = {}) {
   const annualKm = veh.distanceDriven?.annually || veh.annualDistance || '12000';
   const oneWayKm = veh.distanceDriven?.inTrip || veh.commuteDistance || '20';
 
-  // ── Build coverage entries ──
+  // -- Coverages --
   const collEnabled = veh.collisionCoverage || veh.coverage?.collisionCoverage;
   const collDeductible = veh.collisionDeductible || veh.coverage?.collisionDeductible || '1000';
   const compEnabled = veh.comprehensiveCoverage || veh.coverage?.comprehensiveCoverage;
@@ -222,7 +158,7 @@ function buildCsioXml(data, insurerId, options = {}) {
   coveragesXml += coverageWithLimit('20', '25000');
   coveragesXml += coverageWithLimit('27', '75000');
 
-  // ── Assemble full XML ──
+  // -- Assemble full XML --
   const xml = `<?xml version="1.0"?>
 <ACORD xmlns:csio="http://www.CSIO.org/standards/PC_Surety/CSIO1/xml/"
   xmlns="http://www.ACORD.org/standards/PC_Surety/ACORD1/xml/">
@@ -308,7 +244,7 @@ ${questionAnswers}
         <LOBCd>csio:AUTO</LOBCd>
         <PersDriver id="${esc(driverRef)}">
           <ItemIdInfo>
-            <InsurerId>${Array.from({ length: 35 }, () => Math.floor(Math.random() * 10)).join('')}</InsurerId>
+            <InsurerId>${randomNumericId(35)}</InsurerId>
             <csio:FixedId>5000</csio:FixedId>
           </ItemIdInfo>
           <GeneralPartyInfo>

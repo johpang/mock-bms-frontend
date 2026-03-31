@@ -6,7 +6,7 @@
  * and page components.
  */
 import React, { useState } from 'react';
-import { QuoteProvider, useQuote } from './context/QuoteContext';
+import { AutoProvider, useAutoQuote } from './context/AutoContext';
 import { HabProvider, useHab } from './context/HabContext';
 import { Header, Footer, StepIndicator } from './components/Layout';
 
@@ -101,7 +101,7 @@ const styles = {
 
 // ── Auto wizard content ──
 function AutoContent() {
-  const { currentStep } = useQuote();
+  const { currentStep } = useAutoQuote();
 
   React.useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -171,9 +171,9 @@ function App() {
       </div>
 
       {activeLine === 'auto' ? (
-        <QuoteProvider>
+        <AutoProvider>
           <AutoContent />
-        </QuoteProvider>
+        </AutoProvider>
       ) : (
         <HabProvider>
           <HabContent />

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuote } from '../context/QuoteContext';
+import { useAutoQuote } from '../context/AutoContext';
 import { formatCurrency } from '../utils/formatters';
 import MockDisclaimer from '../components/MockDisclaimer';
 
@@ -17,7 +17,7 @@ const BindPage = () => {
     isLoading,
     bindError,
     quoteData,
-  } = useQuote();
+  } = useAutoQuote();
 
   const selectedResponse = quoteResponses?.[selectedInsurerIndex ?? 0];
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuote } from '../context/QuoteContext';
+import { useAutoQuote } from '../context/AutoContext';
 import CheckboxInput from '../components/FormControls/CheckboxInput';
 import MockDisclaimer from '../components/MockDisclaimer';
 
@@ -12,7 +12,7 @@ import MockDisclaimer from '../components/MockDisclaimer';
  */
 const InsurerSelectionPage = () => {
   const { quoteData, setSelectedInsurers, submitQuote, nextStep, prevStep, isLoading, error } =
-    useQuote();
+    useAutoQuote();
 
   /** Insurer list — id must match the keys in server/mockData.js */
   const AVAILABLE_INSURERS = [

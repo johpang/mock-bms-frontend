@@ -16,10 +16,10 @@ import {
   RadioGroup,
   SectionHeader,
 } from '../components/FormControls';
-import { useQuote } from '../context/QuoteContext';
+import { useAutoQuote } from '../context/AutoContext';
 
 const QuoteFormPage2 = () => {
-  const { quoteData, updateQuoteData, nextStep, prevStep } = useQuote();
+  const { quoteData, updateQuoteData, nextStep, prevStep } = useAutoQuote();
   const [errors, setErrors] = useState({});
   const [hoveredButton, setHoveredButton] = useState(null);
   const [expandedDriverIndex, setExpandedDriverIndex] = useState(0);

@@ -15,10 +15,10 @@ import {
   DateInput,
   SectionHeader,
 } from '../components/FormControls';
-import { useQuote } from '../context/QuoteContext';
+import { useAutoQuote } from '../context/AutoContext';
 
 const QuoteFormPage1 = () => {
-  const { quoteData, updateQuoteData, nextStep, prevStep } = useQuote();
+  const { quoteData, updateQuoteData, nextStep, prevStep } = useAutoQuote();
   const [errors, setErrors] = React.useState([]);
   const [hoveredButton, setHoveredButton] = React.useState(null);
 

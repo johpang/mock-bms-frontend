@@ -1,0 +1,67 @@
+{
+  "id": "SC-004",
+  "name": "Personal Lines Bind — Credit Card Payment",
+  "status": "Quoted",
+  "createdDate": "2026-03-25",
+  "producerCode": "M6C 2X8",
+  "bmsQuoteNumber": "Q-2026-0004",
+  "billingMethod": "direct",
+  "customer": {
+    "firstName": "Kristen",
+    "lastName": "Sutherland",
+    "dob": "1980-05-10",
+    "gender": "Female",
+    "address": "456 Oak Ave",
+    "postalCode": "M6C 2X8",
+    "city": "Toronto",
+    "province": "ON",
+    "phone": "416-555-0456"
+  },
+  "policyEffectiveDate": "2026-05-04",
+  "policyStartDate": "2026-05-04",
+  "vehicles": [
+    {
+      "year": "2024",
+      "make": "Honda",
+      "model": "Civic",
+      "antiTheft": false,
+      "primaryUse": "Personal",
+      "distanceDriven": {
+        "inTrip": "50",
+        "annually": "40000",
+        "businessKm": "0"
+      },
+      "comprehensiveCoverage": true,
+      "comprehensiveDeductible": "1000",
+      "collisionCoverage": true,
+      "collisionDeductible": "1000"
+    }
+  ],
+  "garagingLocation": {
+    "postalCode": "M6C 2X8",
+    "city": "Toronto"
+  },
+  "drivers": [
+    {
+      "firstName": "Kristen",
+      "lastName": "Sutherland",
+      "relationship": "Insured",
+      "gender": "Female",
+      "maritalStatus": "Single"
+    }
+  ],
+  "licensing": {
+    "type": "G",
+    "g2Date": "1996-01-01",
+    "gDate": "2000-05-01",
+    "province": "ON"
+  },
+  "cancellations": {
+    "cancelled": "No",
+    "withoutCoverage": "No",
+    "suspended": "No",
+    "accidents": "No",
+    "tickets": "No"
+  },
+  "selectedInsurers": []
+}

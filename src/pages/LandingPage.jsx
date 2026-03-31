@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import { useQuote } from '../context/QuoteContext';
-import savedQuotes from '../data/quotes';
+import { useAutoQuote } from '../context/AutoContext';
+import savedQuotes from '../data/autoQuotes';
 
 const LandingPage = () => {
-  const { nextStep, loadQuote } = useQuote();
+  const { nextStep, loadQuote } = useAutoQuote();
 
   const handleLoadQuote = (quote) => {
     loadQuote(quote);

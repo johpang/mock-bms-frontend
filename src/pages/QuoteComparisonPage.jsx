@@ -1,5 +1,5 @@
 import React from 'react';
-import { useQuote } from '../context/QuoteContext';
+import { useAutoQuote } from '../context/AutoContext';
 import { InsurerComparisonTable } from '../components/QuoteResponse';
 import MockDisclaimer from '../components/MockDisclaimer';
 
@@ -11,7 +11,7 @@ import MockDisclaimer from '../components/MockDisclaimer';
  * @returns {React.ReactElement} The quote comparison page
  */
 const QuoteComparisonPage = () => {
-  const { quoteResponses, nextStep, prevStep, selectedInsurerIndex, setSelectedInsurerIndex } = useQuote();
+  const { quoteResponses, nextStep, prevStep, selectedInsurerIndex, setSelectedInsurerIndex } = useAutoQuote();
 
   const colors = {
     navy: '#0a1e3d',

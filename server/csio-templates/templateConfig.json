@@ -1,0 +1,14 @@
+{
+  "personas": {
+    "john": {
+      "quote": "auto-quote-uc01.xml",
+      "bind": "auto-bind-uc02.xml",
+      "label": "John Smith (Use Case 01/02)"
+    },
+    "kristen": {
+      "quote": "auto-quote-uc03.xml",
+      "bind": "auto-bind-uc04.xml",
+      "label": "Kristen Sutherland (Use Case 03/04)"
+    }
+  }
+}

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { TextInput, SelectInput, CheckboxInput, SectionHeader } from '../components/FormControls';
-import { useQuote } from '../context/QuoteContext';
+import { useAutoQuote } from '../context/AutoContext';
 
 const VehicleDetailsPage = () => {
-  const { quoteData, updateQuoteData, nextStep, prevStep } = useQuote();
+  const { quoteData, updateQuoteData, nextStep, prevStep } = useAutoQuote();
   const [errors, setErrors] = useState([]);
   const [expandedIndex, setExpandedIndex] = useState(0);
 

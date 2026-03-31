@@ -25,9 +25,9 @@ if (MODE === 'proxy') {
   console.log('[Config] Route mode: PROXY  →  forwarding to', serverConfig.aws.baseUrl);
 } else {
   // MOCK MODE — return mock data locally
-  const quoteRoutes = require('./routes/quoteRoutes');
+  const autoQuoteRoutes = require('./routes/autoQuoteRoutes');
   const habQuoteRoutes = require('./routes/habQuoteRoutes');
-  app.use('/api', quoteRoutes);
+  app.use('/api', autoQuoteRoutes);
   app.use('/api/hab', habQuoteRoutes);
   console.log('[Config] Route mode: MOCK  →  returning local mock data');
 }

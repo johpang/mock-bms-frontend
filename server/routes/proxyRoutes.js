@@ -1,74 +1,61 @@
 /**
  * Proxy Routes
  *
- * Accepts JSON from the frontend, transforms to CSIO-compliant XML
- * using csioTransformer, then forwards to the real AWS API endpoints.
- * The server handles OAuth token acquisition so that client credentials
- * never reach the browser.
+ * Accepts JSON from the frontend, transforms to CSIO-compliant XML,
+ * then forwards to the real AWS API endpoints.
  *
- * Environment variables consumed (via serverConfig):
- *   AWS_API_BASE_URL  – base URL of the AWS API (e.g. https://api.example.com)
- *   AWS_QUOTE_PATH    – path for quote requests  (default: /quote)
- *   AWS_BIND_PATH     – path for bind requests   (default: /bind)
+ * Short-circuit: if customer first name is "John" or "Kristen",
+ * use hardcoded CSIO XML from use case files instead of dynamic mapping.
  */
 
 const express = require('express');
+const path = require('path');
 const router = express.Router();
 const { getAuthHeaders } = require('../authService');
 const serverConfig = require('../serverConfig');
 const { buildCsioXml, getInsurerConfig } = require('../csioTransformer');
+const { getHardcodedXml } = require('../csioHelpers');
+
+const TEMPLATES_DIR = path.join(__dirname, '..', 'csio-templates');
 
 /**
- * Forwards a CSIO XML request body to an upstream URL and pipes the response back.
- * @param {string} upstreamUrl  – Full URL to forward to
- * @param {string} csioXml      – The CSIO-compliant XML to send
- * @param {string} insurerLabel – Label for logging (e.g. "Aviva")
- * @param {import('express').Response} res
+ * Forwards CSIO XML to an upstream URL and returns the response.
  */
-async function forwardXml(upstreamUrl, csioXml, insurerLabel, res) {
-  try {
-    const headers = await getAuthHeaders();
+async function forwardXml(upstreamUrl, csioXml, insurerLabel) {
+  const headers = await getAuthHeaders();
 
-    console.log(`[Proxy] Forwarding CSIO XML for ${insurerLabel} → ${upstreamUrl}`);
+  console.log(`[Proxy] Forwarding CSIO XML for ${insurerLabel} -> ${upstreamUrl}`);
 
-    const upstreamResponse = await fetch(upstreamUrl, {
-      method: 'POST',
-      headers: {
-        ...headers,
-        'Content-Type': 'application/xml',
-      },
-      body: csioXml,
-    });
+  const upstreamResponse = await fetch(upstreamUrl, {
+    method: 'POST',
+    headers: {
+      ...headers,
+      'Content-Type': 'application/xml',
+    },
+    body: csioXml,
+  });
 
-    const responseBody = await upstreamResponse.text();
+  const responseBody = await upstreamResponse.text();
+  console.log(`[Proxy] Upstream responded ${upstreamResponse.status} for ${insurerLabel}`);
 
-    console.log(`[Proxy] Upstream responded ${upstreamResponse.status} for ${insurerLabel}`);
-
-    return {
-      status: upstreamResponse.status,
-      contentType: upstreamResponse.headers.get('content-type') || 'application/xml',
-      body: responseBody,
-    };
-  } catch (error) {
-    console.error(`[Proxy] Error forwarding request for ${insurerLabel}:`, error.message);
-    throw error;
-  }
+  return {
+    status: upstreamResponse.status,
+    contentType: upstreamResponse.headers.get('content-type') || 'application/xml',
+    body: responseBody,
+  };
 }
 
 // ─────────────────────────────────────────────
-// POST /api/quote  →  AWS quote endpoint
-//
-// Accepts JSON from frontend. For each selected insurer,
-// transforms to CSIO XML and forwards upstream.
+// POST /api/quote  ->  AWS quote endpoint
 // ─────────────────────────────────────────────
 router.post('/quote', async (req, res) => {
   try {
     const body = req.body;
 
     console.log('');
-    console.log('═'.repeat(70));
+    console.log('='.repeat(70));
     console.log('[Proxy/QUOTE] Incoming request from frontend');
-    console.log('═'.repeat(70));
+    console.log('='.repeat(70));
     console.log('[Proxy/QUOTE] Received JSON payload:');
     console.log(JSON.stringify(body, null, 2));
     console.log('');
@@ -82,29 +69,35 @@ router.post('/quote', async (req, res) => {
     }
 
     const url = serverConfig.aws.baseUrl + serverConfig.aws.quotePath;
+    const hardcoded = getHardcodedXml(body, 'quote', TEMPLATES_DIR);
 
-    // Fan out: one CSIO XML POST per insurer
     const upstreamResults = [];
     for (const insurerId of selectedInsurers) {
       const config = getInsurerConfig(insurerId);
-      if (!config) {
-        console.warn(`[Proxy/QUOTE]   ⚠ Unknown insurer "${insurerId}" — skipping`);
-        continue;
+      const label = config ? config.name : insurerId;
+
+      let csioXml;
+      if (hardcoded) {
+        console.log(`[Proxy/QUOTE] Demo persona: ${hardcoded.label} -- using hardcoded XML for ${label}`);
+        csioXml = hardcoded.xml;
+      } else {
+        if (!config) {
+          console.warn(`[Proxy/QUOTE] Unknown insurer "${insurerId}" -- skipping`);
+          continue;
+        }
+        csioXml = buildCsioXml(body, insurerId, { type: 'quote' });
       }
 
-      const csioXml = buildCsioXml(body, insurerId, { type: 'quote' });
-
-      console.log('─'.repeat(70));
-      console.log(`[Proxy/QUOTE] CSIO XML for ${config.name}:`);
-      console.log('─'.repeat(70));
+      console.log('-'.repeat(70));
+      console.log(`[Proxy/QUOTE] CSIO XML for ${label}:`);
+      console.log('-'.repeat(70));
       console.log(csioXml);
       console.log('');
 
-      const result = await forwardXml(url, csioXml, config.name, res);
+      const result = await forwardXml(url, csioXml, label);
       upstreamResults.push({ insurerId, ...result });
     }
 
-    // For now, return the first upstream response (or aggregate later)
     if (upstreamResults.length > 0) {
       const first = upstreamResults[0];
       res.status(first.status).set('Content-Type', first.contentType).send(first.body);
@@ -113,27 +106,21 @@ router.post('/quote', async (req, res) => {
     }
   } catch (error) {
     console.error('[Proxy/QUOTE] Error:', error.message);
-    res.status(502).json({
-      success: false,
-      error: 'Proxy error: ' + error.message,
-    });
+    res.status(502).json({ success: false, error: 'Proxy error: ' + error.message });
   }
 });
 
 // ─────────────────────────────────────────────
-// POST /api/bind   →  AWS bind endpoint
-//
-// Accepts JSON from frontend. Transforms to CSIO
-// PersAutoPolicyAddRq XML and forwards upstream.
+// POST /api/bind   ->  AWS bind endpoint
 // ─────────────────────────────────────────────
 router.post('/bind', async (req, res) => {
   try {
     const body = req.body;
 
     console.log('');
-    console.log('═'.repeat(70));
+    console.log('='.repeat(70));
     console.log('[Proxy/BIND] Incoming request from frontend');
-    console.log('═'.repeat(70));
+    console.log('='.repeat(70));
     console.log('[Proxy/BIND] Received JSON payload:');
     console.log(JSON.stringify(body, null, 2));
     console.log('');
@@ -143,24 +130,29 @@ router.post('/bind', async (req, res) => {
     const config = getInsurerConfig(insurerId);
     const insurerLabel = config ? config.name : insurerId;
 
-    const csioXml = buildCsioXml(bindPayload, insurerId, { type: 'bind' });
+    const hardcoded = getHardcodedXml(bindPayload, 'bind', TEMPLATES_DIR);
+    let csioXml;
 
-    console.log('─'.repeat(70));
-    console.log(`[Proxy/BIND] CSIO XML for ${insurerLabel} (PersAutoPolicyAddRq):`);
-    console.log('─'.repeat(70));
+    if (hardcoded) {
+      console.log(`[Proxy/BIND] Demo persona: ${hardcoded.label} -- using hardcoded XML`);
+      csioXml = hardcoded.xml;
+    } else {
+      csioXml = buildCsioXml(bindPayload, insurerId, { type: 'bind' });
+    }
+
+    console.log('-'.repeat(70));
+    console.log(`[Proxy/BIND] CSIO XML for ${insurerLabel}:`);
+    console.log('-'.repeat(70));
     console.log(csioXml);
     console.log('');
 
     const url = serverConfig.aws.baseUrl + serverConfig.aws.bindPath;
-    const result = await forwardXml(url, csioXml, insurerLabel, res);
+    const result = await forwardXml(url, csioXml, insurerLabel);
 
     res.status(result.status).set('Content-Type', result.contentType).send(result.body);
   } catch (error) {
     console.error('[Proxy/BIND] Error:', error.message);
-    res.status(502).json({
-      success: false,
-      error: 'Proxy error: ' + error.message,
-    });
+    res.status(502).json({ success: false, error: 'Proxy error: ' + error.message });
   }
 });
 

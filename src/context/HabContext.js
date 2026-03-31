@@ -104,7 +104,8 @@ export function HabProvider({ children }) {
     setSelectedInsurerIndex(null);
     setBindResponse(null);
     setBindError(null);
-    setCurrentStep(1);
+    // Quoted transactions skip to Select Insurers (step 5); drafts start at Quote Details
+    setCurrentStep(status === 'Quoted' ? 5 : 1);
   }, []);
 
   const resetQuote = useCallback(() => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useQuote } from '../context/QuoteContext';
+import { useAutoQuote } from '../context/AutoContext';
 import { CoverageBreakdownTable, UnderwritingMessages } from '../components/QuoteResponse';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import MockDisclaimer from '../components/MockDisclaimer';
@@ -12,7 +12,7 @@ import MockDisclaimer from '../components/MockDisclaimer';
  * @returns {React.ReactElement} The premium breakdown page
  */
 const PremiumBreakdownPage = () => {
-  const { quoteResponses, prevStep, nextStep, selectedInsurerIndex } = useQuote();
+  const { quoteResponses, prevStep, nextStep, selectedInsurerIndex } = useAutoQuote();
 
   const colors = {
     navy: '#0a1e3d',
