@@ -6,6 +6,9 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import { initialQuoteData } from '../models/quoteRequestSchema.js';
 import { submitQuoteRequest } from '../services/quoteService.js';
+import { submitBindRequest } from '../services/bindService.js';
+import config from '../config/index.js';
+import mockResponses from '../data/mockResponses.js';
 
 /**
  * Quote context object
@@ -27,6 +30,8 @@ export function QuoteProvider({ children }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedInsurerIndex, setSelectedInsurerIndex] = useState(null);
+  const [bindResponse, setBindResponse] = useState(null);
+  const [bindError, setBindError] = useState(null);
 
   /**
    * Updates quote data for a specific section
@@ -81,12 +86,21 @@ export function QuoteProvider({ children }) {
     setIsLoading(true);
     setError(null);
     try {
-      // Allow callers to pass overrides (e.g. selectedInsurers) that aren't
-      // yet reflected in React state due to the async setState batching.
       const payload = overrides ? { ...quoteData, ...overrides } : quoteData;
-      const response = await submitQuoteRequest(payload);
-      // API returns { success, quoteId, timestamp, results }, extract the results array
-      setQuoteResponses(response.results || response);
+      const selectedIds = payload.selectedInsurers || [];
+
+      if (config.mockMode) {
+        // Mock mode: resolve from hardcoded data, no backend needed
+        await new Promise((r) => setTimeout(r, 800)); // simulate brief delay
+        const results = selectedIds
+          .filter((id) => mockResponses[id])
+          .map((id) => ({ ...mockResponses[id] }));
+        setQuoteResponses(results);
+      } else {
+        const response = await submitQuoteRequest(payload);
+        // quoteService now normalizes the XML response — results is a clean array
+        setQuoteResponses(response.results || response);
+      }
     } catch (err) {
       setError(err.message || 'Failed to submit quote');
       console.error('Quote submission error:', err);
@@ -94,6 +108,43 @@ export function QuoteProvider({ children }) {
       setIsLoading(false);
     }
   }, [quoteData]);
+
+  /**
+   * Submits a bind request for the currently selected quote.
+   * @param {Object} bindData - Additional bind data (e.g. payment info)
+   * @returns {Promise<void>}
+   */
+  const submitBind = useCallback(async (bindData = {}) => {
+    setIsLoading(true);
+    setBindError(null);
+    try {
+      const selectedResponse = quoteResponses?.[selectedInsurerIndex ?? 0];
+      const quoteNumber = selectedResponse?.referenceNumber || '';
+
+      const payload = { quoteNumber, ...bindData };
+
+      if (config.mockMode) {
+        // Mock mode: simulate successful bind
+        await new Promise((r) => setTimeout(r, 600));
+        setBindResponse({
+          success: true,
+          policyNumber: 'POL-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+          quoteNumber,
+          bindTimestamp: new Date().toISOString(),
+          status: 'BOUND',
+          message: 'Policy has been successfully bound.',
+        });
+      } else {
+        const response = await submitBindRequest(payload);
+        setBindResponse(response);
+      }
+    } catch (err) {
+      setBindError(err.message || 'Failed to bind quote');
+      console.error('Bind submission error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [quoteResponses, selectedInsurerIndex]);
 
   /**
    * Navigates to a specific step
@@ -142,6 +193,8 @@ export function QuoteProvider({ children }) {
     setCurrentStep(0);
     setError(null);
     setSelectedInsurerIndex(null);
+    setBindResponse(null);
+    setBindError(null);
   }, []);
 
   const value = {
@@ -161,6 +214,9 @@ export function QuoteProvider({ children }) {
     resetQuote,
     selectedInsurerIndex,
     setSelectedInsurerIndex,
+    bindResponse,
+    bindError,
+    submitBind,
   };
 
   return <QuoteContext.Provider value={value}>{children}</QuoteContext.Provider>;

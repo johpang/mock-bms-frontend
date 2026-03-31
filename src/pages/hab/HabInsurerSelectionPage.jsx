@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
-import { useQuote } from '../context/QuoteContext';
-import CheckboxInput from '../components/FormControls/CheckboxInput';
-import MockDisclaimer from '../components/MockDisclaimer';
+import { useHab } from '../../context/HabContext';
+import CheckboxInput from '../../components/FormControls/CheckboxInput';
+import MockDisclaimer from '../../components/MockDisclaimer';
 
 /**
- * InsurerSelectionPage Component
- * Screen 3 top - Allows users to select which insurers to request quotes from
+ * HabInsurerSelectionPage Component
+ * Allows users to select which insurers to request quotes from
+ * Follows the same pattern as auto InsurerSelectionPage
  *
  * @component
  * @returns {React.ReactElement} The insurer selection page
  */
-const InsurerSelectionPage = () => {
-  const { quoteData, setSelectedInsurers, submitQuote, nextStep, prevStep, isLoading, error } =
-    useQuote();
+const HabInsurerSelectionPage = () => {
+  const { habData, setSelectedInsurers, submitQuote, nextStep, prevStep, isLoading, error } =
+    useHab();
 
   /** Insurer list — id must match the keys in server/mockData.js */
   const AVAILABLE_INSURERS = [
@@ -20,12 +21,12 @@ const InsurerSelectionPage = () => {
     { id: 'intact', name: 'Intact' },
     { id: 'definity', name: 'Definity' },
     { id: 'wawanesa', name: 'Wawanesa' },
-    { id: 'caa', name: 'CAA' },
+    { id: 'caa', name: 'CAA Insurance' },
     { id: 'goreMutual', name: 'Gore Mutual' },
   ];
 
   const [localSelectedInsurers, setLocalSelectedInsurers] = useState(
-    quoteData.selectedInsurers || []
+    habData.selectedInsurers || []
   );
 
   const colors = {
@@ -75,9 +76,6 @@ const InsurerSelectionPage = () => {
       backgroundColor: 'transparent',
       cursor: 'pointer',
       transition: 'background-color 0.2s ease',
-      ':hover': {
-        backgroundColor: colors.lightGray,
-      },
     }),
     insurerLabel: {
       fontSize: '15px',
@@ -127,9 +125,6 @@ const InsurerSelectionPage = () => {
       border: isPrimary ? 'none' : `2px solid ${colors.navy}`,
       opacity: isDisabled ? 0.6 : 1,
     }),
-    buttonHover: {
-      boxShadow: '0 2px 8px rgba(10, 30, 61, 0.15)',
-    },
   };
 
   const handleInsurerChange = (insurerId) => {
@@ -157,6 +152,9 @@ const InsurerSelectionPage = () => {
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
+        div[data-insurer-item]:hover {
+          background-color: ${colors.lightGray};
+        }
       `}</style>
 
       <MockDisclaimer />
@@ -169,6 +167,7 @@ const InsurerSelectionPage = () => {
         {AVAILABLE_INSURERS.map((insurer, index) => (
           <div
             key={insurer.id}
+            data-insurer-item="true"
             style={styles.insurerItem(index === 0, index === AVAILABLE_INSURERS.length - 1)}
             onClick={() => handleInsurerChange(insurer.id)}
           >
@@ -216,7 +215,7 @@ const InsurerSelectionPage = () => {
               <div style={styles.loadingSpinner} /> Getting Quotes...
             </span>
           ) : (
-            'Get Quotes'
+            'Submit for Quote'
           )}
         </button>
       </div>
@@ -224,4 +223,4 @@ const InsurerSelectionPage = () => {
   );
 };
 
-export default InsurerSelectionPage;
+export default HabInsurerSelectionPage;

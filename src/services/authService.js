@@ -73,6 +73,7 @@ export async function getAuthHeaders() {
   const token = await getAccessToken();
   return {
     'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json',
+    'Content-Type': 'application/xml',
+    'Accept': 'application/xml',
   };
 }

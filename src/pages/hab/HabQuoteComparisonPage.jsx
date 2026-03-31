@@ -1,17 +1,19 @@
 import React from 'react';
-import { useQuote } from '../context/QuoteContext';
-import { InsurerComparisonTable } from '../components/QuoteResponse';
-import MockDisclaimer from '../components/MockDisclaimer';
+import { useHab } from '../../context/HabContext';
+import { formatCurrency } from '../../utils/formatters';
+import MockDisclaimer from '../../components/MockDisclaimer';
 
 /**
- * QuoteComparisonPage Component
- * Screen 3 bottom - Displays insurer quote comparison and allows selection for detail view
+ * HabQuoteComparisonPage Component
+ * Displays habitational insurer quote comparison in a table with radio buttons for single selection
+ * Similar to auto QuoteComparisonPage
  *
  * @component
  * @returns {React.ReactElement} The quote comparison page
  */
-const QuoteComparisonPage = () => {
-  const { quoteResponses, nextStep, prevStep, selectedInsurerIndex, setSelectedInsurerIndex } = useQuote();
+const HabQuoteComparisonPage = () => {
+  const { habResponses, nextStep, prevStep, selectedInsurerIndex, setSelectedInsurerIndex } =
+    useHab();
 
   const colors = {
     navy: '#0a1e3d',
@@ -21,6 +23,7 @@ const QuoteComparisonPage = () => {
     lightGray: '#f5f5f5',
     border: '#d0d0d0',
     success: '#1a7f37',
+    lightAccent: '#e8f5ff',
   };
 
   const styles = {
@@ -46,6 +49,59 @@ const QuoteComparisonPage = () => {
     },
     tableWrapper: {
       marginBottom: '32px',
+      border: `1px solid ${colors.border}`,
+      borderRadius: '4px',
+      overflow: 'hidden',
+      backgroundColor: colors.white,
+    },
+    table: {
+      width: '100%',
+      borderCollapse: 'collapse',
+    },
+    headerRow: {
+      backgroundColor: colors.lightGray,
+      borderBottom: `2px solid ${colors.border}`,
+    },
+    headerCell: {
+      padding: '16px 20px',
+      textAlign: 'left',
+      fontSize: '13px',
+      fontWeight: 700,
+      color: colors.navy,
+      textTransform: 'uppercase',
+      letterSpacing: '0.3px',
+    },
+    dataRow: (isSelected) => ({
+      borderBottom: `1px solid ${colors.border}`,
+      backgroundColor: isSelected ? colors.lightAccent : colors.white,
+      transition: 'background-color 0.2s ease',
+      cursor: 'pointer',
+    }),
+    dataCell: {
+      padding: '16px 20px',
+      fontSize: '14px',
+      verticalAlign: 'middle',
+      color: colors.text,
+    },
+    radioCellContent: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+    },
+    radioInput: {
+      width: '18px',
+      height: '18px',
+      cursor: 'pointer',
+      accentColor: colors.accent,
+    },
+    insurerName: {
+      fontWeight: 600,
+      color: colors.navy,
+    },
+    premium: {
+      fontWeight: 600,
+      fontSize: '15px',
+      color: colors.navy,
     },
     emptyState: {
       padding: '48px 24px',
@@ -66,7 +122,7 @@ const QuoteComparisonPage = () => {
     },
     selectionHint: {
       padding: '12px 16px',
-      backgroundColor: '#e8f5ff',
+      backgroundColor: colors.lightAccent,
       border: `1px solid ${colors.accent}30`,
       borderRadius: '4px',
       fontSize: '13px',
@@ -94,6 +150,10 @@ const QuoteComparisonPage = () => {
     }),
   };
 
+  const handleSelectInsurer = (index) => {
+    setSelectedInsurerIndex(index);
+  };
+
   const handleViewDetails = () => {
     if (selectedInsurerIndex !== null) {
       nextStep();
@@ -102,11 +162,11 @@ const QuoteComparisonPage = () => {
 
   const isViewDetailsDisabled = selectedInsurerIndex === null;
 
-  if (!quoteResponses || quoteResponses.length === 0) {
+  if (!habResponses || habResponses.length === 0) {
     return (
       <div style={styles.pageContainer}>
         <MockDisclaimer />
-      <h1 style={styles.title}>Insurer Quote Comparison</h1>
+        <h1 style={styles.title}>Insurer Quote Comparison</h1>
         <p style={styles.subtitle}>Compare quotes from selected insurers</p>
 
         <div style={styles.emptyState}>
@@ -121,10 +181,10 @@ const QuoteComparisonPage = () => {
             onClick={prevStep}
             style={styles.button(false, false)}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = colors.lightGray;
+              e.target.style.backgroundColor = '#f0f0f0';
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = colors.white;
+              e.target.style.backgroundColor = 'transparent';
             }}
           >
             Back
@@ -136,6 +196,12 @@ const QuoteComparisonPage = () => {
 
   return (
     <div style={styles.pageContainer}>
+      <style>{`
+        tbody tr:hover {
+          background-color: ${colors.lightAccent};
+        }
+      `}</style>
+
       <MockDisclaimer />
       <h1 style={styles.title}>Insurer Quote Comparison</h1>
       <p style={styles.subtitle}>
@@ -143,17 +209,52 @@ const QuoteComparisonPage = () => {
       </p>
 
       <div style={styles.tableWrapper}>
-        <InsurerComparisonTable
-          responses={quoteResponses}
-          onSelectInsurer={setSelectedInsurerIndex}
-          selectedIndex={selectedInsurerIndex}
-        />
-        {selectedInsurerIndex !== null && (
-          <div style={styles.selectionHint}>
-            Selected: {quoteResponses[selectedInsurerIndex]?.insurerName}
-          </div>
-        )}
+        <table style={styles.table}>
+          <thead>
+            <tr style={styles.headerRow}>
+              <th style={{ ...styles.headerCell, width: '10%' }}>Select</th>
+              <th style={{ ...styles.headerCell, width: '60%' }}>Insurer Name</th>
+              <th style={{ ...styles.headerCell, width: '30%', textAlign: 'right' }}>
+                Annual Premium
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {habResponses.map((response, index) => (
+              <tr
+                key={index}
+                style={styles.dataRow(selectedInsurerIndex === index)}
+                onClick={() => handleSelectInsurer(index)}
+              >
+                <td style={styles.dataCell}>
+                  <div style={styles.radioCellContent}>
+                    <input
+                      type="radio"
+                      name="insurer-selection"
+                      checked={selectedInsurerIndex === index}
+                      onChange={() => handleSelectInsurer(index)}
+                      style={styles.radioInput}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                </td>
+                <td style={styles.dataCell}>
+                  <span style={styles.insurerName}>{response.insurerName}</span>
+                </td>
+                <td style={{ ...styles.dataCell, textAlign: 'right' }}>
+                  <span style={styles.premium}>{formatCurrency(response.premiums?.annual)}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+
+      {selectedInsurerIndex !== null && (
+        <div style={styles.selectionHint}>
+          Selected: {habResponses[selectedInsurerIndex]?.insurerName}
+        </div>
+      )}
 
       <div style={styles.buttonContainer}>
         <button
@@ -188,4 +289,4 @@ const QuoteComparisonPage = () => {
   );
 };
 
-export default QuoteComparisonPage;
+export default HabQuoteComparisonPage;

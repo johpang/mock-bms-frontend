@@ -4,9 +4,13 @@
  */
 
 const config = Object.freeze({
+  /** When true, the app skips all API calls and uses hardcoded mock responses */
+  mockMode: process.env.REACT_APP_MOCK_MODE === 'true',
   api: {
     baseUrl: process.env.REACT_APP_API_BASE_URL || '/api',
     quoteEndpoint: (process.env.REACT_APP_API_BASE_URL || '/api') + '/quote',
+    bindEndpoint: (process.env.REACT_APP_API_BASE_URL || '/api') + '/bind',
+    habQuoteEndpoint: (process.env.REACT_APP_API_BASE_URL || '/api') + '/hab/quote',
   },
   oauth: {
     tokenUrl: process.env.REACT_APP_OAUTH_TOKEN_URL || '/oauth/token',

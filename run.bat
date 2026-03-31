@@ -31,6 +31,13 @@ if not exist "server\node_modules\express\package.json" (
     popd
     echo.
 )
+if not exist "server\node_modules\fast-xml-parser\package.json" (
+    echo Installing new server dependencies...
+    pushd server
+    call npm install
+    popd
+    echo.
+)
 echo Starting mock API server on port 4000...
 start "BMS API" /min cmd /c "cd server && node index.js"
 echo Waiting for API server...

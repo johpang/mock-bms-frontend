@@ -1,18 +1,18 @@
 import React from 'react';
-import { useQuote } from '../context/QuoteContext';
-import { CoverageBreakdownTable, UnderwritingMessages } from '../components/QuoteResponse';
-import { formatCurrency, formatDate } from '../utils/formatters';
-import MockDisclaimer from '../components/MockDisclaimer';
+import { useHab } from '../../context/HabContext';
+import { formatCurrency, formatDate } from '../../utils/formatters';
+import MockDisclaimer from '../../components/MockDisclaimer';
 
 /**
- * PremiumBreakdownPage Component
- * Screen 4 - Displays detailed premium and coverage information for a selected insurer
+ * HabPremiumBreakdownPage Component
+ * Displays individual insurer detail view for habitational insurance quotes
+ * Shows coverage breakdown, underwriting messages, and premium details
  *
  * @component
  * @returns {React.ReactElement} The premium breakdown page
  */
-const PremiumBreakdownPage = () => {
-  const { quoteResponses, prevStep, nextStep, selectedInsurerIndex } = useQuote();
+const HabPremiumBreakdownPage = () => {
+  const { habResponses, prevStep, nextStep, selectedInsurerIndex } = useHab();
 
   const colors = {
     navy: '#0a1e3d',
@@ -21,11 +21,13 @@ const PremiumBreakdownPage = () => {
     text: '#1a1a1a',
     lightGray: '#f5f5f5',
     border: '#d0d0d0',
+    lightAccent: '#e8f5ff',
+    warning: '#d4a574',
   };
 
   const styles = {
     pageContainer: {
-      maxWidth: '1100px',
+      maxWidth: '1000px',
       margin: '0 auto',
       padding: '40px 24px',
       minHeight: 'calc(100vh - 100px)',
@@ -41,6 +43,8 @@ const PremiumBreakdownPage = () => {
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: '24px',
+      flexWrap: 'wrap',
+      gap: '20px',
     },
     insurerName: {
       fontSize: '32px',
@@ -50,7 +54,7 @@ const PremiumBreakdownPage = () => {
     },
     typeLabel: {
       display: 'inline-block',
-      backgroundColor: '#e8f5ff',
+      backgroundColor: colors.lightAccent,
       border: `1px solid ${colors.accent}`,
       color: colors.accent,
       padding: '6px 12px',
@@ -109,21 +113,21 @@ const PremiumBreakdownPage = () => {
       fontWeight: 500,
       marginTop: '8px',
     },
-    infoRow: {
+    premiumSummaryRow: {
       display: 'flex',
       gap: '32px',
       padding: '20px 0',
       borderBottom: `1px solid ${colors.border}`,
       marginBottom: '32px',
     },
-    infoItem: {
+    summaryItem: {
       flex: '0 0 auto',
       minWidth: '140px',
     },
-    infoItemWide: {
+    summaryItemWide: {
       flex: 1,
     },
-    infoLabel: {
+    summaryLabel: {
       fontSize: '12px',
       color: '#666',
       fontWeight: 600,
@@ -131,40 +135,10 @@ const PremiumBreakdownPage = () => {
       letterSpacing: '0.3px',
       marginBottom: '6px',
     },
-    infoValue: {
+    summaryValue: {
       fontSize: '15px',
       fontWeight: 600,
       color: colors.text,
-    },
-    coverageCodesContainer: {
-      display: 'flex',
-      gap: '8px',
-      flexWrap: 'nowrap',
-      marginTop: '8px',
-    },
-    rateGroupItem: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      backgroundColor: colors.lightGray,
-      border: `1px solid ${colors.border}`,
-      padding: '10px 20px',
-      borderRadius: '3px',
-      minWidth: '64px',
-    },
-    rateGroupNumber: {
-      fontSize: '18px',
-      fontWeight: 700,
-      color: colors.navy,
-      lineHeight: 1,
-      marginBottom: '4px',
-    },
-    rateGroupLabel: {
-      fontSize: '11px',
-      fontWeight: 600,
-      color: '#666',
-      textTransform: 'uppercase',
-      letterSpacing: '0.3px',
     },
     sectionTitle: {
       fontSize: '16px',
@@ -173,12 +147,69 @@ const PremiumBreakdownPage = () => {
       marginBottom: '20px',
       paddingTop: '24px',
       borderTop: `2px solid ${colors.border}`,
-      paddingTop: '24px',
     },
     sectionsContainer: {
       display: 'flex',
       flexDirection: 'column',
       gap: '32px',
+    },
+    underwritingContainer: {
+      backgroundColor: colors.lightAccent,
+      border: `1px solid ${colors.accent}30`,
+      borderRadius: '4px',
+      padding: '20px',
+      marginTop: '16px',
+    },
+    underwritingMessageItem: {
+      padding: '8px 0',
+      fontSize: '14px',
+      color: colors.text,
+      lineHeight: 1.5,
+    },
+    underwritingMessageBullet: {
+      display: 'inline-block',
+      width: '6px',
+      height: '6px',
+      backgroundColor: colors.accent,
+      borderRadius: '50%',
+      marginRight: '12px',
+      marginBottom: '2px',
+    },
+    tableContainer: {
+      border: `1px solid ${colors.border}`,
+      borderRadius: '4px',
+      overflow: 'hidden',
+      marginTop: '16px',
+    },
+    table: {
+      width: '100%',
+      borderCollapse: 'collapse',
+    },
+    tableHeaderRow: {
+      backgroundColor: colors.lightGray,
+      borderBottom: `2px solid ${colors.border}`,
+    },
+    tableHeaderCell: {
+      padding: '12px 20px',
+      textAlign: 'left',
+      fontSize: '12px',
+      fontWeight: 700,
+      color: colors.navy,
+      textTransform: 'uppercase',
+      letterSpacing: '0.3px',
+    },
+    tableDataRow: {
+      borderBottom: `1px solid ${colors.border}`,
+      transition: 'background-color 0.2s ease',
+    },
+    tableDataCell: {
+      padding: '12px 20px',
+      fontSize: '14px',
+      color: colors.text,
+    },
+    tableDataCellRight: {
+      textAlign: 'right',
+      fontWeight: 500,
     },
     emptyState: {
       padding: '48px 24px',
@@ -202,20 +233,21 @@ const PremiumBreakdownPage = () => {
       justifyContent: 'flex-start',
       marginTop: '40px',
     },
-    button: (isPrimary) => ({
+    button: (isPrimary, isDisabled) => ({
       padding: '12px 32px',
       fontSize: '15px',
       fontWeight: 600,
       borderRadius: '4px',
-      cursor: 'pointer',
+      cursor: isDisabled ? 'not-allowed' : 'pointer',
       transition: 'all 0.2s ease',
       backgroundColor: isPrimary ? colors.navy : 'transparent',
       color: isPrimary ? colors.white : colors.navy,
       border: isPrimary ? 'none' : `2px solid ${colors.navy}`,
+      opacity: isDisabled ? 0.6 : 1,
     }),
   };
 
-  if (!quoteResponses || quoteResponses.length === 0) {
+  if (!habResponses || habResponses.length === 0) {
     return (
       <div style={styles.pageContainer}>
         <div style={styles.emptyState}>
@@ -227,12 +259,12 @@ const PremiumBreakdownPage = () => {
         <div style={styles.buttonContainer}>
           <button
             onClick={prevStep}
-            style={styles.button(false)}
+            style={styles.button(false, false)}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = colors.lightGray;
+              e.target.style.backgroundColor = '#f0f0f0';
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = colors.white;
+              e.target.style.backgroundColor = 'transparent';
             }}
           >
             Back to Comparison
@@ -242,7 +274,7 @@ const PremiumBreakdownPage = () => {
     );
   }
 
-  const selectedResponse = quoteResponses[selectedInsurerIndex ?? 0];
+  const selectedResponse = habResponses[selectedInsurerIndex ?? 0];
 
   if (!selectedResponse) {
     return (
@@ -254,12 +286,12 @@ const PremiumBreakdownPage = () => {
         <div style={styles.buttonContainer}>
           <button
             onClick={prevStep}
-            style={styles.button(false)}
+            style={styles.button(false, false)}
             onMouseEnter={(e) => {
-              e.target.style.backgroundColor = colors.lightGray;
+              e.target.style.backgroundColor = '#f0f0f0';
             }}
             onMouseLeave={(e) => {
-              e.target.style.backgroundColor = colors.white;
+              e.target.style.backgroundColor = 'transparent';
             }}
           >
             Back to Comparison
@@ -269,15 +301,14 @@ const PremiumBreakdownPage = () => {
     );
   }
 
-  // vehicleSummary may be a string ("2024 Honda Civic") or an object ({ year, make, model })
-  const vehicleSummary = typeof selectedResponse.vehicleSummary === 'string'
-    ? selectedResponse.vehicleSummary
-    : selectedResponse.vehicleSummary
-      ? `${selectedResponse.vehicleSummary.year} ${selectedResponse.vehicleSummary.make} ${selectedResponse.vehicleSummary.model}`
-      : '';
-
   return (
     <div style={styles.pageContainer}>
+      <style>{`
+        tbody tr:hover {
+          background-color: ${colors.lightAccent};
+        }
+      `}</style>
+
       <MockDisclaimer />
       <div style={styles.headerSection}>
         <div style={styles.insurerNameAndType}>
@@ -296,43 +327,26 @@ const PremiumBreakdownPage = () => {
             <div style={styles.premiumSection}>
               <div style={styles.annualPremiumLabel}>Annual Premium</div>
               <div style={styles.annualPremium}>
-                {formatCurrency(selectedResponse.premiums.annual)}
+                {formatCurrency(selectedResponse.premiums?.annual)}
               </div>
               <div style={styles.monthlyPremium}>
-                {formatCurrency(selectedResponse.premiums.monthly)}/month
+                {formatCurrency(selectedResponse.premiums?.monthly)}/month
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div style={styles.infoRow}>
-        <div style={styles.infoItem}>
-          <div style={styles.infoLabel}>Effective Date</div>
-          <div style={styles.infoValue}>{formatDate(selectedResponse.effectiveDate)}</div>
-        </div>
-        <div style={styles.infoItem}>
-          <div style={styles.infoLabel}>Territory</div>
-          <div style={styles.infoValue}>{selectedResponse.territory}</div>
-        </div>
-        <div style={styles.infoItemWide}>
-          <div style={styles.infoLabel}>Rate Groups</div>
-          <div style={styles.coverageCodesContainer}>
-            {selectedResponse.coverageCodes && selectedResponse.coverageCodes.length > 0 ? (
-              selectedResponse.coverageCodes.map((codeObj, index) => (
-                <div key={index} style={styles.rateGroupItem}>
-                  <span style={styles.rateGroupNumber}>
-                    {typeof codeObj === 'object' ? codeObj.code : codeObj}
-                  </span>
-                  <span style={styles.rateGroupLabel}>
-                    {typeof codeObj === 'object' ? codeObj.label : ''}
-                  </span>
-                </div>
-              ))
-            ) : (
-              <span style={styles.infoValue}>N/A</span>
-            )}
+      <div style={styles.premiumSummaryRow}>
+        <div style={styles.summaryItem}>
+          <div style={styles.summaryLabel}>Effective Date</div>
+          <div style={styles.summaryValue}>
+            {formatDate(selectedResponse.effectiveDate)}
           </div>
+        </div>
+        <div style={styles.summaryItemWide}>
+          <div style={styles.summaryLabel}>Property Address</div>
+          <div style={styles.summaryValue}>{selectedResponse.propertyAddress}</div>
         </div>
       </div>
 
@@ -340,16 +354,49 @@ const PremiumBreakdownPage = () => {
         {selectedResponse.underwritingMessages &&
           selectedResponse.underwritingMessages.length > 0 && (
             <div>
-              <UnderwritingMessages messages={selectedResponse.underwritingMessages} />
+              <h2 style={styles.sectionTitle}>Underwriting Messages</h2>
+              <div style={styles.underwritingContainer}>
+                {selectedResponse.underwritingMessages.map((message, index) => (
+                  <div key={index} style={styles.underwritingMessageItem}>
+                    <span style={styles.underwritingMessageBullet} />
+                    {message}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
         {selectedResponse.coverages && selectedResponse.coverages.length > 0 && (
           <div>
-            <CoverageBreakdownTable
-              coverages={selectedResponse.coverages}
-              vehicleSummary={vehicleSummary}
-            />
+            <h2 style={styles.sectionTitle}>Coverage Breakdown</h2>
+            <div style={styles.tableContainer}>
+              <table style={styles.table}>
+                <thead>
+                  <tr style={styles.tableHeaderRow}>
+                    <th style={styles.tableHeaderCell}>Coverage</th>
+                    <th style={styles.tableHeaderCell}>Deductible</th>
+                    <th style={styles.tableHeaderCell}>Amount</th>
+                    <th style={{ ...styles.tableHeaderCell, textAlign: 'right' }}>Premium</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedResponse.coverages.map((coverage, index) => (
+                    <tr key={index} style={styles.tableDataRow}>
+                      <td style={styles.tableDataCell}>{coverage.name}</td>
+                      <td style={styles.tableDataCell}>
+                        {coverage.deductible ? formatCurrency(coverage.deductible) : '—'}
+                      </td>
+                      <td style={styles.tableDataCell}>
+                        {coverage.amount ? formatCurrency(coverage.amount) : '—'}
+                      </td>
+                      <td style={{ ...styles.tableDataCell, ...styles.tableDataCellRight }}>
+                        {coverage.premium ? formatCurrency(coverage.premium) : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
@@ -357,7 +404,7 @@ const PremiumBreakdownPage = () => {
       <div style={styles.buttonContainer}>
         <button
           onClick={prevStep}
-          style={styles.button(false)}
+          style={styles.button(false, false)}
           onMouseEnter={(e) => {
             e.target.style.backgroundColor = '#f0f0f0';
           }}
@@ -365,11 +412,11 @@ const PremiumBreakdownPage = () => {
             e.target.style.backgroundColor = 'transparent';
           }}
         >
-          Back to Comparison
+          Back
         </button>
         <button
           onClick={nextStep}
-          style={styles.button(true)}
+          style={styles.button(true, false)}
           onMouseEnter={(e) => {
             e.target.style.boxShadow = '0 4px 12px rgba(42, 82, 152, 0.25)';
           }}
@@ -384,4 +431,4 @@ const PremiumBreakdownPage = () => {
   );
 };
 
-export default PremiumBreakdownPage;
+export default HabPremiumBreakdownPage;

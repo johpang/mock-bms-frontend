@@ -1,0 +1,107 @@
+{
+  "id": "HAB-SC-001",
+  "name": "Homeowners - Marshall St",
+  "status": "Quoted",
+  "createdDate": "2026-03-28",
+  "producerCode": "BRK-5500",
+  "bmsQuoteNumber": "HAB-Q-20260001",
+  "billingMethod": "direct",
+  "customer": {
+    "firstName": "John",
+    "lastName": "Smith",
+    "address": "52 Marshall Street",
+    "postalCode": "L4N 3S7",
+    "city": "Barrie",
+    "province": "ON",
+    "phone": "705-555-1234"
+  },
+  "policyEffectiveDate": "2026-04-01",
+  "policyEffectiveTime": "12:01",
+  "policyEffectiveAmPm": "AM",
+  "policyExpiryDate": "2027-04-01",
+  "applicant": {
+    "name": "John Smith",
+    "dateOfBirth": "1985-06-15"
+  },
+  "lossHistory": {
+    "hasLossesOrClaims": "No",
+    "hasBeenDeclined": "No"
+  },
+  "riskType": "Homeowners",
+  "riskAddress": {
+    "address": "52 Marshall Street",
+    "city": "Barrie",
+    "province": "ON",
+    "postalCode": "L4N 3S7"
+  },
+  "building": {
+    "yearBuilt": "1995",
+    "numStoreys": "2",
+    "numFamilies": "1",
+    "numUnits": "1",
+    "totalLivingArea": "2200",
+    "smokers": "No",
+    "numMortgages": "1",
+    "yearsHomeInsurance": "10"
+  },
+  "replacementCost": {
+    "occupancyType": "Owner Occupied",
+    "structureType": "Detached",
+    "foundationType": "Full Basement",
+    "finishedBasement": "50",
+    "exteriorWallFinish": "Brick Veneer",
+    "garageType": "Attached"
+  },
+  "upgrades": {
+    "roofYear": "2015",
+    "roofCoveringType": "Asphalt Shingles",
+    "electricalYear": "1995",
+    "electricalWiringType": "Copper",
+    "electricalPanelType": "Circuit Breakers",
+    "serviceAmperage": "200",
+    "heatingYear": "2018",
+    "primaryHeatingType": "Forced Air Gas",
+    "plumbingYear": "1995",
+    "auxiliaryHeating": "No",
+    "oilTank": "No"
+  },
+  "protection": {
+    "mainWaterValveShutOff": "Yes",
+    "fireProtection": "Full",
+    "securitySystem": "Yes",
+    "distanceToHydrant": "300",
+    "numSmokeDetectors": "4"
+  },
+  "numBathrooms": "3",
+  "numKitchens": "1",
+  "detachedOutbuildings": "Shed",
+  "swimmingPool": {
+    "year": "",
+    "poolType": "",
+    "poolFenced": ""
+  },
+  "liabilityExposures": {
+    "ownMultipleLocations": "No",
+    "weeksRentedToOthers": "0",
+    "roomsRentedToOthers": "0",
+    "daycareNumChildren": "0",
+    "ownTrampoline": "No",
+    "haveGardenTractor": "No",
+    "haveGolfCart": "No",
+    "numSaddleDraftAnimals": "0",
+    "ownUnlicensedRecVehicles": "No",
+    "renewableEnergyInstall": "No",
+    "ownWatercraft": "No"
+  },
+  "coverages": {
+    "dwellingBuilding":          { "enabled": true, "amount": "450000", "deductible": "1000" },
+    "detachedPrivateStructures": { "enabled": true, "amount": "45000", "deductible": "1000" },
+    "personalProperty":          { "enabled": true, "amount": "225000", "deductible": "1000" },
+    "additionalLivingExpenses":  { "enabled": true, "amount": "90000", "deductible": "" },
+    "legalLiability":            { "enabled": true, "amount": "2000000", "deductible": "" },
+    "voluntaryMedicalPayments":  { "enabled": true, "amount": "5000", "deductible": "" },
+    "voluntaryPropertyDamage":   { "enabled": true, "amount": "2000", "deductible": "" },
+    "sewerBackup":               { "enabled": true, "amount": "25000", "deductible": "1000" }
+  },
+  "selectedInsurers": []
+}

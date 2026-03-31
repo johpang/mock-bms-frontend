@@ -1,38 +1,38 @@
 /**
  * Quote API Service
- * Handles quote submission and API communication
+ * Handles quote submission and API communication using JSON
+ *
+ * The frontend sends the simplified data model as JSON.
+ * The server handles CSIO XML transformation.
  */
 
 import { getAuthHeaders } from './authService.js';
 import config from '../config/index.js';
 
 /**
- * Composes the API request payload from form data
- * Maps form fields to API structure with organized sections
+ * Composes the API request payload from form data.
+ * Sends the simplified model directly — the server maps to CSIO XML.
  * @param {Object} quoteData - The complete quote form state
  * @returns {Object} The structured API payload
  */
 export function composeRequestPayload(quoteData) {
   return {
-    producer: {
-      code: quoteData.producerCode,
-      bmsQuoteNumber: quoteData.bmsQuoteNumber,
-      billingMethod: quoteData.billingMethod,
-    },
+    producerCode: quoteData.producerCode || '',
+    bmsQuoteNumber: quoteData.bmsQuoteNumber || '',
+    billingMethod: quoteData.billingMethod || '',
     customer: {
       firstName: quoteData.customer?.firstName || '',
       lastName: quoteData.customer?.lastName || '',
-      dateOfBirth: quoteData.customer?.dob || '',
+      dob: quoteData.customer?.dob || '',
+      gender: quoteData.customer?.gender || '',
       address: quoteData.customer?.address || '',
       postalCode: quoteData.customer?.postalCode || '',
       city: quoteData.customer?.city || '',
       province: quoteData.customer?.province || '',
       phone: quoteData.customer?.phone || '',
     },
-    policy: {
-      effectiveDate: quoteData.policyEffectiveDate || '',
-      startDate: quoteData.policyStartDate || '',
-    },
+    policyEffectiveDate: quoteData.policyEffectiveDate || '',
+    policyStartDate: quoteData.policyStartDate || '',
     vehicles: (quoteData.vehicles || []).map((v) => ({
       year: v.year || '',
       make: v.make || '',
@@ -44,12 +44,10 @@ export function composeRequestPayload(quoteData) {
         annually: v.distanceDriven?.annually || '',
         businessKm: v.distanceDriven?.businessKm || '',
       },
-      coverage: {
-        comprehensiveCoverage: v.comprehensiveCoverage || false,
-        comprehensiveDeductible: v.comprehensiveDeductible || '',
-        collisionCoverage: v.collisionCoverage || false,
-        collisionDeductible: v.collisionDeductible || '',
-      },
+      comprehensiveCoverage: v.comprehensiveCoverage || false,
+      comprehensiveDeductible: v.comprehensiveDeductible || '',
+      collisionCoverage: v.collisionCoverage || false,
+      collisionDeductible: v.collisionDeductible || '',
     })),
     drivers: (quoteData.drivers || []).map((d) => ({
       firstName: d.firstName || '',
@@ -80,18 +78,27 @@ export function composeRequestPayload(quoteData) {
 }
 
 /**
- * Submits a quote request to the API
+ * Submits a quote request to the API as JSON.
+ * The server transforms to CSIO XML per insurer.
  * @param {Object} quoteData - The complete quote form state
- * @returns {Promise<Object>} The parsed JSON response from the API
+ * @returns {Promise<Object>} The parsed response object
  * @throws {Error} If the request fails
  */
 export async function submitQuoteRequest(quoteData) {
   const headers = await getAuthHeaders();
   const payload = composeRequestPayload(quoteData);
 
+  // Log the outgoing request
+  console.log('[QuoteService] Sending quote request to server:');
+  console.log('[QuoteService] Endpoint:', config.api.quoteEndpoint);
+  console.log('[QuoteService] Payload:', JSON.stringify(payload, null, 2));
+
   const response = await fetch(config.api.quoteEndpoint, {
     method: 'POST',
-    headers,
+    headers: {
+      ...headers,
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify(payload),
   });
 
@@ -99,5 +106,12 @@ export async function submitQuoteRequest(quoteData) {
     throw new Error(`Quote submission failed: ${response.statusText}`);
   }
 
-  return await response.json();
+  const data = await response.json();
+
+  console.log('[QuoteService] Received response from server:');
+  console.log('[QuoteService] Success:', data.success);
+  console.log('[QuoteService] Quote ID:', data.quoteId);
+  console.log('[QuoteService] Results count:', data.results?.length || 0);
+
+  return data;
 }
