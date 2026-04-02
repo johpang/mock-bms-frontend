@@ -1,11 +1,13 @@
 /**
  * Habitational Quote API Service
- * Handles hab quote submission using XML
+ * Handles hab quote submission using JSON
+ *
+ * The frontend sends simplified JSON. The server transforms
+ * to CSIO-compliant HomePolicyQuoteInqRq XML.
  */
 
 import { getAuthHeaders } from './authService.js';
 import config from '../config/index.js';
-import { objectToXml, xmlToObject } from '../utils/xmlHelpers.js';
 
 function ensureArray(val, childKey) {
   if (!val) return [];
@@ -28,18 +30,14 @@ function normalizeResult(r) {
 
 export function composeHabRequestPayload(habData) {
   return {
-    producer: {
-      code: habData.producerCode,
-      bmsQuoteNumber: habData.bmsQuoteNumber,
-      billingMethod: habData.billingMethod,
-    },
+    producerCode: habData.producerCode || '',
+    bmsQuoteNumber: habData.bmsQuoteNumber || '',
+    billingMethod: habData.billingMethod || '',
     customer: habData.customer || {},
-    policy: {
-      effectiveDate: habData.policyEffectiveDate || '',
-      effectiveTime: habData.policyEffectiveTime || '',
-      effectiveAmPm: habData.policyEffectiveAmPm || '',
-      expiryDate: habData.policyExpiryDate || '',
-    },
+    policyEffectiveDate: habData.policyEffectiveDate || '',
+    policyEffectiveTime: habData.policyEffectiveTime || '',
+    policyEffectiveAmPm: habData.policyEffectiveAmPm || '',
+    policyExpiryDate: habData.policyExpiryDate || '',
     applicant: habData.applicant || {},
     lossHistory: habData.lossHistory || {},
     riskType: habData.riskType || '',
@@ -61,26 +59,33 @@ export function composeHabRequestPayload(habData) {
 export async function submitHabQuoteRequest(habData) {
   const headers = await getAuthHeaders();
   const payload = composeHabRequestPayload(habData);
-  const xmlBody = objectToXml(payload, 'habQuoteRequest');
+
+  console.log('[HabQuoteService] Sending JSON to server:');
+  console.log('[HabQuoteService] Endpoint:', config.api.habQuoteEndpoint);
+  console.log('[HabQuoteService] Payload:', JSON.stringify(payload, null, 2));
 
   const response = await fetch(config.api.habQuoteEndpoint, {
     method: 'POST',
-    headers,
-    body: xmlBody,
+    headers: {
+      ...headers,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
     throw new Error(`Hab quote submission failed: ${response.statusText}`);
   }
 
-  const xmlText = await response.text();
-  const parsed = xmlToObject(xmlText);
+  const data = await response.json();
 
-  let results = parsed.results || parsed;
-  if (results && !Array.isArray(results)) {
-    results = results.result || results;
-    if (!Array.isArray(results)) results = [results];
-  }
+  console.log('[HabQuoteService] Received JSON response:');
+  console.log('[HabQuoteService] Success:', data.success);
+  console.log('[HabQuoteService] Quote ID:', data.quoteId);
+  console.log('[HabQuoteService] Results count:', data.results?.length);
 
-  return { ...parsed, results: results.map(normalizeResult) };
+  let results = data.results || [];
+  if (!Array.isArray(results)) results = [results];
+
+  return { ...data, results: results.map(normalizeResult) };
 }

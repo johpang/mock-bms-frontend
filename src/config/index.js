@@ -11,6 +11,7 @@ const config = Object.freeze({
     quoteEndpoint: (process.env.REACT_APP_API_BASE_URL || '/api') + '/quote',
     bindEndpoint: (process.env.REACT_APP_API_BASE_URL || '/api') + '/bind',
     habQuoteEndpoint: (process.env.REACT_APP_API_BASE_URL || '/api') + '/hab/quote',
+    habBindEndpoint: (process.env.REACT_APP_API_BASE_URL || '/api') + '/hab/bind',
   },
   oauth: {
     tokenUrl: process.env.REACT_APP_OAUTH_TOKEN_URL || '/oauth/token',

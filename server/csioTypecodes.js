@@ -40,9 +40,131 @@ const PROVINCE_FULL_NAME = {
   NT: 'Northwest Territories', YT: 'Yukon', NU: 'Nunavut',
 };
 
+// ── Habitational-specific typecodes ─────────────────────────
+
+// riskType -> LOBSubCd
+const HAB_RISK_TYPE_MAP = {
+  Homeowners: 'HOME',
+  Condo:      'COND',
+  Tenant:     'TENT',
+};
+
+// replacementCost.structureType -> ConstructionCd
+const HAB_CONSTRUCTION_MAP = {
+  'Detached':       'B',   // Brick/Masonry
+  'Semi-Detached':  'B',
+  'Row House':      'C',   // Masonry Veneer
+  'Condo':          'C',
+};
+
+// replacementCost.foundationType -> FoundationCd
+const HAB_FOUNDATION_MAP = {
+  'Full Basement':  '6',   // Basement
+  'Crawl Space':    '7',   // Crawlspace
+  'Slab':           '8',   // Slab/Concrete Slab
+  'Concrete':       '1',   // Concrete/Masonry
+};
+
+// upgrades.roofCoveringType -> RoofMaterialCd
+const HAB_ROOF_MATERIAL_MAP = {
+  'Asphalt Shingles': 'A',
+  'Metal':            'B',   // Aluminium/Metal
+  'Flat Membrane':    'L',   // Corrugated/Flat
+  'Cedar Shakes':     'F',   // Mineral Fiber Shakes (closest)
+  'Tile':             'C',   // Clay Tile
+};
+
+// upgrades.electricalPanelType -> ElectricalPanelCd
+const HAB_ELECTRICAL_PANEL_MAP = {
+  'Circuit Breakers': '1',
+  'Fuses':            '2',
+};
+
+// upgrades.electricalWiringType -> WiringTypeCd
+const HAB_WIRING_TYPE_MAP = {
+  'Copper':        '2',
+  'Aluminum':      '1',
+  'Knob and Tube': '3',
+};
+
+// upgrades.primaryHeatingType -> FuelTypeCd
+const HAB_FUEL_TYPE_MAP = {
+  'Forced Air Gas':      'N',   // Natural Gas
+  'Forced Air Electric': 'E',   // Electric
+  'Hot Water':           'N',   // Typically gas
+  'Electric Baseboard':  'E',
+  'Radiant':             'E',
+};
+
+// upgrades.primaryHeatingType -> HeatingUnitCd
+const HAB_HEATING_UNIT_MAP = {
+  'Forced Air Gas':      '7',   // Forced Air
+  'Forced Air Electric': '7',
+  'Hot Water':           '6',   // Hot Water/Steam
+  'Electric Baseboard':  '4',   // Radiant Ceiling (closest)
+  'Radiant':             '4',
+};
+
+// replacementCost.garageType -> GarageTypeCd
+const HAB_GARAGE_TYPE_MAP = {
+  'Attached':             '4',   // Attached Frame
+  'Detached':             '6',   // Detached Frame
+  'Built-In':             '1',
+  'Carport':              '3',
+  'None':                 '0',
+  'Underground Parking':  '2',   // Basement (closest)
+};
+
+// replacementCost.structureType -> ResidenceTypeCd
+const HAB_RESIDENCE_TYPE_MAP = {
+  'Detached':       'DT',
+  'Semi-Detached':  'SD',
+  'Row House':      'TH',   // Townhouse
+  'Condo':          'AC',   // Apartment/Co-op
+};
+
+// replacementCost.occupancyType -> DwellUseCd
+const HAB_DWELL_USE_MAP = {
+  'Owner Occupied':  '1',   // Primary Residence
+  'Tenant Occupied': '4',   // Rental
+  'Vacant':          '8',
+};
+
+// replacementCost.occupancyType -> OccupancyTypeCd
+const HAB_OCCUPANCY_TYPE_MAP = {
+  'Owner Occupied':  '1',
+  'Tenant Occupied': '4',
+  'Vacant':          '8',
+};
+
+// Frontend coverage key -> CSIO CoverageCd
+const HAB_COVERAGE_CODE_MAP = {
+  dwellingBuilding:          'DWELL',
+  detachedPrivateStructures: 'OS',
+  personalProperty:          'PP',
+  additionalLivingExpenses:  'BLDG',
+  legalLiability:            'PERUS',
+  voluntaryMedicalPayments:  'MEDPM',
+  voluntaryPropertyDamage:   'VPDA',
+  sewerBackup:               'RVCS',
+};
+
 module.exports = {
   INSURER_CONFIG,
   BILLING_METHOD_MAP,
   MARITAL_STATUS_MAP,
   PROVINCE_FULL_NAME,
+  HAB_RISK_TYPE_MAP,
+  HAB_CONSTRUCTION_MAP,
+  HAB_FOUNDATION_MAP,
+  HAB_ROOF_MATERIAL_MAP,
+  HAB_ELECTRICAL_PANEL_MAP,
+  HAB_WIRING_TYPE_MAP,
+  HAB_FUEL_TYPE_MAP,
+  HAB_HEATING_UNIT_MAP,
+  HAB_GARAGE_TYPE_MAP,
+  HAB_RESIDENCE_TYPE_MAP,
+  HAB_DWELL_USE_MAP,
+  HAB_OCCUPANCY_TYPE_MAP,
+  HAB_COVERAGE_CODE_MAP,
 };

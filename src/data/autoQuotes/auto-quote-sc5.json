@@ -1,0 +1,67 @@
+{
+  "id": "SC-005",
+  "name": "Personal Lines Bind — Peter Thompson (UC05)",
+  "status": "Quoted",
+  "createdDate": "2026-03-30",
+  "producerCode": "0001-01",
+  "bmsQuoteNumber": "123456789",
+  "billingMethod": "directBilling",
+  "customer": {
+    "firstName": "Peter",
+    "lastName": "Thompson",
+    "dob": "1970-06-15",
+    "gender": "Male",
+    "address": "245 Ferris Rd",
+    "postalCode": "M4B 1E7",
+    "city": "Toronto",
+    "province": "ON",
+    "phone": ""
+  },
+  "policyEffectiveDate": "2026-04-05",
+  "policyStartDate": "2026-04-05",
+  "vehicles": [
+    {
+      "year": "2025",
+      "make": "Ford",
+      "model": "Escape",
+      "antiTheft": false,
+      "primaryUse": "Personal",
+      "distanceDriven": {
+        "inTrip": "80",
+        "annually": "25000",
+        "businessKm": "0"
+      },
+      "comprehensiveCoverage": true,
+      "comprehensiveDeductible": "1000",
+      "collisionCoverage": true,
+      "collisionDeductible": "1000"
+    }
+  ],
+  "garagingLocation": {
+    "postalCode": "M4B 1E7",
+    "city": "Toronto"
+  },
+  "drivers": [
+    {
+      "firstName": "Peter",
+      "lastName": "Thompson",
+      "relationship": "Insured",
+      "gender": "Male",
+      "maritalStatus": "Married"
+    }
+  ],
+  "licensing": {
+    "type": "G",
+    "g2Date": "",
+    "gDate": "1999-05-10",
+    "province": "ON"
+  },
+  "cancellations": {
+    "cancelled": "No",
+    "withoutCoverage": "No",
+    "suspended": "No",
+    "accidents": "Yes",
+    "tickets": "No"
+  },
+  "selectedInsurers": []
+}

@@ -1,0 +1,107 @@
+{
+  "id": "UC-009",
+  "name": "Homeowners Bind — Ben Taylor (UC09)",
+  "status": "Quoted",
+  "createdDate": "2026-03-30",
+  "producerCode": "0001-01",
+  "bmsQuoteNumber": "HAB-Q-UC09",
+  "billingMethod": "insuredBilled",
+  "customer": {
+    "firstName": "Ben",
+    "lastName": "Taylor",
+    "address": "103 Kennedy Avenue",
+    "postalCode": "M6S 2X8",
+    "city": "Toronto",
+    "province": "ON",
+    "phone": "555-555-6666"
+  },
+  "policyEffectiveDate": "2026-04-01",
+  "policyEffectiveTime": "12:01",
+  "policyEffectiveAmPm": "AM",
+  "policyExpiryDate": "2027-04-01",
+  "applicant": {
+    "name": "Ben Taylor",
+    "dateOfBirth": "1983-08-02"
+  },
+  "lossHistory": {
+    "hasLossesOrClaims": "No",
+    "hasBeenDeclined": "No"
+  },
+  "riskType": "Homeowners",
+  "riskAddress": {
+    "address": "103 Kennedy Avenue",
+    "city": "Toronto",
+    "province": "ON",
+    "postalCode": "M6S 2X8"
+  },
+  "building": {
+    "yearBuilt": "1975",
+    "numStoreys": "2",
+    "numFamilies": "1",
+    "numUnits": "1",
+    "totalLivingArea": "1800",
+    "smokers": "No",
+    "numMortgages": "0",
+    "yearsHomeInsurance": "10"
+  },
+  "replacementCost": {
+    "occupancyType": "Owner Occupied",
+    "structureType": "Detached",
+    "foundationType": "Full Basement",
+    "finishedBasement": "50",
+    "exteriorWallFinish": "Brick Veneer",
+    "garageType": "None"
+  },
+  "upgrades": {
+    "roofYear": "2018",
+    "roofCoveringType": "Asphalt Shingles",
+    "electricalYear": "2021",
+    "electricalWiringType": "Copper",
+    "electricalPanelType": "Fuses",
+    "serviceAmperage": "125",
+    "heatingYear": "2020",
+    "primaryHeatingType": "Forced Air Gas",
+    "plumbingYear": "2018",
+    "auxiliaryHeating": "Yes",
+    "oilTank": "No"
+  },
+  "protection": {
+    "mainWaterValveShutOff": "Yes",
+    "fireProtection": "Full",
+    "securitySystem": "No",
+    "distanceToHydrant": "300",
+    "numSmokeDetectors": "3"
+  },
+  "numBathrooms": "2",
+  "numKitchens": "1",
+  "detachedOutbuildings": "",
+  "swimmingPool": {
+    "year": "",
+    "poolType": "",
+    "poolFenced": ""
+  },
+  "liabilityExposures": {
+    "ownMultipleLocations": "No",
+    "weeksRentedToOthers": "0",
+    "roomsRentedToOthers": "0",
+    "daycareNumChildren": "0",
+    "ownTrampoline": "No",
+    "haveGardenTractor": "No",
+    "haveGolfCart": "No",
+    "numSaddleDraftAnimals": "0",
+    "ownUnlicensedRecVehicles": "No",
+    "renewableEnergyInstall": "No",
+    "ownWatercraft": "No"
+  },
+  "coverages": {
+    "dwellingBuilding":          { "enabled": true,  "amount": "695876",  "deductible": "1000" },
+    "detachedPrivateStructures": { "enabled": true,  "amount": "22500",   "deductible": "1000" },
+    "personalProperty":          { "enabled": true,  "amount": "120000",  "deductible": "1000" },
+    "additionalLivingExpenses":  { "enabled": true,  "amount": "30000",   "deductible": "1000" },
+    "legalLiability":            { "enabled": true,  "amount": "1000000", "deductible": "" },
+    "voluntaryMedicalPayments":  { "enabled": true,  "amount": "5000",    "deductible": "" },
+    "voluntaryPropertyDamage":   { "enabled": true,  "amount": "5000",    "deductible": "" },
+    "sewerBackup":               { "enabled": false, "amount": "",        "deductible": "" }
+  },
+  "selectedInsurers": []
+}

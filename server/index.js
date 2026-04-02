@@ -76,8 +76,10 @@ app.listen(PORT, () => {
   console.log('='.repeat(60));
   console.log('');
   console.log('Available endpoints:');
-  console.log('  POST /api/quote           - Quote request (JSON → CSIO XML)');
-  console.log('  POST /api/bind            - Bind request (JSON → CSIO XML)');
+  console.log('  POST /api/quote           - Auto quote request (JSON -> CSIO XML)');
+  console.log('  POST /api/bind            - Auto bind request (JSON -> CSIO XML)');
+  console.log('  POST /api/hab/quote       - Hab quote request (JSON -> CSIO XML)');
+  console.log('  POST /api/hab/bind        - Hab bind request (JSON -> CSIO XML)');
   if (MODE === 'mock') {
     console.log('  POST /oauth/token         - Mock OAuth token');
   }

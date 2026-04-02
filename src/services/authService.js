@@ -38,7 +38,7 @@ async function fetchNewToken() {
   }
 
   const data = await response.json();
-  return data.access_token;
+  return { accessToken: data.access_token, expiresIn: data.expires_in || 3600 };
 }
 
 /**
@@ -56,11 +56,11 @@ export async function getAccessToken() {
   }
 
   // Fetch new token
-  const accessToken = await fetchNewToken();
+  const { accessToken, expiresIn } = await fetchNewToken();
 
-  // Cache the token (assume 1 hour expiry if not provided)
+  // Cache the token using the actual expiry from the token response
   tokenCache.accessToken = accessToken;
-  tokenCache.expiresAt = now + (3600 * 1000);
+  tokenCache.expiresAt = now + (expiresIn * 1000);
 
   return accessToken;
 }

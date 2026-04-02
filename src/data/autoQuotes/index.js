@@ -7,7 +7,8 @@ import quoteSc1 from './auto-quote-sc1.json';
 import quoteSc2 from './auto-quote-sc2.json';
 import quoteSc3 from './auto-quote-sc3.json';
 import quoteSc4 from './auto-quote-sc4.json';
+import quoteSc5 from './auto-quote-sc5.json';
 
-const savedAutoQuotes = [quoteSc1, quoteSc2, quoteSc3, quoteSc4];
+const savedAutoQuotes = [quoteSc1, quoteSc2, quoteSc3, quoteSc4, quoteSc5];
 
 export default savedAutoQuotes;

@@ -1,51 +1,12 @@
 const express = require('express');
+const path = require('path');
 const router = express.Router();
-const { XMLParser, XMLBuilder } = require('fast-xml-parser');
 const habMockData = require('../habMockData');
+const { buildHabCsioXml } = require('../csioHabTransformer');
+const { getInsurerConfig } = require('../csioTransformer');
+const { getHardcodedXml } = require('../csioHelpers');
 
-const xmlParser = new XMLParser({
-  ignoreAttributes: false,
-  isArray: (name) =>
-    ['selectedInsurer', 'coverage', 'message', 'result'].includes(name),
-});
-
-const xmlBuilder = new XMLBuilder({
-  ignoreAttributes: false, format: true, suppressEmptyNode: false,
-});
-
-function parseRequestBody(req) {
-  if (typeof req.body === 'string') {
-    const parsed = xmlParser.parse(req.body);
-    const rootKey = Object.keys(parsed).find((k) => k !== '?xml');
-    return rootKey ? parsed[rootKey] : parsed;
-  }
-  return req.body;
-}
-
-function wrapArraysForXml(obj) {
-  if (obj === null || obj === undefined || typeof obj !== 'object') return obj;
-  if (Array.isArray(obj)) return obj.map(wrapArraysForXml);
-  const arrayChildNames = {
-    results: 'result', coverages: 'coverage', underwritingMessages: 'message',
-    selectedInsurers: 'insurer',
-  };
-  const out = {};
-  for (const [key, val] of Object.entries(obj)) {
-    if (Array.isArray(val) && arrayChildNames[key]) {
-      out[key] = { [arrayChildNames[key]]: val.map(wrapArraysForXml) };
-    } else if (typeof val === 'object' && val !== null) {
-      out[key] = wrapArraysForXml(val);
-    } else {
-      out[key] = val;
-    }
-  }
-  return out;
-}
-
-function buildXmlResponse(rootTag, obj) {
-  const wrapped = { [rootTag]: wrapArraysForXml(obj) };
-  return '<?xml version="1.0" encoding="UTF-8"?>\n' + xmlBuilder.build(wrapped);
-}
+const TEMPLATES_DIR = path.join(__dirname, '..', 'csio-templates');
 
 function addRandomVariation(premium, pct = 5) {
   const v = (Math.random() - 0.5) * 2 * (pct / 100);
@@ -54,33 +15,75 @@ function addRandomVariation(premium, pct = 5) {
 
 function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
 
-function ensureArray(val) {
-  if (!val) return [];
-  return Array.isArray(val) ? val : [val];
-}
-
-// POST /api/hab/quote
+// ----------------------------------------------------------------
+// POST /api/hab/quote - Request habitational quotes (JSON in / JSON out)
+//
+// Short-circuit: if customer first name matches a known hab persona,
+// use hardcoded CSIO XML from template files.
+// Otherwise: dynamic mapping via csioHabTransformer.
+// ----------------------------------------------------------------
 router.post('/quote', (req, res) => {
   try {
-    const body = parseRequestBody(req);
+    const body = req.body;
 
-    let selectedInsurers = body.selectedInsurers;
-    if (selectedInsurers && !Array.isArray(selectedInsurers)) {
-      selectedInsurers = ensureArray(selectedInsurers.selectedInsurer || selectedInsurers.insurer || selectedInsurers);
+    console.log('');
+    console.log('='.repeat(70));
+    console.log('[HAB QUOTE] Incoming request from frontend');
+    console.log('='.repeat(70));
+    console.log('[HAB QUOTE] Received JSON payload:');
+    console.log(JSON.stringify(body, null, 2));
+    console.log('');
+
+    const selectedInsurers = body.selectedInsurers || [];
+
+    if (!Array.isArray(selectedInsurers) || selectedInsurers.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'selectedInsurers must be a non-empty array',
+      });
     }
-    if (Array.isArray(selectedInsurers) && selectedInsurers.length > 0 && typeof selectedInsurers[0] === 'object') {
-      selectedInsurers = selectedInsurers.flatMap((item) => ensureArray(item.selectedInsurer || item.insurer || item));
+
+    // Check for hardcoded persona
+    const hardcoded = getHardcodedXml(body, 'habQuote', TEMPLATES_DIR);
+
+    if (hardcoded) {
+      console.log(`[HAB QUOTE] Demo persona detected: ${hardcoded.label}`);
+      console.log('[HAB QUOTE] Using hardcoded CSIO XML template (skipping dynamic mapping)');
+      console.log('');
+
+      for (const insurerId of selectedInsurers) {
+        const config = getInsurerConfig(insurerId);
+        const label = config ? config.name : insurerId;
+
+        console.log('-'.repeat(70));
+        console.log(`[HAB QUOTE] Hardcoded CSIO XML for ${label}:`);
+        console.log('-'.repeat(70));
+        console.log(hardcoded.xml);
+        console.log('');
+      }
+    } else {
+      // Dynamic CSIO XML transformation per insurer
+      console.log(`[HAB QUOTE] Transforming to CSIO XML for ${selectedInsurers.length} insurer(s) via dynamic mapping...`);
+      console.log('');
+
+      for (const insurerId of selectedInsurers) {
+        const config = getInsurerConfig(insurerId);
+        if (!config) {
+          console.warn(`[HAB QUOTE] Unknown insurer "${insurerId}" -- skipping`);
+          continue;
+        }
+
+        const csioXml = buildHabCsioXml(body, insurerId, { type: 'quote' });
+
+        console.log('-'.repeat(70));
+        console.log(`[HAB QUOTE] CSIO XML for ${config.name} (${insurerId}):`);
+        console.log('-'.repeat(70));
+        console.log(csioXml);
+        console.log('');
+      }
     }
 
-    console.log('[Hab Quote Request - XML]');
-    console.log('  Timestamp:', new Date().toISOString());
-    console.log('  Selected Insurers:', selectedInsurers || []);
-
-    if (!selectedInsurers || !Array.isArray(selectedInsurers) || selectedInsurers.length === 0) {
-      res.set('Content-Type', 'application/xml');
-      return res.status(400).send(buildXmlResponse('habQuoteResponse', { success: false, error: 'selectedInsurers must be a non-empty array' }));
-    }
-
+    // Mock response
     const quoteId = 'HQ-' + Math.random().toString(36).substr(2, 9).toUpperCase();
     const timestamp = new Date().toISOString();
 
@@ -91,25 +94,103 @@ router.post('/quote', (req, res) => {
         const annualVar = addRandomVariation(base.premiums.annual);
         base.premiums = { annual: annualVar, monthly: Math.round((annualVar / 12) * 100) / 100 };
         base.coverages = base.coverages.map((c) => {
-          if (c.premium > 0) c.premium = addRandomVariation(c.premium, 3);
-          return c;
+          if (c.premium > 0) return { ...c, premium: addRandomVariation(c.premium, 3) };
+          return { ...c };
         });
         return base;
       });
 
-    console.log('  Quote ID:', quoteId);
-    console.log('  Results Count:', results.length);
+    console.log(`[HAB QUOTE] Generated quote ID: ${quoteId}`);
+    console.log(`[HAB QUOTE] Returning ${results.length} result(s) for: ${results.map((r) => r.insurerName).join(', ')}`);
 
     setTimeout(() => {
-      res.set('Content-Type', 'application/xml');
-      res.send(buildXmlResponse('habQuoteResponse', {
-        success: true, quoteId, timestamp, results: results,
-      }));
+      const responseObj = { success: true, quoteId, timestamp, results };
+      console.log('[HAB QUOTE] Sending JSON response to frontend');
+      console.log('');
+      res.json(responseObj);
     }, 1500);
   } catch (error) {
-    console.error('[Hab Quote Error]', error);
-    res.set('Content-Type', 'application/xml');
-    res.status(500).send(buildXmlResponse('habQuoteResponse', { success: false, error: error.message }));
+    console.error('[HAB QUOTE] Error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ----------------------------------------------------------------
+// POST /api/hab/bind - Bind a hab quote (JSON in / JSON out)
+//
+// Same short-circuit logic for hardcoded personas,
+// otherwise dynamic mapping via csioHabTransformer.
+// ----------------------------------------------------------------
+router.post('/bind', (req, res) => {
+  try {
+    const body = req.body;
+
+    console.log('');
+    console.log('='.repeat(70));
+    console.log('[HAB BIND] Incoming request from frontend');
+    console.log('='.repeat(70));
+    console.log('[HAB BIND] Received JSON payload:');
+    console.log(JSON.stringify(body, null, 2));
+    console.log('');
+
+    const quoteNumber = body.quoteNumber || body.referenceNumber || '';
+
+    if (!quoteNumber) {
+      return res.status(400).json({
+        success: false,
+        error: 'quoteNumber is required',
+      });
+    }
+
+    const bindPayload = body.quoteData || body;
+    const insurerId = body.insurerId || 'aviva';
+
+    // Check for hardcoded persona
+    const hardcoded = getHardcodedXml(bindPayload, 'habBind', TEMPLATES_DIR);
+
+    if (hardcoded) {
+      console.log(`[HAB BIND] Demo persona detected: ${hardcoded.label}`);
+      console.log('[HAB BIND] Using hardcoded CSIO XML template (skipping dynamic mapping)');
+      console.log('');
+      console.log('-'.repeat(70));
+      console.log(`[HAB BIND] Hardcoded CSIO XML (HomePolicyAddRq):`);
+      console.log('-'.repeat(70));
+      console.log(hardcoded.xml);
+      console.log('');
+    } else {
+      // Dynamic mapping
+      const config = getInsurerConfig(insurerId);
+      if (config) {
+        const csioXml = buildHabCsioXml(bindPayload, insurerId, { type: 'bind' });
+        console.log('-'.repeat(70));
+        console.log(`[HAB BIND] CSIO XML for ${config.name} (HomePolicyAddRq):`);
+        console.log('-'.repeat(70));
+        console.log(csioXml);
+        console.log('');
+      }
+    }
+
+    const policyNumber = 'HPOL-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    const timestamp = new Date().toISOString();
+
+    setTimeout(() => {
+      const responseObj = {
+        success: true,
+        policyNumber,
+        quoteNumber,
+        bindTimestamp: timestamp,
+        status: 'BOUND',
+        message: 'Habitational policy has been successfully bound.',
+      };
+
+      console.log(`[HAB BIND] Policy bound: ${policyNumber} for quote ${quoteNumber}`);
+      console.log('[HAB BIND] Sending JSON response to frontend');
+      console.log('');
+      res.json(responseObj);
+    }, 1000);
+  } catch (error) {
+    console.error('[HAB BIND] Error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

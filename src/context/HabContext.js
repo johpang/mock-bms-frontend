@@ -7,7 +7,7 @@
 import { createContext, useContext, useState, useCallback } from 'react';
 import { initialHabQuoteData } from '../models/habRequestSchema.js';
 import { submitHabQuoteRequest } from '../services/habQuoteService.js';
-import { submitBindRequest } from '../services/bindService.js';
+import { submitHabBindRequest } from '../services/habBindService.js';
 import config from '../config/index.js';
 import habMockResponses from '../data/habMockResponses.js';
 
@@ -69,20 +69,25 @@ export function HabProvider({ children }) {
     try {
       const selectedResponse = habResponses?.[selectedInsurerIndex ?? 0];
       const quoteNumber = selectedResponse?.referenceNumber || '';
-      const payload = { quoteNumber, ...bindData };
+      const payload = {
+        quoteNumber,
+        insurerId: bindData.insurerId || 'aviva',
+        quoteData: habData,
+        ...bindData,
+      };
 
       if (config.mockMode) {
         await new Promise((r) => setTimeout(r, 600));
         setBindResponse({
           success: true,
-          policyNumber: 'POL-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+          policyNumber: 'HPOL-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
           quoteNumber,
           bindTimestamp: new Date().toISOString(),
           status: 'BOUND',
-          message: 'Policy has been successfully bound.',
+          message: 'Habitational policy has been successfully bound.',
         });
       } else {
-        const response = await submitBindRequest(payload);
+        const response = await submitHabBindRequest(payload);
         setBindResponse(response);
       }
     } catch (err) {

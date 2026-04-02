@@ -1,19 +1,19 @@
 {
-  "id": "HAB-SC-001",
-  "name": "Homeowners - Marshall St",
-  "status": "Quoted",
-  "createdDate": "2026-03-28",
-  "producerCode": "BRK-5500",
-  "bmsQuoteNumber": "HAB-Q-20260001",
+  "id": "UC-006",
+  "name": "Homeowners Quote — John Smith (UC06)",
+  "status": "Draft",
+  "createdDate": "2026-03-30",
+  "producerCode": "0001-01",
+  "bmsQuoteNumber": "HAB-Q-UC06",
   "billingMethod": "direct",
   "customer": {
     "firstName": "John",
     "lastName": "Smith",
-    "address": "52 Marshall Street",
-    "postalCode": "L4N 3S7",
-    "city": "Barrie",
+    "address": "103 Kennedy Avenue",
+    "postalCode": "M6S 2X8",
+    "city": "Toronto",
     "province": "ON",
-    "phone": "705-555-1234"
+    "phone": "555-555-5555"
   },
   "policyEffectiveDate": "2026-04-01",
   "policyEffectiveTime": "12:01",
@@ -21,7 +21,7 @@
   "policyExpiryDate": "2027-04-01",
   "applicant": {
     "name": "John Smith",
-    "dateOfBirth": "1985-06-15"
+    "dateOfBirth": "1983-08-02"
   },
   "lossHistory": {
     "hasLossesOrClaims": "No",
@@ -29,19 +29,19 @@
   },
   "riskType": "Homeowners",
   "riskAddress": {
-    "address": "52 Marshall Street",
-    "city": "Barrie",
+    "address": "103 Kennedy Avenue",
+    "city": "Toronto",
     "province": "ON",
-    "postalCode": "L4N 3S7"
+    "postalCode": "M6S 2X8"
   },
   "building": {
-    "yearBuilt": "1995",
+    "yearBuilt": "1975",
     "numStoreys": "2",
     "numFamilies": "1",
     "numUnits": "1",
-    "totalLivingArea": "2200",
+    "totalLivingArea": "1800",
     "smokers": "No",
-    "numMortgages": "1",
+    "numMortgages": "0",
     "yearsHomeInsurance": "10"
   },
   "replacementCost": {
@@ -50,31 +50,31 @@
     "foundationType": "Full Basement",
     "finishedBasement": "50",
     "exteriorWallFinish": "Brick Veneer",
-    "garageType": "Attached"
+    "garageType": "None"
   },
   "upgrades": {
-    "roofYear": "2015",
+    "roofYear": "2018",
     "roofCoveringType": "Asphalt Shingles",
-    "electricalYear": "1995",
+    "electricalYear": "2021",
     "electricalWiringType": "Copper",
-    "electricalPanelType": "Circuit Breakers",
-    "serviceAmperage": "200",
-    "heatingYear": "2018",
+    "electricalPanelType": "Fuses",
+    "serviceAmperage": "125",
+    "heatingYear": "2020",
     "primaryHeatingType": "Forced Air Gas",
-    "plumbingYear": "1995",
-    "auxiliaryHeating": "No",
+    "plumbingYear": "2018",
+    "auxiliaryHeating": "Yes",
     "oilTank": "No"
   },
   "protection": {
     "mainWaterValveShutOff": "Yes",
     "fireProtection": "Full",
-    "securitySystem": "Yes",
+    "securitySystem": "No",
     "distanceToHydrant": "300",
-    "numSmokeDetectors": "4"
+    "numSmokeDetectors": "3"
   },
-  "numBathrooms": "3",
+  "numBathrooms": "2",
   "numKitchens": "1",
-  "detachedOutbuildings": "Shed",
+  "detachedOutbuildings": "",
   "swimmingPool": {
     "year": "",
     "poolType": "",
@@ -94,14 +94,14 @@
     "ownWatercraft": "No"
   },
   "coverages": {
-    "dwellingBuilding":          { "enabled": true, "amount": "450000", "deductible": "1000" },
-    "detachedPrivateStructures": { "enabled": true, "amount": "45000", "deductible": "1000" },
-    "personalProperty":          { "enabled": true, "amount": "225000", "deductible": "1000" },
-    "additionalLivingExpenses":  { "enabled": true, "amount": "90000", "deductible": "" },
-    "legalLiability":            { "enabled": true, "amount": "2000000", "deductible": "" },
-    "voluntaryMedicalPayments":  { "enabled": true, "amount": "5000", "deductible": "" },
-    "voluntaryPropertyDamage":   { "enabled": true, "amount": "2000", "deductible": "" },
-    "sewerBackup":               { "enabled": true, "amount": "25000", "deductible": "1000" }
+    "dwellingBuilding":          { "enabled": true,  "amount": "695876",  "deductible": "1000" },
+    "detachedPrivateStructures": { "enabled": true,  "amount": "22500",   "deductible": "1000" },
+    "personalProperty":          { "enabled": true,  "amount": "120000",  "deductible": "1000" },
+    "additionalLivingExpenses":  { "enabled": true,  "amount": "30000",   "deductible": "1000" },
+    "legalLiability":            { "enabled": true,  "amount": "1000000", "deductible": "" },
+    "voluntaryMedicalPayments":  { "enabled": true,  "amount": "5000",    "deductible": "" },
+    "voluntaryPropertyDamage":   { "enabled": true,  "amount": "5000",    "deductible": "" },
+    "sewerBackup":               { "enabled": false, "amount": "",        "deductible": "" }
   },
   "selectedInsurers": []
 }

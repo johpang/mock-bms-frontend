@@ -31,7 +31,7 @@ const StepIndicator = ({
 
   const styles = {
     container: {
-      padding: '0.5px 24px',
+      padding: '8px 24px 4px',
       backgroundColor: '#ffffff',
     },
     barWrapper: {
@@ -55,6 +55,7 @@ const StepIndicator = ({
     labelWrapper: {
       position: 'relative',
       marginTop: '8px',
+      height: '24px',
     },
     label: {
       fontSize: '14px',

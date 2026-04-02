@@ -18,11 +18,18 @@ function uuid() {
 }
 
 /**
- * Returns the current timestamp in ISO format with EST offset.
+ * Returns the current timestamp in ISO format with the correct Eastern offset,
+ * accounting for Daylight Saving Time (EDT = -04:00, EST = -05:00).
  * @returns {string}
  */
 function isoNow() {
-  return new Date().toISOString().replace('Z', '-05:00');
+  const now = new Date();
+  // Determine Eastern offset by checking Jan 1 (always EST) vs current
+  const janOffset = new Date(now.getFullYear(), 0, 1).getTimezoneOffset();
+  const curOffset = now.getTimezoneOffset();
+  const isDST = curOffset < janOffset;
+  const offsetStr = isDST ? '-04:00' : '-05:00';
+  return now.toISOString().replace('Z', offsetStr);
 }
 
 /**

@@ -3,12 +3,26 @@
     "john": {
       "quote": "auto-quote-uc01.xml",
       "bind": "auto-bind-uc02.xml",
-      "label": "John Smith (Use Case 01/02)"
+      "habQuote": "hab-quote-uc06.xml",
+      "habBind": "hab-bind-uc07.xml",
+      "label": "John Smith (Auto UC01/02, Hab UC06/07)"
     },
     "kristen": {
       "quote": "auto-quote-uc03.xml",
       "bind": "auto-bind-uc04.xml",
       "label": "Kristen Sutherland (Use Case 03/04)"
+    },
+    "peter": {
+      "bind": "auto-bind-uc05.xml",
+      "label": "Peter Thompson (Use Case 05 - bind only)"
+    },
+    "ben": {
+      "habQuote": "hab-quote-uc08.xml",
+      "habBind": "hab-bind-uc09.xml",
+      "label": "Ben Taylor (Hab UC08/09)"
     }
+  },
+  "_notes": {
+    "uc10": "UC10 (hab-bind-uc10.xml) is a John Smith bind-with-loss-history variant. Since the persona lookup is firstName-based, it cannot coexist with UC07 under 'john'. UC10 is available as a template file but uses dynamic mapping when submitted."
   }
 }
