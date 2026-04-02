@@ -17,6 +17,7 @@ import config from '../config/index.js';
  */
 export function composeRequestPayload(quoteData) {
   return {
+    id: quoteData.id || '',
     producerCode: quoteData.producerCode || '',
     bmsQuoteNumber: quoteData.bmsQuoteNumber || '',
     billingMethod: quoteData.billingMethod || '',

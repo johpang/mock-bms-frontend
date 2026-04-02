@@ -6,7 +6,7 @@
   "proxy": "http://localhost:4000",
   "scripts": {
     "start": "react-scripts start",
-    "server": "cd server && node index.js",
+    "server": "cd server && node index.js || (echo. && echo === SERVER CRASHED === && pause)",
     "dev": "concurrently \"npm start\" \"npm run server\"",
     "build": "react-scripts build",
     "deploy": "gh-pages -d build",
@@ -33,8 +33,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "concurrently": "^9.2.1"
   }
 }

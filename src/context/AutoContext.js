@@ -116,7 +116,12 @@ export function AutoProvider({ children }) {
       const selectedResponse = quoteResponses?.[selectedInsurerIndex ?? 0];
       const quoteNumber = selectedResponse?.referenceNumber || '';
 
-      const payload = { quoteNumber, ...bindData };
+      const payload = {
+        quoteNumber,
+        insurerId: bindData.insurerId || 'aviva',
+        quoteData,
+        ...bindData,
+      };
 
       if (config.mockMode) {
         await new Promise((r) => setTimeout(r, 600));

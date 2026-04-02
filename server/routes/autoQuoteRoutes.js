@@ -50,7 +50,7 @@ router.post('/quote', (req, res) => {
     const hardcoded = getHardcodedXml(body, 'quote', TEMPLATES_DIR);
 
     if (hardcoded) {
-      console.log(`[QUOTE] Demo persona detected: ${hardcoded.label}`);
+      console.log(`[QUOTE] Template match: ${hardcoded.label}`);
       console.log('[QUOTE] Using hardcoded CSIO XML template (skipping dynamic mapping)');
       console.log('');
 
@@ -166,10 +166,10 @@ router.post('/bind', (req, res) => {
     const insurerId = body.insurerId || 'aviva';
 
     // Check for hardcoded persona
-    const hardcoded = getHardcodedXml(bindPayload, 'bind', TEMPLATES_DIR);
+    const hardcoded = getHardcodedXml(body, 'bind', TEMPLATES_DIR);
 
     if (hardcoded) {
-      console.log(`[BIND] Demo persona detected: ${hardcoded.label}`);
+      console.log(`[BIND] Template match: ${hardcoded.label}`);
       console.log('[BIND] Using hardcoded CSIO XML template (skipping dynamic mapping)');
       console.log('');
       console.log('-'.repeat(70));

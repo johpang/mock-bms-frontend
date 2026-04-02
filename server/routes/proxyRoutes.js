@@ -79,7 +79,7 @@ router.post('/quote', async (req, res) => {
 
       let csioXml;
       if (hardcoded) {
-        console.log(`[Proxy/QUOTE] Demo persona: ${hardcoded.label} -- using hardcoded XML for ${label}`);
+        console.log(`[Proxy/QUOTE] Template match: ${hardcoded.label} -- using hardcoded XML for ${label}`);
         csioXml = hardcoded.xml;
       } else {
         if (!config) {
@@ -131,11 +131,11 @@ router.post('/bind', async (req, res) => {
     const config = getInsurerConfig(insurerId);
     const insurerLabel = config ? config.name : insurerId;
 
-    const hardcoded = getHardcodedXml(bindPayload, 'bind', TEMPLATES_DIR);
+    const hardcoded = getHardcodedXml(body, 'bind', TEMPLATES_DIR);
     let csioXml;
 
     if (hardcoded) {
-      console.log(`[Proxy/BIND] Demo persona: ${hardcoded.label} -- using hardcoded XML`);
+      console.log(`[Proxy/BIND] Template match: ${hardcoded.label} -- using hardcoded XML`);
       csioXml = hardcoded.xml;
     } else {
       csioXml = buildCsioXml(bindPayload, insurerId, { type: 'bind' });
@@ -190,7 +190,7 @@ router.post('/hab/quote', async (req, res) => {
 
       let csioXml;
       if (hardcoded) {
-        console.log(`[Proxy/HAB-QUOTE] Demo persona: ${hardcoded.label} -- using hardcoded XML for ${label}`);
+        console.log(`[Proxy/HAB-QUOTE] Template match: ${hardcoded.label} -- using hardcoded XML for ${label}`);
         csioXml = hardcoded.xml;
       } else {
         csioXml = buildHabCsioXml(body, insurerId, { type: 'quote' });
@@ -238,11 +238,11 @@ router.post('/hab/bind', async (req, res) => {
     const config = getInsurerConfig(insurerId);
     const insurerLabel = config ? config.name : insurerId;
 
-    const hardcoded = getHardcodedXml(bindPayload, 'habBind', TEMPLATES_DIR);
+    const hardcoded = getHardcodedXml(body, 'habBind', TEMPLATES_DIR);
     let csioXml;
 
     if (hardcoded) {
-      console.log(`[Proxy/HAB-BIND] Demo persona: ${hardcoded.label} -- using hardcoded XML`);
+      console.log(`[Proxy/HAB-BIND] Template match: ${hardcoded.label} -- using hardcoded XML`);
       csioXml = hardcoded.xml;
     } else {
       csioXml = buildHabCsioXml(bindPayload, insurerId, { type: 'bind' });

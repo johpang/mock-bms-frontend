@@ -30,6 +30,7 @@ function normalizeResult(r) {
 
 export function composeHabRequestPayload(habData) {
   return {
+    id: habData.id || '',
     producerCode: habData.producerCode || '',
     bmsQuoteNumber: habData.bmsQuoteNumber || '',
     billingMethod: habData.billingMethod || '',

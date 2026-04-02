@@ -78,11 +78,15 @@ function randomNumericId(length = 35) {
 }
 
 /**
- * Loads a hardcoded XML template for a demo persona if the customer
- * first name matches a known persona.
+ * Loads a hardcoded XML template by matching the request's ID field
+ * against templateConfig.json entries.
  *
- * @param {Object} body - The request body containing customer info
- * @param {string} type - 'quote' or 'bind'
+ * The ID comes from the saved quote JSON (e.g. "SC-001", "UC-006").
+ * For quote requests, body.id is checked directly.
+ * For bind requests, body.quoteData.id is also checked.
+ *
+ * @param {Object} body - The request body
+ * @param {string} type - 'quote', 'bind', 'habQuote', or 'habBind'
  * @param {string} templatesDir - Absolute path to the templates directory
  * @returns {{ xml: string, label: string } | null}
  */
@@ -91,11 +95,13 @@ function getHardcodedXml(body, type, templatesDir) {
   if (!fs.existsSync(configPath)) return null;
 
   const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-  const firstName = (body.customer?.firstName || '').trim().toLowerCase();
-  const persona = config.personas?.[firstName];
-  if (!persona) return null;
+  const id = body.id || body.quoteData?.id || '';
+  if (!id) return null;
 
-  const templateFile = persona[type];
+  const entry = config.templates?.[id];
+  if (!entry) return null;
+
+  const templateFile = entry[type];
   if (!templateFile) return null;
 
   const templatePath = path.join(templatesDir, templateFile);
@@ -105,7 +111,7 @@ function getHardcodedXml(body, type, templatesDir) {
   }
 
   const xml = fs.readFileSync(templatePath, 'utf-8');
-  return { xml, label: persona.label || firstName };
+  return { xml, label: id };
 }
 
 module.exports = { uuid, isoNow, dateOnly, addOneYear, esc, randomNumericId, getHardcodedXml };
