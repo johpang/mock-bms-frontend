@@ -95,24 +95,17 @@ function getHardcodedXml(body, type, templatesDir) {
   const persona = config.personas?.[firstName];
   if (!persona) return null;
 
-  const fileName = persona[type];
-  if (!fileName) return null;
+  const templateFile = persona[type];
+  if (!templateFile) return null;
 
-  const filePath = path.join(templatesDir, fileName);
-  if (!fs.existsSync(filePath)) return null;
+  const templatePath = path.join(templatesDir, templateFile);
+  if (!fs.existsSync(templatePath)) {
+    console.warn(`[csioHelpers] Template file not found: ${templatePath}`);
+    return null;
+  }
 
-  return {
-    xml: fs.readFileSync(filePath, 'utf-8'),
-    label: persona.label,
-  };
+  const xml = fs.readFileSync(templatePath, 'utf-8');
+  return { xml, label: persona.label || firstName };
 }
 
-module.exports = {
-  uuid,
-  isoNow,
-  dateOnly,
-  addOneYear,
-  esc,
-  randomNumericId,
-  getHardcodedXml,
-};
+module.exports = { uuid, isoNow, dateOnly, addOneYear, esc, randomNumericId, getHardcodedXml };

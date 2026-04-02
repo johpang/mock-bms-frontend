@@ -15,6 +15,8 @@
  *  AWS_API_BASE_URL      (none)                  e.g. https://api.example.com
  *  AWS_QUOTE_PATH        /quote                  Appended to base URL
  *  AWS_BIND_PATH         /bind                   Appended to base URL
+ *  AWS_HAB_QUOTE_PATH    /hab/quote              Hab quote path
+ *  AWS_HAB_BIND_PATH     /hab/bind               Hab bind path
  *
  *  -- OAuth (proxy mode only) --
  *  OAUTH_TOKEN_URL       (none)                  Token endpoint URL
@@ -36,6 +38,8 @@ const config = {
     baseUrl: process.env.AWS_API_BASE_URL || '',
     quotePath: process.env.AWS_QUOTE_PATH || '/quote',
     bindPath: process.env.AWS_BIND_PATH || '/bind',
+    habQuotePath: process.env.AWS_HAB_QUOTE_PATH || '/hab/quote',
+    habBindPath: process.env.AWS_HAB_BIND_PATH || '/hab/bind',
   },
 
   /** OAuth2 client-credentials settings (used only in proxy mode) */
