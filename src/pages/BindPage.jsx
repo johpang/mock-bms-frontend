@@ -21,12 +21,11 @@ const BindPage = () => {
 
   const selectedResponse = quoteResponses?.[selectedInsurerIndex ?? 0];
 
-  const [payment, setPayment] = useState({
-    cardholderName: '',
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    billingAddress: '',
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [eftDetails, setEftDetails] = useState({
+    bankName: '',
+    transitNumber: '',
+    accountNumber: '',
   });
 
   const colors = {
@@ -165,13 +164,14 @@ const BindPage = () => {
     },
   };
 
-  const handleChange = (field) => (e) => {
-    setPayment((prev) => ({ ...prev, [field]: e.target.value }));
+  const handleEftChange = (field) => (e) => {
+    setEftDetails((prev) => ({ ...prev, [field]: e.target.value }));
   };
 
   const handleBind = async () => {
-    await submitBind({ payment });
-    // If no error thrown, move to success page
+    const paymentInfo = { method: paymentMethod };
+    if (paymentMethod === 'eft') paymentInfo.eft = eftDetails;
+    await submitBind({ payment: paymentInfo });
     nextStep();
   };
 
@@ -241,58 +241,69 @@ const BindPage = () => {
         </div>
       </div>
 
-      {/* Payment Information */}
+      {/* Payment Method */}
       <div style={styles.sectionBox}>
-        <div style={styles.sectionTitle}>Payment Information</div>
-        <div style={styles.formGrid}>
-          <div style={styles.formGridFull}>
-            <label style={styles.fieldLabel}>Cardholder Name</label>
-            <input
-              style={styles.input}
-              value={payment.cardholderName}
-              onChange={handleChange('cardholderName')}
-              placeholder="Full name on card"
-            />
-          </div>
-          <div>
-            <label style={styles.fieldLabel}>Card Number</label>
-            <input
-              style={styles.input}
-              value={payment.cardNumber}
-              onChange={handleChange('cardNumber')}
-              placeholder="1234 5678 9012 3456"
-            />
-          </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <div style={{ flex: 1 }}>
-              <label style={styles.fieldLabel}>Expiry Date</label>
+        <div style={styles.sectionTitle}>Payment Method</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {[
+            { value: 'eft', label: 'Pre-Authorized Debit (EFT)' },
+            { value: 'creditCard', label: 'Credit Card' },
+            { value: 'brokerCollected', label: 'Broker Collected' },
+          ].map((opt) => (
+            <label
+              key={opt.value}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                padding: '12px 16px', borderRadius: '4px', cursor: 'pointer',
+                border: `1px solid ${paymentMethod === opt.value ? colors.accent : colors.border}`,
+                backgroundColor: paymentMethod === opt.value ? '#f0f4ff' : colors.white,
+                transition: 'all 0.15s ease',
+              }}
+            >
               <input
-                style={styles.input}
-                value={payment.expiryDate}
-                onChange={handleChange('expiryDate')}
-                placeholder="MM/YY"
+                type="radio"
+                name="paymentMethod"
+                value={opt.value}
+                checked={paymentMethod === opt.value}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                style={{ accentColor: colors.navy }}
               />
-            </div>
-            <div style={{ flex: 1 }}>
-              <label style={styles.fieldLabel}>CVV</label>
-              <input
-                style={styles.input}
-                value={payment.cvv}
-                onChange={handleChange('cvv')}
-                placeholder="123"
-              />
-            </div>
-          </div>
-          <div style={styles.formGridFull}>
-            <label style={styles.fieldLabel}>Billing Address</label>
-            <input
-              style={styles.input}
-              value={payment.billingAddress}
-              onChange={handleChange('billingAddress')}
-              placeholder="Full billing address"
-            />
-          </div>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: colors.text }}>{opt.label}</span>
+            </label>
+          ))}
         </div>
+
+        {paymentMethod === 'eft' && (
+          <div style={{ ...styles.formGrid, marginTop: '20px' }}>
+            <div style={styles.formGridFull}>
+              <label style={styles.fieldLabel}>Bank / Financial Institution</label>
+              <input
+                style={styles.input}
+                value={eftDetails.bankName}
+                onChange={handleEftChange('bankName')}
+                placeholder="e.g. TD Canada Trust"
+              />
+            </div>
+            <div>
+              <label style={styles.fieldLabel}>Transit Number</label>
+              <input
+                style={styles.input}
+                value={eftDetails.transitNumber}
+                onChange={handleEftChange('transitNumber')}
+                placeholder="5 digits"
+              />
+            </div>
+            <div>
+              <label style={styles.fieldLabel}>Account Number</label>
+              <input
+                style={styles.input}
+                value={eftDetails.accountNumber}
+                onChange={handleEftChange('accountNumber')}
+                placeholder="7-12 digits"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       <div style={styles.buttonContainer}>

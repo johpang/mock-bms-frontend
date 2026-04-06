@@ -9,6 +9,7 @@
 import React, { useState, useCallback } from 'react';
 import { AutoProvider, useAutoQuote } from './context/AutoContext';
 import { HabProvider, useHab } from './context/HabContext';
+import { CommlProvider, useComml } from './context/CommlContext';
 import { Footer, StepIndicator } from './components/Layout';
 
 // Dashboard
@@ -35,6 +36,17 @@ import HabPremiumBreakdownPage from './pages/hab/HabPremiumBreakdownPage';
 import HabBindPage from './pages/hab/HabBindPage';
 import HabBindSuccessPage from './pages/hab/HabBindSuccessPage';
 
+// Commercial page imports
+import CommlQuoteFormPage1 from './pages/comml/CommlQuoteFormPage1';
+import CommlQuoteFormPage2 from './pages/comml/CommlQuoteFormPage2';
+import CommlQuoteFormPage3 from './pages/comml/CommlQuoteFormPage3';
+import CommlQuoteFormPage4 from './pages/comml/CommlQuoteFormPage4';
+import CommlInsurerSelectionPage from './pages/comml/CommlInsurerSelectionPage';
+import CommlQuoteComparisonPage from './pages/comml/CommlQuoteComparisonPage';
+import CommlPremiumBreakdownPage from './pages/comml/CommlPremiumBreakdownPage';
+import CommlBindPage from './pages/comml/CommlBindPage';
+import CommlBindSuccessPage from './pages/comml/CommlBindSuccessPage';
+
 // Auto steps (step 1 = Quote Details, no landing page)
 const AUTO_LABELS = [
   'Quote Details', 'Vehicle Details', 'Driver & History',
@@ -57,6 +69,18 @@ const HAB_COMPONENTS = [
   HabQuoteFormPage1, HabQuoteFormPage2, HabQuoteFormPage3,
   HabCoveragePage, HabInsurerSelectionPage, HabQuoteComparisonPage,
   HabPremiumBreakdownPage, HabBindPage, HabBindSuccessPage,
+];
+
+// Commercial steps (step 1 = Quote Details, no landing page)
+const COMML_LABELS = [
+  'Quote Details', 'Questions & Location', 'Protection & Improvements',
+  'Coverages', 'Select Insurers', 'Compare Quotes', 'Premium Breakdown',
+  'Bind Policy', 'Confirmation',
+];
+const COMML_COMPONENTS = [
+  CommlQuoteFormPage1, CommlQuoteFormPage2, CommlQuoteFormPage3,
+  CommlQuoteFormPage4, CommlInsurerSelectionPage, CommlQuoteComparisonPage,
+  CommlPremiumBreakdownPage, CommlBindPage, CommlBindSuccessPage,
 ];
 
 /** Layout styles */
@@ -155,6 +179,33 @@ function HabContent({ onGoHome }) {
   );
 }
 
+// -- Commercial wizard content (rendered inside CommlProvider) --
+function CommlContent({ onGoHome }) {
+  const { currentStep } = useComml();
+
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
+
+  const componentIndex = currentStep - 1;
+  const CurrentPage = COMML_COMPONENTS[componentIndex] || COMML_COMPONENTS[0];
+
+  return (
+    <>
+      <div style={styles.topBar}>
+        <button style={styles.brandLink} onClick={onGoHome}>BMS</button>
+        <span style={styles.lineLabel}>Small Commercial Lines</span>
+      </div>
+      <main style={styles.mainContent}>
+        <div style={styles.stepIndicatorWrapper}>
+          <StepIndicator steps={COMML_LABELS} currentStep={componentIndex} />
+        </div>
+        <div style={styles.pageWrapper}><CurrentPage /></div>
+      </main>
+    </>
+  );
+}
+
 // -- Root App --
 function App() {
   // null = dashboard, 'auto' = auto wizard, 'hab' = hab wizard
@@ -187,10 +238,20 @@ function App() {
     setActiveLine('hab');
   }, []);
 
+  const handleNewCommlQuote = useCallback(() => {
+    setPendingAction({ type: 'new' });
+    setActiveLine('comml');
+  }, []);
+
+  const handleOpenCommlQuote = useCallback((quote) => {
+    setPendingAction({ type: 'load', quote });
+    setActiveLine('comml');
+  }, []);
+
   if (activeLine === 'auto') {
     return (
       <div style={styles.appContainer}>
-        <AutoProvider>
+        <AutoProvider onGoHome={goHome}>
           <AutoWizardBridge pendingAction={pendingAction} onActionConsumed={() => setPendingAction(null)} />
           <AutoContent onGoHome={goHome} />
         </AutoProvider>
@@ -202,10 +263,22 @@ function App() {
   if (activeLine === 'hab') {
     return (
       <div style={styles.appContainer}>
-        <HabProvider>
+        <HabProvider onGoHome={goHome}>
           <HabWizardBridge pendingAction={pendingAction} onActionConsumed={() => setPendingAction(null)} />
           <HabContent onGoHome={goHome} />
         </HabProvider>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (activeLine === 'comml') {
+    return (
+      <div style={styles.appContainer}>
+        <CommlProvider onGoHome={goHome}>
+          <CommlWizardBridge pendingAction={pendingAction} onActionConsumed={() => setPendingAction(null)} />
+          <CommlContent onGoHome={goHome} />
+        </CommlProvider>
         <Footer />
       </div>
     );
@@ -223,6 +296,8 @@ function App() {
           onOpenAutoQuote={handleOpenAutoQuote}
           onNewHabQuote={handleNewHabQuote}
           onOpenHabQuote={handleOpenHabQuote}
+          onNewCommlQuote={handleNewCommlQuote}
+          onOpenCommlQuote={handleOpenCommlQuote}
         />
       </div>
       <Footer />
@@ -256,6 +331,26 @@ function AutoWizardBridge({ pendingAction, onActionConsumed }) {
  */
 function HabWizardBridge({ pendingAction, onActionConsumed }) {
   const { goToStep, loadQuote } = useHab();
+
+  React.useEffect(() => {
+    if (!pendingAction) return;
+    if (pendingAction.type === 'new') {
+      goToStep(1); // Step 1 = Quote Details
+    } else if (pendingAction.type === 'load') {
+      loadQuote(pendingAction.quote);
+    }
+    onActionConsumed();
+  }, []); // Run once on mount
+
+  return null;
+}
+
+/**
+ * Bridge component that runs inside CommlProvider to execute the pending action
+ * (new quote or load quote) on mount.
+ */
+function CommlWizardBridge({ pendingAction, onActionConsumed }) {
+  const { goToStep, loadQuote } = useComml();
 
   React.useEffect(() => {
     if (!pendingAction) return;

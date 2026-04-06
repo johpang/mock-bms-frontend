@@ -1,0 +1,84 @@
+{
+  "id": "UC-015",
+  "name": "ABC Landscaping — Bind with Mortgage (UC15)",
+  "status": "Quoted",
+  "createdDate": "2026-03-31",
+  "producerCode": "11111",
+  "bmsQuoteNumber": "COMML-Q-UC15",
+  "billingMethod": "directBilling",
+  "account": {
+    "commercialName": "2435268 Ontario Inc. O/A ABC Landscaping",
+    "dbaName": "ABC Landscaping",
+    "address": "400 Applewood Crescent, Unit 200",
+    "city": "Concord",
+    "province": "ON",
+    "postalCode": "L4K 0C3",
+    "country": "CA",
+    "email": "info@abclandscaping.ca",
+    "website": "www.abclandscaping.ca"
+  },
+  "language": "en",
+  "policyEffectiveDate": "2026-04-01",
+  "policyExpiryDate": "2027-04-01",
+  "paymentMethod": "csio:CD",
+  "business": {
+    "startDate": "2015-06-01",
+    "yearsExperience": "11",
+    "annualRevenue": "950000",
+    "totalRevenue": "950000",
+    "operations": [
+      {
+        "ibcCode": "1521",
+        "revenuePct": "100"
+      }
+    ]
+  },
+  "questions": {
+    "undergroundWork": "No",
+    "sqftOccupied": "2500",
+    "insuranceCancelled": "No",
+    "claimsLast5Years": "No"
+  },
+  "location": {
+    "yearBuilt": "2000",
+    "buildingType": "NonCombustible",
+    "foundationType": "Slab",
+    "numStories": "1",
+    "numUnits": "1",
+    "areaOccupied": "2500",
+    "pctVacant": "0",
+    "numEmployees": "12"
+  },
+  "building": {
+    "protection": {
+      "burglarAlarm": "LocalAlarm",
+      "fireAlarm": "None",
+      "fireProtection": "Unprotected",
+      "sprinklered": "0"
+    },
+    "improvements": {
+      "heating": "2018",
+      "plumbing": "2015",
+      "electrical": "2020",
+      "roof": "2019"
+    },
+    "coverages": {
+      "cgl": "Yes",
+      "cglLimit": "1000000",
+      "contractorEquipment": "Yes",
+      "toolFloater": "No",
+      "buildingCov": "No",
+      "buildingLimit": "",
+      "equipmentCov": "Yes",
+      "equipmentLimit": "50000",
+      "stockCov": "No",
+      "contentsCov": "No",
+      "sewerBackup": "No",
+      "sewerBackupLimit": "",
+      "flood": "No",
+      "earthquake": "No"
+    }
+  },
+  "mortgageHolder": "Toyota Credit Canada",
+  "selectedInsurers": []
+}

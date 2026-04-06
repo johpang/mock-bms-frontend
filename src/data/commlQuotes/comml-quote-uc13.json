@@ -1,0 +1,84 @@
+{
+  "id": "UC-013",
+  "name": "Paws & Claws Pet Spa — New Business (UC13)",
+  "status": "Draft",
+  "createdDate": "2026-03-30",
+  "producerCode": "11111",
+  "bmsQuoteNumber": "COMML-Q-UC13",
+  "billingMethod": "directBilling",
+  "account": {
+    "commercialName": "Pet Groomers Inc.",
+    "dbaName": "Paws & Claws Pet Spa",
+    "address": "88 Queen St E",
+    "city": "Toronto",
+    "province": "ON",
+    "postalCode": "M5C 1S6",
+    "country": "CA",
+    "email": "contact@pawsandclaws.ca",
+    "website": "www.pawsandclaws.ca"
+  },
+  "language": "en",
+  "policyEffectiveDate": "2026-05-01",
+  "policyExpiryDate": "2027-05-01",
+  "paymentMethod": "",
+  "business": {
+    "startDate": "2019-03-15",
+    "yearsExperience": "7",
+    "annualRevenue": "320000",
+    "totalRevenue": "320000",
+    "operations": [
+      {
+        "ibcCode": "7215",
+        "revenuePct": "100"
+      }
+    ]
+  },
+  "questions": {
+    "undergroundWork": "No",
+    "sqftOccupied": "1200",
+    "insuranceCancelled": "No",
+    "claimsLast5Years": "Yes"
+  },
+  "location": {
+    "yearBuilt": "1985",
+    "buildingType": "Frame",
+    "foundationType": "FullBasement",
+    "numStories": "2",
+    "numUnits": "1",
+    "areaOccupied": "1200",
+    "pctVacant": "0",
+    "numEmployees": "6"
+  },
+  "building": {
+    "protection": {
+      "burglarAlarm": "None",
+      "fireAlarm": "LocalAlarm",
+      "fireProtection": "Protected",
+      "sprinklered": "1"
+    },
+    "improvements": {
+      "heating": "2010",
+      "plumbing": "2012",
+      "electrical": "2015",
+      "roof": "2017"
+    },
+    "coverages": {
+      "cgl": "Yes",
+      "cglLimit": "2000000",
+      "contractorEquipment": "No",
+      "toolFloater": "No",
+      "buildingCov": "Yes",
+      "buildingLimit": "200000",
+      "equipmentCov": "Yes",
+      "equipmentLimit": "25000",
+      "stockCov": "Yes",
+      "contentsCov": "Yes",
+      "sewerBackup": "Yes",
+      "sewerBackupLimit": "25000",
+      "flood": "No",
+      "earthquake": "No"
+    }
+  },
+  "mortgageHolder": "",
+  "selectedInsurers": []
+}

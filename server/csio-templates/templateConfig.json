@@ -9,6 +9,11 @@
     "UC-007": { "habQuote": "hab-quote-uc06.xml", "habBind": "hab-bind-uc07.xml" },
     "UC-008": { "habQuote": "hab-quote-uc08.xml" },
     "UC-009": { "habQuote": "hab-quote-uc08.xml", "habBind": "hab-bind-uc09.xml" },
-    "UC-010": { "habQuote": "hab-quote-uc06.xml", "habBind": "hab-bind-uc10.xml" }
+    "UC-010": { "habQuote": "hab-quote-uc06.xml", "habBind": "hab-bind-uc10.xml" },
+    "UC-011": { "commlQuote": "comml-quote-uc11.xml" },
+    "UC-012": { "commlQuote": "comml-quote-uc11.xml", "commlBind": "comml-bind-uc12.xml" },
+    "UC-013": { "commlQuote": "comml-quote-uc13.xml" },
+    "UC-014": { "commlQuote": "comml-quote-uc13.xml", "commlBind": "comml-bind-uc14.xml" },
+    "UC-015": { "commlQuote": "comml-quote-uc11.xml", "commlBind": "comml-bind-uc15.xml" }
   }
 }

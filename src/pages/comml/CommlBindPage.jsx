@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { useHab } from '../../context/HabContext';
+import { useComml } from '../../context/CommlContext';
 import { formatCurrency } from '../../utils/formatters';
 import MockDisclaimer from '../../components/MockDisclaimer';
 
-const HabBindPage = () => {
-  const { habResponses, selectedInsurerIndex, submitBind, nextStep, prevStep, isLoading, bindError, habData } = useHab();
-  const selectedResponse = habResponses?.[selectedInsurerIndex ?? 0];
+const CommlBindPage = () => {
+  const { commlResponses, selectedInsurerIndex, submitBind, nextStep, prevStep, isLoading, bindError, commlData } = useComml();
+  const selectedResponse = commlResponses?.[selectedInsurerIndex ?? 0];
 
   const [paymentMethod, setPaymentMethod] = useState('');
   const [eftDetails, setEftDetails] = useState({ bankName: '', transitNumber: '', accountNumber: '' });
@@ -42,7 +42,7 @@ const HabBindPage = () => {
     await submitBind({ payment: paymentInfo });
     nextStep();
   };
-  const customerName = (habData.customer?.firstName || '') + ' ' + (habData.customer?.lastName || '');
+  const namedInsured = commlData.account?.commercialName || 'N/A';
 
   if (!selectedResponse) {
     return (
@@ -68,8 +68,8 @@ const HabBindPage = () => {
         <div style={styles.summaryGrid}>
           <div><span style={styles.summaryLabel}>Insurer</span><div style={styles.summaryValue}>{selectedResponse.insurerName}</div></div>
           <div><span style={styles.summaryLabel}>Quote Number</span><div style={styles.summaryValue}>{selectedResponse.referenceNumber}</div></div>
-          <div><span style={styles.summaryLabel}>Named Insured</span><div style={styles.summaryValue}>{customerName.trim() || 'N/A'}</div></div>
-          <div><span style={styles.summaryLabel}>Property</span><div style={styles.summaryValue}>{selectedResponse.propertyAddress || 'N/A'}</div></div>
+          <div><span style={styles.summaryLabel}>Named Insured</span><div style={styles.summaryValue}>{namedInsured}</div></div>
+          <div><span style={styles.summaryLabel}>Business Address</span><div style={styles.summaryValue}>{selectedResponse.businessAddress || 'N/A'}</div></div>
           <div><span style={styles.summaryLabel}>Annual Premium</span><div style={styles.premiumHighlight}>{formatCurrency(selectedResponse.premiums?.annual)}</div></div>
           <div><span style={styles.summaryLabel}>Monthly Premium</span><div style={styles.summaryValue}>{formatCurrency(selectedResponse.premiums?.monthly)}/month</div></div>
         </div>
@@ -114,4 +114,4 @@ const HabBindPage = () => {
   );
 };
 
-export default HabBindPage;
+export default CommlBindPage;

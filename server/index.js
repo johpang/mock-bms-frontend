@@ -27,8 +27,10 @@ if (MODE === 'proxy') {
   // MOCK MODE — return mock data locally
   const autoQuoteRoutes = require('./routes/autoQuoteRoutes');
   const habQuoteRoutes = require('./routes/habQuoteRoutes');
+  const commlQuoteRoutes = require('./routes/commlQuoteRoutes');
   app.use('/api', autoQuoteRoutes);
   app.use('/api/hab', habQuoteRoutes);
+  app.use('/api/comml', commlQuoteRoutes);
   console.log('[Config] Route mode: MOCK  →  returning local mock data');
 }
 
@@ -80,6 +82,8 @@ app.listen(PORT, () => {
   console.log('  POST /api/bind            - Auto bind request (JSON -> CSIO XML)');
   console.log('  POST /api/hab/quote       - Hab quote request (JSON -> CSIO XML)');
   console.log('  POST /api/hab/bind        - Hab bind request (JSON -> CSIO XML)');
+  console.log('  POST /api/comml/quote     - Commercial quote request (JSON -> CSIO XML)');
+  console.log('  POST /api/comml/bind      - Commercial bind request (JSON -> CSIO XML)');
   if (MODE === 'mock') {
     console.log('  POST /oauth/token         - Mock OAuth token');
   }

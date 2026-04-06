@@ -12,6 +12,8 @@ const config = Object.freeze({
     bindEndpoint: (process.env.REACT_APP_API_BASE_URL || '/api') + '/bind',
     habQuoteEndpoint: (process.env.REACT_APP_API_BASE_URL || '/api') + '/hab/quote',
     habBindEndpoint: (process.env.REACT_APP_API_BASE_URL || '/api') + '/hab/bind',
+    commlQuoteEndpoint: (process.env.REACT_APP_API_BASE_URL || '/api') + '/comml/quote',
+    commlBindEndpoint: (process.env.REACT_APP_API_BASE_URL || '/api') + '/comml/bind',
   },
   oauth: {
     tokenUrl: process.env.REACT_APP_OAUTH_TOKEN_URL || '/oauth/token',

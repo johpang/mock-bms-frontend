@@ -7,6 +7,7 @@
 import React from 'react';
 import savedAutoQuotes from '../data/autoQuotes';
 import savedHabQuotes from '../data/habQuotes';
+import savedCommlQuotes from '../data/commlQuotes';
 
 const styles = {
   container: {
@@ -220,7 +221,16 @@ const habColumns = [
   { key: 'createdDate', label: 'Created' },
 ];
 
-const DashboardPage = ({ onNewAutoQuote, onOpenAutoQuote, onNewHabQuote, onOpenHabQuote }) => {
+const commlColumns = [
+  { key: 'id', label: 'ID' },
+  { key: 'name', label: 'Description' },
+  { key: 'businessName', label: 'Business', render: (q) => q.account?.commercialName || q.account?.dbaName || '—' },
+  { key: 'ibcCode', label: 'IBC Code', render: (q) => q.business?.operations?.[0]?.ibcCode || '—' },
+  { key: 'status', label: 'Status' },
+  { key: 'createdDate', label: 'Created' },
+];
+
+const DashboardPage = ({ onNewAutoQuote, onOpenAutoQuote, onNewHabQuote, onOpenHabQuote, onNewCommlQuote, onOpenCommlQuote }) => {
   const [hoveredRow, setHoveredRow] = React.useState(null);
 
   return (
@@ -286,6 +296,36 @@ const DashboardPage = ({ onNewAutoQuote, onOpenAutoQuote, onNewHabQuote, onOpenH
             hoveredRow={hoveredRow}
             setHoveredRow={setHoveredRow}
             rowOffset={1000}
+          />
+        </div>
+      </div>
+
+      {/* Small Commercial Lines section */}
+      <div style={styles.section}>
+        <div style={styles.sectionHeader}>
+          <h2 style={styles.sectionTitle}>Small Commercial Lines</h2>
+          <button
+            style={styles.newQuoteBtn}
+            onClick={onNewCommlQuote}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = '#081a32')}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = '#0a1e3d')}
+          >
+            + New Quote
+          </button>
+        </div>
+        <div style={styles.tableCard}>
+          <div style={styles.tableSubHeader}>
+            <span style={styles.quoteCount}>
+              {savedCommlQuotes.length} quote{savedCommlQuotes.length !== 1 ? 's' : ''}
+            </span>
+          </div>
+          <QuoteTable
+            quotes={savedCommlQuotes}
+            columns={commlColumns}
+            onOpen={onOpenCommlQuote}
+            hoveredRow={hoveredRow}
+            setHoveredRow={setHoveredRow}
+            rowOffset={2000}
           />
         </div>
       </div>

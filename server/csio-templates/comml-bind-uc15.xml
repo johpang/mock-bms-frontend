@@ -1,0 +1,233 @@
+<ACORD xmlns="http://www.ACORD.org/standards/PC_Surety/ACORD1/xml/"
+    xmlns:csio="http://www.CSIO.org/standards/PC_Surety/CSIO1/xml/">
+    <SignonRq>
+        <SessKey>ABCDEF</SessKey>
+        <ClientDt>2026-04-01T00:00:00-05:00</ClientDt>
+        <CustLangPref>en</CustLangPref>
+        <ClientApp>
+            <Org>CSIO</Org>
+            <Name>CSIO</Name>
+            <Version>2026</Version>
+        </ClientApp>
+    </SignonRq>
+    <InsuranceSvcRq>
+        <RqUID>35c99f64-a2b3-43cf-a954-c32135910b2e</RqUID>
+        <CommlPkgPolicyAddRq>
+            <RqUID>1230acfb-d6dd-4742-9287-f362a834c450</RqUID>
+            <TransactionRequestDt>2026-04-01T17:20:37+00:00</TransactionRequestDt>
+            <CurCd>CAD</CurCd>
+            <Producer id="producer-1">
+                <ProducerInfo>
+                    <ContractNumber>11111</ContractNumber>
+                </ProducerInfo>
+            </Producer>
+            <InsuredOrPrincipal id="insured-1">
+                <ItemIdInfo>
+                    <AgencyId>TEST00001</AgencyId>
+                    <InsurerId>1</InsurerId>
+                </ItemIdInfo>
+                <GeneralPartyInfo>
+                    <NameInfo>
+                        <CommlName id="account-name-1">
+                            <CommercialName>2435268 Ontario Inc. O/A ABC Landscaping</CommercialName>
+                        </CommlName>
+                        <SupplementaryNameInfo id="supplementary-name-info-1">
+                            <SupplementaryNameCd>csio:DBA</SupplementaryNameCd>
+                            <SupplementaryName>O/A ABC Landscaping</SupplementaryName>
+                        </SupplementaryNameInfo>
+                    </NameInfo>
+                    <Addr id="account-address-1">
+                        <Addr1>110 Yonge Street</Addr1>
+                        <City>Toronto</City>
+                        <StateProvCd>ON</StateProvCd>
+                        <PostalCode>M5C 1T4</PostalCode>
+                        <CountryCd>CA</CountryCd>
+                    </Addr>
+                    <Communications>
+                        <EmailInfo id="account-email-1">
+                            <EmailAddr>abc123llandscaping@gmail.com</EmailAddr>
+                        </EmailInfo>
+                        <WebsiteInfo id="account-website-1">
+                            <WebsiteURL>https://abc.com</WebsiteURL>
+                        </WebsiteInfo>
+                    </Communications>
+                </GeneralPartyInfo>
+                <InsuredOrPrincipalInfo>
+                    <BusinessInfo id="business-info-1">
+                        <BusinessStartDt>1989-11-22</BusinessStartDt>
+                        <csio:IBCIndustryCd>1521</csio:IBCIndustryCd>
+                        <NumYrsExperience>10</NumYrsExperience>
+                    </BusinessInfo>
+                    <BusinessInfo id="business-info-2">
+                        <BusinessStartDt>1989-11-22</BusinessStartDt>
+                        <csio:IBCIndustryCd>1522</csio:IBCIndustryCd>
+                        <NumYrsExperience>10</NumYrsExperience>
+                    </BusinessInfo>
+                </InsuredOrPrincipalInfo>
+            </InsuredOrPrincipal>
+            <CommlPolicy>
+                <LOBCd>csio:PACK</LOBCd>
+                <ContractTerm>
+					<EffectiveDt>2026-04-01</EffectiveDt>
+                    <ExpirationDt>2027-04-01</ExpirationDt>
+                </ContractTerm>
+				<BillingAccountNumber>10015514A01</BillingAccountNumber>
+				<BillingMethodCd>csio:P</BillingMethodCd>
+                <LanguageCd>en</LanguageCd>
+				<PaymentOption>
+					<MethodPaymentCd>csio:CD</MethodPaymentCd>
+				</PaymentOption>
+				<AdditionalInterest>
+					<GeneralPartyInfo>
+						<NameInfo>
+							<CommlName>
+								<CommercialName>Toyota Credit Canada</CommercialName>
+							</CommlName>
+						</NameInfo>
+					</GeneralPartyInfo>
+				</AdditionalInterest>
+                <QuestionAnswer>
+                    <QuestionCd>csio:23</QuestionCd>
+                    <YesNoCd>NO</YesNoCd>
+                </QuestionAnswer>
+                <QuestionAnswer>
+                    <QuestionCd>csio:59</QuestionCd>
+                    <YesNoCd>NO</YesNoCd>
+                </QuestionAnswer>
+                <csio:CompanyCd>TRAV</csio:CompanyCd>
+                <CommlPolicySupplement>
+                    <CommlParentOrSubsidiaryInfo id="comml-parent-subsidiary-1"
+                        IdRef="business-info-1">
+                        <AnnualGrossReceiptsAmt>
+                            <Amt>2000000</Amt>
+                        </AnnualGrossReceiptsAmt>
+                        <ForeignGrossSalesAmt>
+                            <Amt>0</Amt>
+                        </ForeignGrossSalesAmt>
+                    </CommlParentOrSubsidiaryInfo>
+                    <AnnualSalesAmt>
+                        <Amt>2000000</Amt>
+                    </AnnualSalesAmt>
+                </CommlPolicySupplement>
+            </CommlPolicy>
+            <Location id="location-1">
+                <ItemIdInfo>
+                    <AgencyId>1</AgencyId>
+                    <InsurerId>1</InsurerId>
+                </ItemIdInfo>
+                <Addr id="location-address-1">
+                    <Addr1>110 Yonge Street</Addr1>
+                    <City>Toronto</City>
+                    <StateProvCd>ON</StateProvCd>
+                    <PostalCode>M5C 1T4</PostalCode>
+                    <CountryCd>CA</CountryCd>
+                </Addr>
+            </Location>
+            <CommlSubLocation id="comml-sub-location-1" LocationRef="location-1">
+                <InterestCd>csio:TN</InterestCd>
+                <Construction>
+                    <YearBuilt>2000</YearBuilt>
+                    <NumStories>2</NumStories>
+                    <csio:BldgConstructionCd>1</csio:BldgConstructionCd>
+                </Construction>
+                <BldgImprovements>
+                    <HeatingImprovementYear>2017</HeatingImprovementYear>
+                    <PlumbingImprovementYear>2018</PlumbingImprovementYear>
+                    <RoofingImprovementYear>2020</RoofingImprovementYear>
+                    <WiringImprovementYear>2019</WiringImprovementYear>
+                </BldgImprovements>
+                <BldgProtection>
+                    <csio:SprinkleredInd>1</csio:SprinkleredInd>
+                    <csio:FireProtectionCd>Protected</csio:FireProtectionCd>
+                </BldgProtection>
+                <BldgOccupancy id="building-occ-1">
+                    <AreaOccupied>
+                        <NumUnits>2000</NumUnits>
+                        <UnitMeasurementCd>FTK</UnitMeasurementCd>
+                    </AreaOccupied>
+                    <OccupancyCd>csio:11</OccupancyCd>
+                </BldgOccupancy>
+                <AlarmAndSecurity id="alarm-1">
+                    <AlarmDescCd>csio:4</AlarmDescCd>
+                    <AlarmDesc>TEST</AlarmDesc>
+                </AlarmAndSecurity>
+                <csio:NumMortgages>1</csio:NumMortgages>
+            </CommlSubLocation>
+            <CommlPropertyLineBusiness>
+                <LOBCd>csio:CPROP</LOBCd>
+                <PropertyInfo>
+                    <CommlPropertyInfo LocationRef="location-1">
+                        <CommlCoverage id="location-1-comml-coverage-1">
+                            <CoverageCd>csio:BIALS</CoverageCd>
+                            <CoverageDesc>Business Income</CoverageDesc>
+                        </CommlCoverage>
+                        <CommlCoverage id="location-1-comml-coverage-2">
+                            <CoverageCd>csio:EquipmentBreakdown</CoverageCd>
+                            <CoverageDesc>Equipment Breakdown</CoverageDesc>
+                        </CommlCoverage>
+                        <CommlCoverage id="location-1-comml-coverage-3">
+                            <CoverageCd>csio:Equipment</CoverageCd>
+                            <CoverageDesc>Equipment</CoverageDesc>
+                            <Limit>
+                                <FormatInteger>50000</FormatInteger>
+                            </Limit>
+                        </CommlCoverage>
+                    </CommlPropertyInfo>
+                </PropertyInfo>
+            </CommlPropertyLineBusiness>
+            <GeneralLiabilityLineBusiness id="general-liability-1">
+                <LOBCd>csio:GL</LOBCd>
+                <LiabilityInfo>
+                    <ContractorsUnderwritingQuestions id="busop-questions-1" IdRef="business-info-1">
+                        <SubcontractedWorkPct>10</SubcontractedWorkPct>
+                        <QuestionAnswer>
+                            <QuestionCd>csio:422</QuestionCd>
+                            <YesNoCd>NO</YesNoCd>
+                        </QuestionAnswer>
+                        <QuestionAnswer>
+                            <QuestionCd>csio:464</QuestionCd>
+                            <YesNoCd>NO</YesNoCd>
+                        </QuestionAnswer>
+                        <QuestionAnswer>
+                            <QuestionCd>csio:463</QuestionCd>
+                            <YesNoCd>NO</YesNoCd>
+                        </QuestionAnswer>
+                        <QuestionAnswer>
+                            <QuestionCd>csio:845</QuestionCd>
+                            <YesNoCd>NO</YesNoCd>
+                        </QuestionAnswer>
+                        <QuestionAnswer>
+                            <QuestionCd>csio:423</QuestionCd>
+                            <YesNoCd>NO</YesNoCd>
+                        </QuestionAnswer>
+                        <QuestionAnswer>
+                            <QuestionCd>csio:550</QuestionCd>
+                            <YesNoCd>NO</YesNoCd>
+                        </QuestionAnswer>
+                        <QuestionAnswer>
+                            <QuestionCd>csio:453</QuestionCd>
+                            <YesNoCd>NO</YesNoCd>
+                        </QuestionAnswer>
+                        <QuestionAnswer>
+                            <QuestionCd>csio:400</QuestionCd>
+                            <YesNoCd>NO</YesNoCd>
+                        </QuestionAnswer>
+                        <QuestionAnswer>
+                            <QuestionCd>csio:202</QuestionCd>
+                            <YesNoCd>NO</YesNoCd>
+                        </QuestionAnswer>
+                        <QuestionAnswer>
+                            <QuestionCd>csio:205</QuestionCd>
+                            <YesNoCd>NO</YesNoCd>
+                        </QuestionAnswer>
+                        <ResidentialPct>10</ResidentialPct>
+                        <CommlPct>30</CommlPct>
+                        <csio:IndustrialPct>30</csio:IndustrialPct>
+                        <csio:InstitutionalPct>30</csio:InstitutionalPct>
+                        <csio:NumEmployeesPremise>1000</csio:NumEmployeesPremise>
+                    </ContractorsUnderwritingQuestions>
+                </LiabilityInfo>
+            </GeneralLiabilityLineBusiness>
+        </CommlPkgPolicyAddRq>
+    </InsuranceSvcRq>
+</ACORD>

@@ -8,7 +8,7 @@ import MockDisclaimer from '../components/MockDisclaimer';
  * Screen 8 - Confirmation that the policy has been successfully bound
  */
 const BindSuccessPage = () => {
-  const { bindResponse, quoteResponses, selectedInsurerIndex, resetQuote, quoteData } = useAutoQuote();
+  const { bindResponse, quoteResponses, selectedInsurerIndex, goHome, quoteData } = useAutoQuote();
 
   const selectedResponse = quoteResponses?.[selectedInsurerIndex ?? 0];
 
@@ -197,9 +197,41 @@ const BindSuccessPage = () => {
         </div>
       </div>
 
+      {/* Bind Messages */}
+      {bindResponse?.bindMessages?.length > 0 && (
+        <div style={{
+          border: `1px solid #d4a017`,
+          borderRadius: '4px',
+          padding: '24px',
+          marginBottom: '24px',
+          backgroundColor: '#fffbf0',
+        }}>
+          <div style={{
+            fontSize: '16px', fontWeight: 700, color: colors.navy,
+            marginBottom: '16px', paddingBottom: '8px',
+            borderBottom: `1px solid #d4a017`,
+          }}>
+            Bind Messages
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {bindResponse.bindMessages.map((msg, i) => (
+              <div key={i} style={{
+                display: 'flex', gap: '12px', padding: '12px 16px',
+                backgroundColor: '#ffffff', borderLeft: '4px solid #d4a017',
+                borderRadius: '2px', border: '1px solid #d4a017',
+                borderLeftWidth: '4px',
+              }}>
+                <span style={{ color: '#d4a017', fontWeight: 700, fontSize: '16px', lineHeight: '20px', minWidth: '12px', flexShrink: 0 }}>!</span>
+                <span style={{ fontSize: '14px', color: colors.text, fontWeight: 500, lineHeight: '1.5' }}>{msg}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div style={styles.buttonContainer}>
         <button
-          onClick={resetQuote}
+          onClick={goHome}
           style={styles.button}
           onMouseEnter={(e) => {
             e.target.style.boxShadow = '0 4px 12px rgba(42, 82, 152, 0.25)';

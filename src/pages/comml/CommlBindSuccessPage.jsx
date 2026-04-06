@@ -1,11 +1,11 @@
 import React from 'react';
-import { useHab } from '../../context/HabContext';
+import { useComml } from '../../context/CommlContext';
 import { formatCurrency } from '../../utils/formatters';
 import MockDisclaimer from '../../components/MockDisclaimer';
 
-const HabBindSuccessPage = () => {
-  const { bindResponse, habResponses, selectedInsurerIndex, goHome, habData } = useHab();
-  const selectedResponse = habResponses?.[selectedInsurerIndex ?? 0];
+const CommlBindSuccessPage = () => {
+  const { bindResponse, commlResponses, selectedInsurerIndex, goHome, commlData } = useComml();
+  const selectedResponse = commlResponses?.[selectedInsurerIndex ?? 0];
   const colors = { navy: '#0a1e3d', white: '#ffffff', text: '#1a1a1a', border: '#d0d0d0', success: '#1a7f37', successBg: '#dafbe1', successBorder: '#aceebb' };
 
   const styles = {
@@ -24,7 +24,7 @@ const HabBindSuccessPage = () => {
     button: { padding: '12px 32px', fontSize: '15px', fontWeight: 600, borderRadius: '4px', cursor: 'pointer', backgroundColor: colors.navy, color: colors.white, border: 'none' },
   };
 
-  const customerName = (habData.customer?.firstName || '') + ' ' + (habData.customer?.lastName || '');
+  const namedInsured = commlData.account?.commercialName || 'N/A';
 
   return (
     <div style={styles.pageContainer}>
@@ -45,11 +45,11 @@ const HabBindSuccessPage = () => {
           <div><div style={styles.detailLabel}>Policy Number</div><div style={styles.policyNumber}>{bindResponse?.policyNumber || 'N/A'}</div></div>
           <div><div style={styles.detailLabel}>Quote Number</div><div style={styles.detailValue}>{bindResponse?.quoteNumber || selectedResponse?.referenceNumber || 'N/A'}</div></div>
           <div><div style={styles.detailLabel}>Insurer</div><div style={styles.detailValue}>{selectedResponse?.insurerName || 'N/A'}</div></div>
-          <div><div style={styles.detailLabel}>Named Insured</div><div style={styles.detailValue}>{customerName.trim() || 'N/A'}</div></div>
+          <div><div style={styles.detailLabel}>Named Insured</div><div style={styles.detailValue}>{namedInsured}</div></div>
           <div><div style={styles.detailLabel}>Annual Premium</div><div style={styles.detailValue}>{formatCurrency(selectedResponse?.premiums?.annual)}</div></div>
           <div><div style={styles.detailLabel}>Bind Date</div><div style={styles.detailValue}>{bindResponse?.bindTimestamp ? new Date(bindResponse.bindTimestamp).toLocaleDateString('en-CA') : new Date().toLocaleDateString('en-CA')}</div></div>
           <div><div style={styles.detailLabel}>Status</div><div style={{ ...styles.detailValue, color: colors.success }}>{bindResponse?.status || 'BOUND'}</div></div>
-          <div><div style={styles.detailLabel}>Property</div><div style={styles.detailValue}>{selectedResponse?.propertyAddress || 'N/A'}</div></div>
+          <div><div style={styles.detailLabel}>Business Address</div><div style={styles.detailValue}>{selectedResponse?.businessAddress || 'N/A'}</div></div>
         </div>
       </div>
 
@@ -87,4 +87,4 @@ const HabBindSuccessPage = () => {
   );
 };
 
-export default HabBindSuccessPage;
+export default CommlBindSuccessPage;

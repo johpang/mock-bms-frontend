@@ -40,6 +40,8 @@ const config = {
     bindPath: process.env.AWS_BIND_PATH || '/bind',
     habQuotePath: process.env.AWS_HAB_QUOTE_PATH || '/hab/quote',
     habBindPath: process.env.AWS_HAB_BIND_PATH || '/hab/bind',
+    commlQuotePath: process.env.AWS_COMML_QUOTE_PATH || '/comml/quote',
+    commlBindPath: process.env.AWS_COMML_BIND_PATH || '/comml/bind',
   },
 
   /** OAuth2 client-credentials settings (used only in proxy mode) */

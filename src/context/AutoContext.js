@@ -23,7 +23,7 @@ export const AutoContext = createContext();
  * @param {React.ReactNode} props.children - Child components
  * @returns {JSX.Element} The provider component
  */
-export function AutoProvider({ children }) {
+export function AutoProvider({ children, onGoHome }) {
   const [quoteData, setQuoteData] = useState(initialQuoteData);
   const [quoteResponses, setQuoteResponses] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
@@ -123,6 +123,16 @@ export function AutoProvider({ children }) {
         ...bindData,
       };
 
+      // Client-side bind messages based on quote ID
+      const bindMessages = [];
+      if (quoteData.id === 'SC-004') {
+        bindMessages.push(
+          'Credit card payment selected. Insurer will contact the insured directly to collect credit card details.',
+          'First payment must be processed within 30 days of the policy effective date to avoid cancellation.',
+          'A confirmation of payment will be sent to the broker once the insurer has successfully collected payment.',
+        );
+      }
+
       if (config.mockMode) {
         await new Promise((r) => setTimeout(r, 600));
         setBindResponse({
@@ -132,10 +142,14 @@ export function AutoProvider({ children }) {
           bindTimestamp: new Date().toISOString(),
           status: 'BOUND',
           message: 'Policy has been successfully bound.',
+          ...(bindMessages.length > 0 && { bindMessages }),
         });
       } else {
         const response = await submitBindRequest(payload);
-        setBindResponse(response);
+        setBindResponse({
+          ...response,
+          ...(bindMessages.length > 0 && { bindMessages }),
+        });
       }
     } catch (err) {
       setBindError(err.message || 'Failed to bind quote');
@@ -174,7 +188,7 @@ export function AutoProvider({ children }) {
    * @param {Object} savedQuote - A saved quote object from JSON
    */
   const loadQuote = useCallback((savedQuote) => {
-    const { id, name, status, createdDate, ...formData } = savedQuote;
+    const { name, status, createdDate, ...formData } = savedQuote;
     setQuoteData({ ...initialQuoteData, ...formData });
     setQuoteResponses(null);
     setError(null);
@@ -216,6 +230,7 @@ export function AutoProvider({ children }) {
     bindResponse,
     bindError,
     submitBind,
+    goHome: onGoHome,
   };
 
   return <AutoContext.Provider value={value}>{children}</AutoContext.Provider>;

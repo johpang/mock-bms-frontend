@@ -1,21 +1,21 @@
 /**
- * Habitational Quote Context
- * Provides hab quote data state management and functions.
- * Mirrors QuoteContext pattern but with hab-specific data model.
+ * Commercial Lines Quote Context
+ * Provides commercial quote data state management and functions.
+ * Mirrors HabContext pattern but with commercial-specific data model.
  */
 
 import { createContext, useContext, useState, useCallback } from 'react';
-import { initialHabQuoteData } from '../models/habRequestSchema.js';
-import { submitHabQuoteRequest } from '../services/habQuoteService.js';
-import { submitHabBindRequest } from '../services/habBindService.js';
+import { initialCommlQuoteData } from '../models/commlRequestSchema.js';
+import { submitCommlQuoteRequest } from '../services/commlQuoteService.js';
+import { submitCommlBindRequest } from '../services/commlBindService.js';
 import config from '../config/index.js';
-import habMockResponses from '../data/habMockResponses.js';
+import commlMockResponses from '../data/commlMockResponses.js';
 
-export const HabContext = createContext();
+export const CommlContext = createContext();
 
-export function HabProvider({ children, onGoHome }) {
-  const [habData, setHabData] = useState(initialHabQuoteData);
-  const [habResponses, setHabResponses] = useState(null);
+export function CommlProvider({ children, onGoHome }) {
+  const [commlData, setCommlData] = useState(initialCommlQuoteData);
+  const [commlResponses, setCommlResponses] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -23,8 +23,8 @@ export function HabProvider({ children, onGoHome }) {
   const [bindResponse, setBindResponse] = useState(null);
   const [bindError, setBindError] = useState(null);
 
-  const updateHabData = useCallback((section, data) => {
-    setHabData((prev) => {
+  const updateCommlData = useCallback((section, data) => {
+    setCommlData((prev) => {
       if (!section) return { ...prev, ...data };
       if (Array.isArray(data)) return { ...prev, [section]: data };
       if (typeof prev[section] === 'object' && prev[section] !== null && !Array.isArray(prev[section])) {
@@ -35,50 +35,50 @@ export function HabProvider({ children, onGoHome }) {
   }, []);
 
   const setSelectedInsurers = useCallback((insurerList) => {
-    setHabData((prev) => ({ ...prev, selectedInsurers: insurerList }));
+    setCommlData((prev) => ({ ...prev, selectedInsurers: insurerList }));
   }, []);
 
   const submitQuote = useCallback(async (overrides) => {
     setIsLoading(true);
     setError(null);
     try {
-      const payload = overrides ? { ...habData, ...overrides } : habData;
+      const payload = overrides ? { ...commlData, ...overrides } : commlData;
       const selectedIds = payload.selectedInsurers || [];
 
       if (config.mockMode) {
         await new Promise((r) => setTimeout(r, 800));
         const results = selectedIds
-          .filter((id) => habMockResponses[id])
-          .map((id) => ({ ...habMockResponses[id] }));
-        setHabResponses(results);
+          .filter((id) => commlMockResponses[id])
+          .map((id) => ({ ...commlMockResponses[id] }));
+        setCommlResponses(results);
       } else {
-        const response = await submitHabQuoteRequest(payload);
-        setHabResponses(response.results || response);
+        const response = await submitCommlQuoteRequest(payload);
+        setCommlResponses(response.results || response);
       }
     } catch (err) {
       setError(err.message || 'Failed to submit quote');
-      console.error('Hab quote submission error:', err);
+      console.error('Commercial quote submission error:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [habData]);
+  }, [commlData]);
 
   const submitBind = useCallback(async (bindData = {}) => {
     setIsLoading(true);
     setBindError(null);
     try {
-      const selectedResponse = habResponses?.[selectedInsurerIndex ?? 0];
+      const selectedResponse = commlResponses?.[selectedInsurerIndex ?? 0];
       const quoteNumber = selectedResponse?.referenceNumber || '';
       const payload = {
         quoteNumber,
         insurerId: bindData.insurerId || 'aviva',
-        quoteData: habData,
+        quoteData: commlData,
         ...bindData,
       };
 
       // Client-side bind messages based on quote ID
       const bindMessages = [];
-      if (habData.id === 'UC-009') {
+      if (commlData.id === 'UC-014') {
         bindMessages.push(
           'Credit card payment selected. Insurer will contact the insured directly to collect credit card details.',
           'First payment must be processed within 30 days of the policy effective date to avoid cancellation.',
@@ -90,15 +90,15 @@ export function HabProvider({ children, onGoHome }) {
         await new Promise((r) => setTimeout(r, 600));
         setBindResponse({
           success: true,
-          policyNumber: 'HPOL-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+          policyNumber: 'CPOL-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
           quoteNumber,
           bindTimestamp: new Date().toISOString(),
           status: 'BOUND',
-          message: 'Habitational policy has been successfully bound.',
+          message: 'Commercial policy has been successfully bound.',
           ...(bindMessages.length > 0 && { bindMessages }),
         });
       } else {
-        const response = await submitHabBindRequest(payload);
+        const response = await submitCommlBindRequest(payload);
         setBindResponse({
           ...response,
           ...(bindMessages.length > 0 && { bindMessages }),
@@ -109,7 +109,7 @@ export function HabProvider({ children, onGoHome }) {
     } finally {
       setIsLoading(false);
     }
-  }, [habResponses, selectedInsurerIndex]);
+  }, [commlResponses, selectedInsurerIndex]);
 
   const goToStep = useCallback((stepNumber) => setCurrentStep(stepNumber), []);
   const nextStep = useCallback(() => setCurrentStep((p) => p + 1), []);
@@ -117,8 +117,8 @@ export function HabProvider({ children, onGoHome }) {
 
   const loadQuote = useCallback((savedQuote) => {
     const { name, status, createdDate, ...formData } = savedQuote;
-    setHabData({ ...initialHabQuoteData, ...formData });
-    setHabResponses(null);
+    setCommlData({ ...initialCommlQuoteData, ...formData });
+    setCommlResponses(null);
     setError(null);
     setSelectedInsurerIndex(null);
     setBindResponse(null);
@@ -128,8 +128,8 @@ export function HabProvider({ children, onGoHome }) {
   }, []);
 
   const resetQuote = useCallback(() => {
-    setHabData(initialHabQuoteData);
-    setHabResponses(null);
+    setCommlData(initialCommlQuoteData);
+    setCommlResponses(null);
     setCurrentStep(0);
     setError(null);
     setSelectedInsurerIndex(null);
@@ -138,10 +138,10 @@ export function HabProvider({ children, onGoHome }) {
   }, []);
 
   const value = {
-    habData,
-    updateHabData,
-    habResponses,
-    setHabResponses,
+    commlData,
+    updateCommlData,
+    commlResponses,
+    setCommlResponses,
     currentStep,
     isLoading,
     error,
@@ -160,11 +160,11 @@ export function HabProvider({ children, onGoHome }) {
     goHome: onGoHome,
   };
 
-  return <HabContext.Provider value={value}>{children}</HabContext.Provider>;
+  return <CommlContext.Provider value={value}>{children}</CommlContext.Provider>;
 }
 
-export function useHab() {
-  const context = useContext(HabContext);
-  if (!context) throw new Error('useHab must be used within a HabProvider');
+export function useComml() {
+  const context = useContext(CommlContext);
+  if (!context) throw new Error('useComml must be used within a CommlProvider');
   return context;
 }
