@@ -56,23 +56,23 @@ export function composeRequestPayload(quoteData) {
       relationship: d.relationship || '',
       gender: d.gender || '',
       maritalStatus: d.maritalStatus || '',
+      licensing: {
+        type: d.licensing?.type || '',
+        g2Date: d.licensing?.g2Date || '',
+        gDate: d.licensing?.gDate || '',
+        province: d.licensing?.province || '',
+      },
+      cancellations: {
+        cancelled: d.cancellations?.cancelled || '',
+        withoutCoverage: d.cancellations?.withoutCoverage || '',
+        suspended: d.cancellations?.suspended || '',
+        accidents: d.cancellations?.accidents || '',
+        tickets: d.cancellations?.tickets || '',
+      },
     })),
-    licensing: {
-      type: quoteData.licensing?.type || '',
-      g2Date: quoteData.licensing?.g2Date || '',
-      gDate: quoteData.licensing?.gDate || '',
-      province: quoteData.licensing?.province || '',
-    },
     garagingLocation: {
       postalCode: quoteData.garagingLocation?.postalCode || '',
       city: quoteData.garagingLocation?.city || '',
-    },
-    cancellations: {
-      cancelled: quoteData.cancellations?.cancelled || '',
-      withoutCoverage: quoteData.cancellations?.withoutCoverage || '',
-      suspended: quoteData.cancellations?.suspended || '',
-      accidents: quoteData.cancellations?.accidents || '',
-      tickets: quoteData.cancellations?.tickets || '',
     },
     selectedInsurers: quoteData.selectedInsurers || [],
   };

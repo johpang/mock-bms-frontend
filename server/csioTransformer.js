@@ -10,6 +10,9 @@
  * The frontend continues to send its simplified JSON model.
  * This module maps those fields into the full CSIO XML structure,
  * generating UUIDs, timestamps, and other envelope values server-side.
+ *
+ * Supports multiple drivers and vehicles with per-driver licensing
+ * and cancellation history.
  */
 
 const { uuid, isoNow, dateOnly, addOneYear, esc, randomNumericId } = require('./csioHelpers');
@@ -50,6 +53,14 @@ function coverageNoAmount(code) {
       </Coverage>`;
 }
 
+// -- Ownership mapping ---------------------------------------------------
+
+const OWNERSHIP_MAP = {
+  Owned:    '0',  // LeasedVehInd = 0 (not leased)
+  Leased:   '1',  // LeasedVehInd = 1 (leased)
+  Financed: '0',  // LeasedVehInd = 0, but has lien holder
+};
+
 // -- Main transformer ----------------------------------------------------
 
 /**
@@ -64,6 +75,7 @@ function coverageNoAmount(code) {
 function buildCsioXml(data, insurerId, options = {}) {
   const type = options.type || 'quote';
   const isQuote = type === 'quote';
+  const companysQuoteNumber = options.companysQuoteNumber || '';
 
   const insurer = INSURER_CONFIG[insurerId] || INSURER_CONFIG.aviva;
   const rqUID = uuid();
@@ -74,8 +86,12 @@ function buildCsioXml(data, insurerId, options = {}) {
   const customer = data.customer || {};
   const vehicles = data.vehicles || [];
   const drivers = data.drivers || [];
-  const licensing = data.licensing || {};
-  const cancellations = data.cancellations || {};
+
+  // Backward compatibility: support old top-level licensing/cancellations
+  // as well as new per-driver model
+  const primaryDriver = drivers[0] || {};
+  const primaryLicensing = primaryDriver.licensing || data.licensing || {};
+  const primaryCancellations = primaryDriver.cancellations || data.cancellations || {};
 
   const effectiveDt = dateOnly(data.policyEffectiveDate || data.policy?.effectiveDate || '');
   const expirationDt = addOneYear(effectiveDt);
@@ -94,69 +110,180 @@ function buildCsioXml(data, insurerId, options = {}) {
           <InsuredOrPrincipalRoleCd>csio:5</InsuredOrPrincipalRoleCd>
           <InsuredOrPrincipalRoleCd>csio:999</InsuredOrPrincipalRoleCd>`;
 
-  // Build QuestionAnswer entries from cancellations
+  // Build QuestionAnswer entries from primary driver's cancellations
   const yesNo = (val) => (val === 'Yes' || val === 'yes' || val === true) ? 'YES' : 'NO';
   const questionAnswers = `
         <QuestionAnswer>
           <QuestionCd>csio:59</QuestionCd>
-          <YesNoCd>${yesNo(cancellations.cancelled)}</YesNoCd>
+          <YesNoCd>${yesNo(primaryCancellations.cancelled)}</YesNoCd>
         </QuestionAnswer>
         <QuestionAnswer>
           <QuestionCd>csio:35</QuestionCd>
-          <YesNoCd>${yesNo(cancellations.suspended)}</YesNoCd>
+          <YesNoCd>${yesNo(primaryCancellations.suspended)}</YesNoCd>
         </QuestionAnswer>
         <QuestionAnswer>
           <QuestionCd>csio:23</QuestionCd>
-          <YesNoCd>${yesNo(cancellations.withoutCoverage)}</YesNoCd>
+          <YesNoCd>${yesNo(primaryCancellations.withoutCoverage)}</YesNoCd>
         </QuestionAnswer>`;
 
-  // -- Driver and vehicle references --
-  const driverRef = 'Driver_' + Math.floor(100000 + Math.random() * 900000);
-  const vehRef = 'Veh_' + Math.floor(10000 + Math.random() * 90000);
+  // -- Generate driver refs and vehicle refs --
+  const driverRefs = drivers.map((_, i) => 'Driver_' + Math.floor(100000 + Math.random() * 900000));
+  const vehRefs = vehicles.map((_, i) => 'Veh_' + Math.floor(10000 + Math.random() * 90000));
 
-  const primaryDriver = drivers[0] || {};
-  const driverFirstName = primaryDriver.firstName || customer.firstName || '';
-  const driverLastName = primaryDriver.lastName || customer.lastName || '';
-  const driverGender = (primaryDriver.gender || customer.gender || 'M').charAt(0).toUpperCase();
-  const driverDob = dateOnly(customer.dob || customer.dateOfBirth || '1983-08-02');
-  const maritalStatus = MARITAL_STATUS_MAP[primaryDriver.maritalStatus] || 'S';
-  const licensedDt = dateOnly(licensing.gDate || licensing.g2Date || '2001-01-01');
-  const licenseProvince = licensing.province || province;
+  // -- DriverVeh pairings (primary driver assigned to first vehicle, etc.) --
+  let driverVehXml = '';
+  drivers.forEach((driver, dIdx) => {
+    const vIdx = Math.min(dIdx, vehicles.length - 1);
+    if (vIdx >= 0) {
+      const driverTypeCd = dIdx === 0 ? 'P' : 'O'; // P = Principal, O = Occasional
+      driverVehXml += `
+        <DriverVeh DriverRef="${esc(driverRefs[dIdx])}" VehRef="${esc(vehRefs[vIdx])}">
+          <DriverTypeCd>csio:${driverTypeCd}</DriverTypeCd>
+        </DriverVeh>`;
+    }
+  });
 
-  // -- Vehicle --
-  const veh = vehicles[0] || {};
-  const vehMake = veh.make || 'Toyota';
-  const vehModel = veh.model || 'Corolla';
-  const vehYear = veh.year || '2022';
-  const annualKm = veh.distanceDriven?.annually || veh.annualDistance || '12000';
-  const oneWayKm = veh.distanceDriven?.inTrip || veh.commuteDistance || '20';
+  // -- Build PersDriver XML for each driver --
+  let persDriversXml = '';
+  drivers.forEach((driver, dIdx) => {
+    const licensing = driver.licensing || (dIdx === 0 ? primaryLicensing : {});
+    const cancellations = driver.cancellations || (dIdx === 0 ? primaryCancellations : {});
 
-  // -- Coverages --
-  const collEnabled = veh.collisionCoverage || veh.coverage?.collisionCoverage;
-  const collDeductible = veh.collisionDeductible || veh.coverage?.collisionDeductible || '1000';
-  const compEnabled = veh.comprehensiveCoverage || veh.coverage?.comprehensiveCoverage;
-  const compDeductible = veh.comprehensiveDeductible || veh.coverage?.comprehensiveDeductible || '1000';
+    const driverFirstName = driver.firstName || '';
+    const driverLastName = driver.lastName || '';
+    const driverGender = (driver.gender || 'M').charAt(0).toUpperCase();
+    const driverDob = dateOnly(customer.dob || customer.dateOfBirth || '1983-08-02');
+    const maritalStatus = MARITAL_STATUS_MAP[driver.maritalStatus] || 'S';
+    const licensedDt = dateOnly(licensing.gDate || licensing.g2Date || '2001-01-01');
+    const licenseProvince = licensing.province || province;
 
-  let coveragesXml = '';
-  // Mandatory ON coverages
-  coveragesXml += coverageWithLimit('TPPD', '1000000');
-  coveragesXml += coverageNoAmount('AB');
-  coveragesXml += coverageWithDeductible('TPDC', '0');
-  coveragesXml += coverageNoAmount('UA');
-  coveragesXml += coverageWithLimit('TPBI', '1000000');
+    // Per-driver question answers (for additional drivers beyond the primary)
+    let driverQuestionAnswersXml = '';
+    if (dIdx > 0) {
+      driverQuestionAnswersXml = `
+          <QuestionAnswer>
+            <QuestionCd>csio:59</QuestionCd>
+            <YesNoCd>${yesNo(cancellations.cancelled)}</YesNoCd>
+          </QuestionAnswer>
+          <QuestionAnswer>
+            <QuestionCd>csio:35</QuestionCd>
+            <YesNoCd>${yesNo(cancellations.suspended)}</YesNoCd>
+          </QuestionAnswer>
+          <QuestionAnswer>
+            <QuestionCd>csio:23</QuestionCd>
+            <YesNoCd>${yesNo(cancellations.withoutCoverage)}</YesNoCd>
+          </QuestionAnswer>`;
+    }
 
-  // Optional coverages
-  if (collEnabled) {
-    coveragesXml += coverageWithDeductible('COL', collDeductible);
-  }
-  if (compEnabled) {
-    coveragesXml += coverageWithDeductible('CMP', compDeductible);
-  }
+    persDriversXml += `
+        <PersDriver id="${esc(driverRefs[dIdx])}">
+          <ItemIdInfo>
+            <InsurerId>${randomNumericId(35)}</InsurerId>
+            <csio:FixedId>${5000 + dIdx}</csio:FixedId>
+          </ItemIdInfo>
+          <GeneralPartyInfo>
+            <NameInfo>
+              <PersonName>
+                <Surname>${esc(driverLastName)}</Surname>
+                <GivenName>${esc(driverFirstName)}</GivenName>
+              </PersonName>
+            </NameInfo>
+            <Addr>
+              <AddrTypeCd>csio:1</AddrTypeCd>
+              <Addr1>${esc(customer.address)}</Addr1>
+              <City>${esc(customer.city)}</City>
+              <StateProvCd>${esc(province)}</StateProvCd>
+              <StateProv>${esc(provinceFull)}</StateProv>
+              <PostalCode>${esc(customer.postalCode)}</PostalCode>
+            </Addr>
+          </GeneralPartyInfo>
+          <DriverInfo>
+            <PersonInfo>
+              <GenderCd>${esc(driverGender)}</GenderCd>
+              <BirthDt>${esc(driverDob)}</BirthDt>
+              <MaritalStatusCd>csio:${esc(maritalStatus)}</MaritalStatusCd>
+              <OccupationClassCd>csio:A08</OccupationClassCd>
+            </PersonInfo>
+            <License>
+              <LicenseStatusCd>csio:1</LicenseStatusCd>
+              <LicensedDt>${esc(licensedDt)}</LicensedDt>
+              <LicensePermitNumber>S0940-00000-0000${dIdx}</LicensePermitNumber>
+              <StateProvCd>${esc(licenseProvince)}</StateProvCd>
+            </License>
+            <csio:DriverTrainingCd>N</csio:DriverTrainingCd>
+          </DriverInfo>${driverQuestionAnswersXml}
+        </PersDriver>`;
+  });
 
-  // Standard endorsements
-  coveragesXml += coverageWithLimit('44', '1000000');
-  coveragesXml += coverageWithLimit('20', '25000');
-  coveragesXml += coverageWithLimit('27', '75000');
+  // -- Build PersVeh XML for each vehicle --
+  let persVehsXml = '';
+  vehicles.forEach((veh, vIdx) => {
+    const vehMake = veh.make || 'Toyota';
+    const vehModel = veh.model || 'Corolla';
+    const vehYear = veh.year || '2022';
+    const annualKm = veh.distanceDriven?.annually || veh.annualDistance || '12000';
+    const oneWayKm = veh.distanceDriven?.inTrip || veh.commuteDistance || '20';
+    const ownership = veh.ownership || 'Owned';
+    const leasedInd = OWNERSHIP_MAP[ownership] || '0';
+
+    // Coverages — check both vehicle-level and top-level
+    const collEnabled = veh.collisionCoverage || data.collisionCoverage;
+    const collDeductible = veh.collisionDeductible || data.collisionDeductible || '1000';
+    const compEnabled = veh.comprehensiveCoverage || data.comprehensiveCoverage;
+    const compDeductible = veh.comprehensiveDeductible || data.comprehensiveDeductible || '1000';
+
+    let coveragesXml = '';
+    // Mandatory ON coverages
+    coveragesXml += coverageWithLimit('TPPD', '1000000');
+    coveragesXml += coverageNoAmount('AB');
+    coveragesXml += coverageWithDeductible('TPDC', '0');
+    coveragesXml += coverageNoAmount('UA');
+    coveragesXml += coverageWithLimit('TPBI', '1000000');
+
+    // Optional coverages
+    if (collEnabled) {
+      coveragesXml += coverageWithDeductible('COL', collDeductible);
+    }
+    if (compEnabled) {
+      coveragesXml += coverageWithDeductible('CMP', compDeductible);
+    }
+
+    // Standard endorsements
+    coveragesXml += coverageWithLimit('44', '1000000');
+    coveragesXml += coverageWithLimit('20', '25000');
+    coveragesXml += coverageWithLimit('27', '75000');
+
+    persVehsXml += `
+        <PersVeh id="${esc(vehRefs[vIdx])}">
+          <csio:PCVEH>
+            <Manufacturer>${esc(vehMake)}</Manufacturer>
+            <Model>${esc(vehModel)}</Model>
+            <ModelYear>${esc(vehYear)}</ModelYear>
+            <EstimatedAnnualDistance>
+              <NumUnits>${esc(annualKm)}</NumUnits>
+              <UnitMeasurementCd>Km</UnitMeasurementCd>
+            </EstimatedAnnualDistance>
+            <LeasedVehInd>${leasedInd}</LeasedVehInd>
+            <NumCylinders>4</NumCylinders>
+            <PurchaseDt>${esc(vehYear)}-01-01</PurchaseDt>
+            <TerritoryCd>10</TerritoryCd>
+            <VehIdentificationNumber>JNRAS08W64X222014</VehIdentificationNumber>
+            <PurchasePriceAmt>
+              <Amt>35000.00</Amt>
+              <CurCd>CAD</CurCd>
+            </PurchasePriceAmt>
+            <csio:NewUsedCd>2</csio:NewUsedCd>
+            <csio:StatisticalLocationCd>401</csio:StatisticalLocationCd>
+            <DistanceOneWay>
+              <NumUnits>${esc(oneWayKm)}</NumUnits>
+              <UnitMeasurementCd>Km</UnitMeasurementCd>
+            </DistanceOneWay>
+            <EngineTypeCd>csio:3</EngineTypeCd>
+            <RateClassCd>11</RateClassCd>
+            <csio:WinterTiresInd>1</csio:WinterTiresInd>
+          </csio:PCVEH>${coveragesXml}
+        </PersVeh>`;
+  });
 
   // -- Assemble full XML --
   const xml = `<?xml version="1.0"?>
@@ -218,7 +345,10 @@ ${roleCds}
         </InsuredOrPrincipalInfo>
       </InsuredOrPrincipal>
       <PersPolicy>
-        <PolicyNumber>${esc(policyNumber)}</PolicyNumber>
+        <PolicyNumber>${esc(policyNumber)}</PolicyNumber>${!isQuote && companysQuoteNumber ? `
+        <QuoteInfo>
+          <CompanysQuoteNumber>${esc(companysQuoteNumber)}</CompanysQuoteNumber>
+        </QuoteInfo>` : ''}
         <LOBCd>csio:AUTO</LOBCd>
         <ControllingStateProvCd>${esc(province)}</ControllingStateProvCd>
         <ContractTerm>
@@ -235,79 +365,10 @@ ${questionAnswers}
         <TransactionSeqNumber>1</TransactionSeqNumber>
         <PersApplicationInfo>
           <NumVehsInHousehold>${vehicles.length || 1}</NumVehsInHousehold>
-        </PersApplicationInfo>
-        <DriverVeh DriverRef="${esc(driverRef)}" VehRef="${esc(vehRef)}">
-          <DriverTypeCd>csio:P</DriverTypeCd>
-        </DriverVeh>
+        </PersApplicationInfo>${driverVehXml}
       </PersPolicy>
       <PersAutoLineBusiness>
-        <LOBCd>csio:AUTO</LOBCd>
-        <PersDriver id="${esc(driverRef)}">
-          <ItemIdInfo>
-            <InsurerId>${randomNumericId(35)}</InsurerId>
-            <csio:FixedId>5000</csio:FixedId>
-          </ItemIdInfo>
-          <GeneralPartyInfo>
-            <NameInfo>
-              <PersonName>
-                <Surname>${esc(driverLastName)}</Surname>
-                <GivenName>${esc(driverFirstName)}</GivenName>
-              </PersonName>
-            </NameInfo>
-            <Addr>
-              <AddrTypeCd>csio:1</AddrTypeCd>
-              <Addr1>${esc(customer.address)}</Addr1>
-              <City>${esc(customer.city)}</City>
-              <StateProvCd>${esc(province)}</StateProvCd>
-              <StateProv>${esc(provinceFull)}</StateProv>
-              <PostalCode>${esc(customer.postalCode)}</PostalCode>
-            </Addr>
-          </GeneralPartyInfo>
-          <DriverInfo>
-            <PersonInfo>
-              <GenderCd>${esc(driverGender)}</GenderCd>
-              <BirthDt>${esc(driverDob)}</BirthDt>
-              <MaritalStatusCd>csio:${esc(maritalStatus)}</MaritalStatusCd>
-              <OccupationClassCd>csio:A08</OccupationClassCd>
-            </PersonInfo>
-            <License>
-              <LicenseStatusCd>csio:1</LicenseStatusCd>
-              <LicensedDt>${esc(licensedDt)}</LicensedDt>
-              <LicensePermitNumber>S0940-00000-00000</LicensePermitNumber>
-              <StateProvCd>${esc(licenseProvince)}</StateProvCd>
-            </License>
-            <csio:DriverTrainingCd>N</csio:DriverTrainingCd>
-          </DriverInfo>
-        </PersDriver>
-        <PersVeh id="${esc(vehRef)}">
-          <csio:PCVEH>
-            <Manufacturer>${esc(vehMake)}</Manufacturer>
-            <Model>${esc(vehModel)}</Model>
-            <ModelYear>${esc(vehYear)}</ModelYear>
-            <EstimatedAnnualDistance>
-              <NumUnits>${esc(annualKm)}</NumUnits>
-              <UnitMeasurementCd>Km</UnitMeasurementCd>
-            </EstimatedAnnualDistance>
-            <LeasedVehInd>0</LeasedVehInd>
-            <NumCylinders>4</NumCylinders>
-            <PurchaseDt>${esc(vehYear)}-01-01</PurchaseDt>
-            <TerritoryCd>10</TerritoryCd>
-            <VehIdentificationNumber>JNRAS08W64X222014</VehIdentificationNumber>
-            <PurchasePriceAmt>
-              <Amt>35000.00</Amt>
-              <CurCd>CAD</CurCd>
-            </PurchasePriceAmt>
-            <csio:NewUsedCd>2</csio:NewUsedCd>
-            <csio:StatisticalLocationCd>401</csio:StatisticalLocationCd>
-            <DistanceOneWay>
-              <NumUnits>${esc(oneWayKm)}</NumUnits>
-              <UnitMeasurementCd>Km</UnitMeasurementCd>
-            </DistanceOneWay>
-            <EngineTypeCd>csio:3</EngineTypeCd>
-            <RateClassCd>11</RateClassCd>
-            <csio:WinterTiresInd>1</csio:WinterTiresInd>
-          </csio:PCVEH>${coveragesXml}
-        </PersVeh>
+        <LOBCd>csio:AUTO</LOBCd>${persDriversXml}${persVehsXml}
       </PersAutoLineBusiness>
     </${rqElementName}>
   </InsuranceSvcRq>

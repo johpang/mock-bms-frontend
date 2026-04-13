@@ -87,6 +87,7 @@ function questionAnswer(code, yesNoValue) {
 function buildHabCsioXml(data, insurerId, options = {}) {
   const type = options.type || 'quote';
   const isQuote = type === 'quote';
+  const companysQuoteNumber = options.companysQuoteNumber || '';
 
   const insurer = INSURER_CONFIG[insurerId] || INSURER_CONFIG.aviva;
   const rqUID = uuid();
@@ -344,7 +345,10 @@ ${roleCds}
         </InsuredOrPrincipalInfo>
       </InsuredOrPrincipal>
       <PersPolicy>
-        <PolicyNumber>${esc(policyNumber)}</PolicyNumber>
+        <PolicyNumber>${esc(policyNumber)}</PolicyNumber>${!isQuote && companysQuoteNumber ? `
+        <QuoteInfo>
+          <CompanysQuoteNumber>${esc(companysQuoteNumber)}</CompanysQuoteNumber>
+        </QuoteInfo>` : ''}
         <LOBCd>csio:HABL</LOBCd>
         <LOBSubCd>csio:${esc(lobSubCd)}</LOBSubCd>
         <ContractTerm>

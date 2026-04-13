@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find \"C:\\\\Users\\\\johpang\\\\OneDrive - Deloitte \\(O365D\\)\\\\Documents\\\\csio\\\\poc1\\\\app\" -type f -name \"*.json\" -o -name \"*.js\" -o -name \"*.jsx\" -o -name \"*.md\" -o -name \".env*\" -o -name \"*.xml\")",
+      "Bash(ls -la \"C:\\\\Users\\\\johpang\\\\OneDrive - Deloitte \\(O365D\\)\\\\Documents\\\\csio\\\\poc1\\\\app\")",
+      "Bash(find \"C:\\\\Users\\\\johpang\\\\OneDrive - Deloitte \\(O365D\\)\\\\Documents\\\\csio\\\\poc1\\\\app/src\" -type f)",
+      "Bash(find:*)",
+      "Bash(del \"C:\\\\Users\\\\johpang\\\\OneDrive - Deloitte \\(O365D\\)\\\\Documents\\\\csio\\\\poc1\\\\app\\\\nul\")",
+      "Bash(npm install:*)"
+    ]
+  }
+}

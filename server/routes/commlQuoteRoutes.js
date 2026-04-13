@@ -4,6 +4,7 @@ const router = express.Router();
 const commlMockData = require('../commlMockData');
 const { getInsurerConfig } = require('../csioTransformer');
 const { getHardcodedXml } = require('../csioHelpers');
+const { buildCommlCsioXml } = require('../csioCommlTransformer');
 
 const TEMPLATES_DIR = path.join(__dirname, '..', 'csio-templates');
 
@@ -17,9 +18,12 @@ function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
 // ----------------------------------------------------------------
 // POST /api/comml/quote - Request commercial quotes (JSON in / JSON out)
 //
-// Short-circuit: if customer first name matches a known comml persona,
-// use hardcoded CSIO XML from template files.
-// Otherwise: dynamic mapping not yet implemented — use mock response.
+// Priority:
+//   1. Hardcoded CSIO XML template (if quote ID matches templateConfig.json)
+//   2. Dynamic CSIO XML mapping (buildCommlCsioXml)
+//
+// In both cases the frontend receives the same mock JSON response.
+// The CSIO XML is logged to the server console for inspection.
 // ----------------------------------------------------------------
 router.post('/quote', (req, res) => {
   try {
@@ -61,12 +65,29 @@ router.post('/quote', (req, res) => {
         console.log('');
       }
     } else {
-      // Dynamic CSIO XML transformation not yet implemented
-      console.log(`[COMML QUOTE] Dynamic CSIO transformation not yet implemented — skipping XML generation`);
+      // Dynamic CSIO XML transformation
+      console.log('[COMML QUOTE] No template match — using dynamic CSIO XML mapping');
       console.log('');
+
+      for (const insurerId of selectedInsurers) {
+        const config = getInsurerConfig(insurerId);
+        const label = config ? config.name : insurerId;
+
+        try {
+          const xml = buildCommlCsioXml(body, insurerId, { type: 'quote' });
+
+          console.log('-'.repeat(70));
+          console.log(`[COMML QUOTE] Dynamic CSIO XML for ${label} (CommlPkgPolicyQuoteInqRq):`);
+          console.log('-'.repeat(70));
+          console.log(xml);
+          console.log('');
+        } catch (xmlErr) {
+          console.error(`[COMML QUOTE] XML generation error for ${label}:`, xmlErr.message);
+        }
+      }
     }
 
-    // Mock response
+    // Mock response (same regardless of template vs dynamic)
     const quoteId = 'CQ-' + Math.random().toString(36).substr(2, 9).toUpperCase();
     const timestamp = new Date().toISOString();
 
@@ -101,8 +122,9 @@ router.post('/quote', (req, res) => {
 // ----------------------------------------------------------------
 // POST /api/comml/bind - Bind a commercial quote (JSON in / JSON out)
 //
-// Same short-circuit logic for hardcoded personas,
-// otherwise dynamic mapping not yet implemented.
+// Priority:
+//   1. Hardcoded CSIO XML template (if quote ID matches templateConfig.json)
+//   2. Dynamic CSIO XML mapping (buildCommlCsioXml with type='bind')
 // ----------------------------------------------------------------
 router.post('/bind', (req, res) => {
   try {
@@ -136,14 +158,26 @@ router.post('/bind', (req, res) => {
       console.log('[COMML BIND] Using hardcoded CSIO XML template (skipping dynamic mapping)');
       console.log('');
       console.log('-'.repeat(70));
-      console.log(`[COMML BIND] Hardcoded CSIO XML (CommercialPolicyAddRq):`);
+      console.log(`[COMML BIND] Hardcoded CSIO XML (CommlPkgPolicyAddRq):`);
       console.log('-'.repeat(70));
       console.log(hardcoded.xml);
       console.log('');
     } else {
-      // Dynamic mapping not yet implemented
-      console.log('[COMML BIND] Dynamic CSIO transformation not yet implemented — skipping XML generation');
+      // Dynamic CSIO XML transformation
+      console.log('[COMML BIND] No template match — using dynamic CSIO XML mapping');
       console.log('');
+
+      try {
+        const xml = buildCommlCsioXml(bindPayload, insurerId, { type: 'bind' });
+
+        console.log('-'.repeat(70));
+        console.log(`[COMML BIND] Dynamic CSIO XML (CommlPkgPolicyAddRq):`);
+        console.log('-'.repeat(70));
+        console.log(xml);
+        console.log('');
+      } catch (xmlErr) {
+        console.error('[COMML BIND] XML generation error:', xmlErr.message);
+      }
     }
 
     const policyNumber = 'CPOL-' + Math.random().toString(36).substr(2, 9).toUpperCase();

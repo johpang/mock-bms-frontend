@@ -1,8 +1,8 @@
 /**
  * QuoteFormPage2 Component
  * Second page of the quote form wizard
- * Collects garaging location, multiple drivers (via accordions), licensing details,
- * insurance cancellation history, and policy start date
+ * Collects garaging location, multiple drivers (via accordions) with
+ * licensing and insurance cancellation history per driver, and policy start date
  *
  * @component
  * @returns {JSX.Element} The second form page
@@ -24,17 +24,38 @@ const QuoteFormPage2 = () => {
   const [hoveredButton, setHoveredButton] = useState(null);
   const [expandedDriverIndex, setExpandedDriverIndex] = useState(0);
 
+  // Default driver structure including licensing and cancellations
+  const newDriverTemplate = {
+    firstName: '',
+    lastName: '',
+    relationship: '',
+    gender: '',
+    maritalStatus: '',
+    licensing: {
+      type: '',
+      g2Date: '',
+      gDate: '',
+      province: '',
+    },
+    cancellations: {
+      cancelled: '',
+      withoutCoverage: '',
+      suspended: '',
+      accidents: '',
+      tickets: '',
+    },
+  };
+
   // Initialize drivers array on mount if needed
   useEffect(() => {
     if (!quoteData.drivers || quoteData.drivers.length === 0) {
-      updateQuoteData('drivers', [{ firstName: '', lastName: '', relationship: '', gender: '', maritalStatus: '' }]);
+      updateQuoteData('drivers', [{ ...newDriverTemplate }]);
     }
   }, []);
 
   // Handlers for garaging location
   const handleGaragingChange = (field) => (e) => {
     updateQuoteData('garagingLocation', { [field]: e.target.value });
-    // Clear error for this field when user starts typing
     if (errors[`garagingLocation.${field}`]) {
       const newErrors = { ...errors };
       delete newErrors[`garagingLocation.${field}`];
@@ -42,7 +63,7 @@ const QuoteFormPage2 = () => {
     }
   };
 
-  // Handlers for driver information
+  // Handlers for driver information (top-level fields)
   const handleDriverChange = (driverIndex, field) => (e) => {
     const updatedDrivers = [...quoteData.drivers];
     updatedDrivers[driverIndex] = {
@@ -50,7 +71,6 @@ const QuoteFormPage2 = () => {
       [field]: e.target.value,
     };
     updateQuoteData('drivers', updatedDrivers);
-    // Clear error for this field when user starts typing
     if (errors[`drivers.${driverIndex}.${field}`]) {
       const newErrors = { ...errors };
       delete newErrors[`drivers.${driverIndex}.${field}`];
@@ -58,12 +78,46 @@ const QuoteFormPage2 = () => {
     }
   };
 
+  // Handlers for per-driver licensing
+  const handleDriverLicensingChange = (driverIndex, field) => (e) => {
+    const updatedDrivers = [...quoteData.drivers];
+    updatedDrivers[driverIndex] = {
+      ...updatedDrivers[driverIndex],
+      licensing: {
+        ...updatedDrivers[driverIndex].licensing,
+        [field]: e.target.value,
+      },
+    };
+    updateQuoteData('drivers', updatedDrivers);
+    if (errors[`drivers.${driverIndex}.licensing.${field}`]) {
+      const newErrors = { ...errors };
+      delete newErrors[`drivers.${driverIndex}.licensing.${field}`];
+      setErrors(newErrors);
+    }
+  };
+
+  // Handlers for per-driver cancellations (radio buttons pass event)
+  const handleDriverCancellationsChange = (driverIndex, field) => (e) => {
+    const updatedDrivers = [...quoteData.drivers];
+    updatedDrivers[driverIndex] = {
+      ...updatedDrivers[driverIndex],
+      cancellations: {
+        ...updatedDrivers[driverIndex].cancellations,
+        [field]: e.target.value,
+      },
+    };
+    updateQuoteData('drivers', updatedDrivers);
+    if (errors[`drivers.${driverIndex}.cancellations.${field}`]) {
+      const newErrors = { ...errors };
+      delete newErrors[`drivers.${driverIndex}.cancellations.${field}`];
+      setErrors(newErrors);
+    }
+  };
+
   // Add a new driver
   const handleAddDriver = () => {
-    const newDriver = { firstName: '', lastName: '', relationship: '', gender: '', maritalStatus: '' };
-    const updatedDrivers = [...quoteData.drivers, newDriver];
+    const updatedDrivers = [...quoteData.drivers, { ...newDriverTemplate }];
     updateQuoteData('drivers', updatedDrivers);
-    // Expand the newly added driver
     setExpandedDriverIndex(updatedDrivers.length - 1);
   };
 
@@ -72,30 +126,9 @@ const QuoteFormPage2 = () => {
     if (quoteData.drivers.length > 1) {
       const updatedDrivers = quoteData.drivers.filter((_, idx) => idx !== driverIndex);
       updateQuoteData('drivers', updatedDrivers);
-      // Adjust expanded index if needed
       if (expandedDriverIndex >= updatedDrivers.length) {
         setExpandedDriverIndex(updatedDrivers.length - 1);
       }
-    }
-  };
-
-  // Handlers for licensing information
-  const handleLicensingChange = (field) => (e) => {
-    updateQuoteData('licensing', { [field]: e.target.value });
-    if (errors[`licensing.${field}`]) {
-      const newErrors = { ...errors };
-      delete newErrors[`licensing.${field}`];
-      setErrors(newErrors);
-    }
-  };
-
-  // Handlers for cancellations
-  const handleCancellationsChange = (field) => (e) => {
-    updateQuoteData('cancellations', { [field]: e.target.value });
-    if (errors[`cancellations.${field}`]) {
-      const newErrors = { ...errors };
-      delete newErrors[`cancellations.${field}`];
-      setErrors(newErrors);
     }
   };
 
@@ -124,53 +157,55 @@ const QuoteFormPage2 = () => {
     // Driver information validation - validate all drivers
     if (quoteData.drivers && quoteData.drivers.length > 0) {
       quoteData.drivers.forEach((driver, index) => {
+        const label = `Driver ${index + 1}`;
+
         if (!driver.firstName?.trim()) {
-          newErrors[`drivers.${index}.firstName`] = `Driver ${index + 1}: First Name is required`;
+          newErrors[`drivers.${index}.firstName`] = `${label}: First Name is required`;
         }
         if (!driver.lastName?.trim()) {
-          newErrors[`drivers.${index}.lastName`] = `Driver ${index + 1}: Last Name is required`;
+          newErrors[`drivers.${index}.lastName`] = `${label}: Last Name is required`;
         }
         if (!driver.relationship) {
-          newErrors[`drivers.${index}.relationship`] = `Driver ${index + 1}: Relationship is required`;
+          newErrors[`drivers.${index}.relationship`] = `${label}: Relationship is required`;
         }
         if (!driver.gender) {
-          newErrors[`drivers.${index}.gender`] = `Driver ${index + 1}: Gender is required`;
+          newErrors[`drivers.${index}.gender`] = `${label}: Gender is required`;
         }
         if (!driver.maritalStatus) {
-          newErrors[`drivers.${index}.maritalStatus`] = `Driver ${index + 1}: Marital Status is required`;
+          newErrors[`drivers.${index}.maritalStatus`] = `${label}: Marital Status is required`;
+        }
+
+        // Per-driver licensing
+        if (!driver.licensing?.type) {
+          newErrors[`drivers.${index}.licensing.type`] = `${label}: License Type is required`;
+        }
+        if (!driver.licensing?.g2Date) {
+          newErrors[`drivers.${index}.licensing.g2Date`] = `${label}: G2 Licence Date is required`;
+        }
+        if (!driver.licensing?.gDate) {
+          newErrors[`drivers.${index}.licensing.gDate`] = `${label}: G Licence Date is required`;
+        }
+        if (!driver.licensing?.province) {
+          newErrors[`drivers.${index}.licensing.province`] = `${label}: Province is required`;
+        }
+
+        // Per-driver cancellations
+        if (!driver.cancellations?.cancelled) {
+          newErrors[`drivers.${index}.cancellations.cancelled`] = `${label}: Insurance cancellation field is required`;
+        }
+        if (!driver.cancellations?.withoutCoverage) {
+          newErrors[`drivers.${index}.cancellations.withoutCoverage`] = `${label}: Without coverage field is required`;
+        }
+        if (!driver.cancellations?.suspended) {
+          newErrors[`drivers.${index}.cancellations.suspended`] = `${label}: Licence suspension field is required`;
+        }
+        if (!driver.cancellations?.accidents) {
+          newErrors[`drivers.${index}.cancellations.accidents`] = `${label}: Accidents field is required`;
+        }
+        if (!driver.cancellations?.tickets) {
+          newErrors[`drivers.${index}.cancellations.tickets`] = `${label}: Tickets field is required`;
         }
       });
-    }
-
-    // Licensing validation
-    if (!quoteData.licensing?.type) {
-      newErrors['licensing.type'] = 'License Type is required';
-    }
-    if (!quoteData.licensing?.g2Date) {
-      newErrors['licensing.g2Date'] = 'G2 Licence Date is required';
-    }
-    if (!quoteData.licensing?.gDate) {
-      newErrors['licensing.gDate'] = 'G Licence Date is required';
-    }
-    if (!quoteData.licensing?.province) {
-      newErrors['licensing.province'] = 'Province is required';
-    }
-
-    // Cancellations validation
-    if (!quoteData.cancellations?.cancelled) {
-      newErrors['cancellations.cancelled'] = 'This field is required';
-    }
-    if (!quoteData.cancellations?.withoutCoverage) {
-      newErrors['cancellations.withoutCoverage'] = 'This field is required';
-    }
-    if (!quoteData.cancellations?.suspended) {
-      newErrors['cancellations.suspended'] = 'This field is required';
-    }
-    if (!quoteData.cancellations?.accidents) {
-      newErrors['cancellations.accidents'] = 'This field is required';
-    }
-    if (!quoteData.cancellations?.tickets) {
-      newErrors['cancellations.tickets'] = 'This field is required';
     }
 
     // Policy start date validation
@@ -251,6 +286,15 @@ const QuoteFormPage2 = () => {
     driverAccordionContainer: {
       marginBottom: '2rem',
     },
+    subsectionTitle: {
+      fontSize: '1rem',
+      fontWeight: '600',
+      color: '#0a1e3d',
+      marginTop: '1.5rem',
+      marginBottom: '1rem',
+      paddingBottom: '0.5rem',
+      borderBottom: '1px solid #e0e0e0',
+    },
     addDriverButton: {
       backgroundColor: 'transparent',
       color: '#0a1e3d',
@@ -309,18 +353,12 @@ const QuoteFormPage2 = () => {
   };
 
   const provinceOptions = [
-    { value: 'ON', label: 'ON' },
-    { value: 'QC', label: 'QC' },
-    { value: 'BC', label: 'BC' },
-    { value: 'AB', label: 'AB' },
-    { value: 'MB', label: 'MB' },
-    { value: 'SK', label: 'SK' },
-    { value: 'NS', label: 'NS' },
-    { value: 'NB', label: 'NB' },
-    { value: 'PE', label: 'PE' },
-    { value: 'NL', label: 'NL' },
-    { value: 'NT', label: 'NT' },
-    { value: 'YT', label: 'YT' },
+    { value: 'ON', label: 'ON' }, { value: 'QC', label: 'QC' },
+    { value: 'BC', label: 'BC' }, { value: 'AB', label: 'AB' },
+    { value: 'MB', label: 'MB' }, { value: 'SK', label: 'SK' },
+    { value: 'NS', label: 'NS' }, { value: 'NB', label: 'NB' },
+    { value: 'PE', label: 'PE' }, { value: 'NL', label: 'NL' },
+    { value: 'NT', label: 'NT' }, { value: 'YT', label: 'YT' },
     { value: 'NU', label: 'NU' },
   ];
 
@@ -376,12 +414,10 @@ const QuoteFormPage2 = () => {
     return base;
   };
 
-  const getChevronStyle = (isExpanded) => {
-    return {
-      ...styles.chevron,
-      transform: isExpanded ? 'rotate(135deg)' : 'rotate(45deg)',
-    };
-  };
+  const getChevronStyle = (isExpanded) => ({
+    ...styles.chevron,
+    transform: isExpanded ? 'rotate(135deg)' : 'rotate(45deg)',
+  });
 
   const getDriverDisplayName = (driver, index) => {
     const firstName = driver.firstName?.trim() || '';
@@ -444,6 +480,7 @@ const QuoteFormPage2 = () => {
             {/* Accordion Body */}
             {expandedDriverIndex === index && (
               <div style={styles.driverAccordionBody}>
+                {/* Driver Details */}
                 <div style={styles.formGrid}>
                   <TextInput
                     label="First Name"
@@ -492,6 +529,117 @@ const QuoteFormPage2 = () => {
                   />
                 </div>
 
+                {/* Licensing Subsection (per driver) */}
+                <div style={styles.subsectionTitle}>Licensing</div>
+                <div style={styles.formGrid}>
+                  <div style={styles.fullWidth}>
+                    <SelectInput
+                      label="What type of licence do you currently hold?"
+                      name={`licenseType${index}`}
+                      value={driver.licensing?.type || ''}
+                      onChange={handleDriverLicensingChange(index, 'type')}
+                      options={licenseTypeOptions}
+                      placeholder="Select licence type"
+                      error={errors[`drivers.${index}.licensing.type`]}
+                    />
+                  </div>
+                </div>
+                <div style={styles.formGrid}>
+                  <DateInput
+                    label="G2 Licence Date"
+                    name={`g2Date${index}`}
+                    value={driver.licensing?.g2Date || ''}
+                    onChange={handleDriverLicensingChange(index, 'g2Date')}
+                    error={errors[`drivers.${index}.licensing.g2Date`]}
+                  />
+                  <DateInput
+                    label="G Licence Date"
+                    name={`gDate${index}`}
+                    value={driver.licensing?.gDate || ''}
+                    onChange={handleDriverLicensingChange(index, 'gDate')}
+                    error={errors[`drivers.${index}.licensing.gDate`]}
+                  />
+                </div>
+                <div style={styles.formGrid}>
+                  <SelectInput
+                    label="Province"
+                    name={`licenseProvince${index}`}
+                    value={driver.licensing?.province || ''}
+                    onChange={handleDriverLicensingChange(index, 'province')}
+                    options={provinceOptions}
+                    placeholder="Select province"
+                    error={errors[`drivers.${index}.licensing.province`]}
+                  />
+                </div>
+
+                {/* Insurance Cancellations Subsection (per driver) */}
+                <div style={styles.subsectionTitle}>Insurance History</div>
+                <p
+                  style={{
+                    fontSize: '0.95rem',
+                    color: '#555555',
+                    marginBottom: '1rem',
+                    fontFamily: 'var(--font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif)',
+                  }}
+                >
+                  In the past 3 years have you ever had:
+                </p>
+                <div style={{ marginBottom: '1rem' }}>
+                  <RadioGroup
+                    label="An insurance company cancel your policy?"
+                    name={`cancelled${index}`}
+                    value={driver.cancellations?.cancelled || ''}
+                    onChange={handleDriverCancellationsChange(index, 'cancelled')}
+                    options={yesNoOptions}
+                    inline={true}
+                    error={errors[`drivers.${index}.cancellations.cancelled`]}
+                  />
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <RadioGroup
+                    label="Any time without insurance coverage?"
+                    name={`withoutCoverage${index}`}
+                    value={driver.cancellations?.withoutCoverage || ''}
+                    onChange={handleDriverCancellationsChange(index, 'withoutCoverage')}
+                    options={yesNoOptions}
+                    inline={true}
+                    error={errors[`drivers.${index}.cancellations.withoutCoverage`]}
+                  />
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <RadioGroup
+                    label="Have you had any licence suspension in the past 6 years?"
+                    name={`suspended${index}`}
+                    value={driver.cancellations?.suspended || ''}
+                    onChange={handleDriverCancellationsChange(index, 'suspended')}
+                    options={yesNoOptions}
+                    inline={true}
+                    error={errors[`drivers.${index}.cancellations.suspended`]}
+                  />
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <RadioGroup
+                    label="Have you had any at-fault accidents in the last 5 years?"
+                    name={`accidents${index}`}
+                    value={driver.cancellations?.accidents || ''}
+                    onChange={handleDriverCancellationsChange(index, 'accidents')}
+                    options={yesNoOptions}
+                    inline={true}
+                    error={errors[`drivers.${index}.cancellations.accidents`]}
+                  />
+                </div>
+                <div style={{ marginBottom: '1rem' }}>
+                  <RadioGroup
+                    label="Have you had any traffic tickets in the last 3 years?"
+                    name={`tickets${index}`}
+                    value={driver.cancellations?.tickets || ''}
+                    onChange={handleDriverCancellationsChange(index, 'tickets')}
+                    options={yesNoOptions}
+                    inline={true}
+                    error={errors[`drivers.${index}.cancellations.tickets`]}
+                  />
+                </div>
+
                 {/* Remove Driver Button */}
                 <button
                   style={{
@@ -519,119 +667,6 @@ const QuoteFormPage2 = () => {
       >
         + Add Driver
       </button>
-
-      {/* Licensing Section */}
-      <SectionHeader title="Licensing" />
-      <div style={styles.formGrid}>
-        <div style={styles.fullWidth}>
-          <SelectInput
-            label="What type of licence do you currently hold?"
-            name="licenseType"
-            value={quoteData.licensing?.type || ''}
-            onChange={handleLicensingChange('type')}
-            options={licenseTypeOptions}
-            placeholder="Select licence type"
-            error={errors['licensing.type']}
-          />
-        </div>
-      </div>
-      <div style={styles.formGrid}>
-        <DateInput
-          label="G2 Licence Date"
-          name="g2Date"
-          value={quoteData.licensing?.g2Date || ''}
-          onChange={handleLicensingChange('g2Date')}
-          error={errors['licensing.g2Date']}
-        />
-        <DateInput
-          label="G Licence Date"
-          name="gDate"
-          value={quoteData.licensing?.gDate || ''}
-          onChange={handleLicensingChange('gDate')}
-          error={errors['licensing.gDate']}
-        />
-      </div>
-      <div style={styles.formGrid}>
-        <SelectInput
-          label="Province"
-          name="province"
-          value={quoteData.licensing?.province || ''}
-          onChange={handleLicensingChange('province')}
-          options={provinceOptions}
-          placeholder="Select province"
-          error={errors['licensing.province']}
-        />
-      </div>
-
-      {/* Insurance Cancellations Section */}
-      <SectionHeader title="Insurance Cancellations" />
-      <div style={{ marginBottom: '2rem' }}>
-        <p
-          style={{
-            fontSize: '0.95rem',
-            color: '#555555',
-            marginBottom: '1.5rem',
-            fontFamily: 'var(--font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif)',
-          }}
-        >
-          In the past 3 years have you ever had:
-        </p>
-        <div style={{ marginBottom: '1.5rem' }}>
-          <RadioGroup
-            label="An insurance company cancel your policy?"
-            name="cancelled"
-            value={quoteData.cancellations?.cancelled || ''}
-            onChange={handleCancellationsChange('cancelled')}
-            options={yesNoOptions}
-            inline={true}
-            error={errors['cancellations.cancelled']}
-          />
-        </div>
-        <div style={{ marginBottom: '1.5rem' }}>
-          <RadioGroup
-            label="Any time without insurance coverage?"
-            name="withoutCoverage"
-            value={quoteData.cancellations?.withoutCoverage || ''}
-            onChange={handleCancellationsChange('withoutCoverage')}
-            options={yesNoOptions}
-            inline={true}
-            error={errors['cancellations.withoutCoverage']}
-          />
-        </div>
-        <div style={{ marginBottom: '1.5rem' }}>
-          <RadioGroup
-            label="Have you had any licence suspension in the past 6 years?"
-            name="suspended"
-            value={quoteData.cancellations?.suspended || ''}
-            onChange={handleCancellationsChange('suspended')}
-            options={yesNoOptions}
-            inline={true}
-            error={errors['cancellations.suspended']}
-          />
-        </div>
-        <div style={{ marginBottom: '1.5rem' }}>
-          <RadioGroup
-            label="Have you had any at-fault accidents in the last 5 years?"
-            name="accidents"
-            value={quoteData.cancellations?.accidents || ''}
-            onChange={handleCancellationsChange('accidents')}
-            options={yesNoOptions}
-            inline={true}
-            error={errors['cancellations.accidents']}
-          />
-        </div>
-        <div style={{ marginBottom: '1.5rem' }}>
-          <RadioGroup
-            label="Have you had any traffic tickets in the last 3 years?"
-            name="tickets"
-            value={quoteData.cancellations?.tickets || ''}
-            onChange={handleCancellationsChange('tickets')}
-            options={yesNoOptions}
-            inline={true}
-            error={errors['cancellations.tickets']}
-          />
-        </div>
-      </div>
 
       {/* Policy Start Date Section */}
       <SectionHeader title="Policy Start Date" />

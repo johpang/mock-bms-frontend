@@ -149,6 +149,50 @@ const HAB_COVERAGE_CODE_MAP = {
   sewerBackup:               'RVCS',
 };
 
+// ── Commercial-specific typecodes ──────────────────────────
+
+// Alarm type: frontend value -> CSIO AlarmDescCd
+// csio:4 = Local Alarm
+const COMML_ALARM_MAP = {
+  LocalAlarm: '4',
+  None:       null,   // no AlarmAndSecurity element emitted
+};
+
+// Building construction type: frontend value -> csio:BldgConstructionCd
+const COMML_CONSTRUCTION_MAP = {
+  'Frame':              '1',   // Frame
+  'NonCombustible':     '2',   // Non-Combustible (Joisted Masonry)
+  'Non-Combustible':    '2',
+  'Masonry':            '3',   // Masonry Non-Combustible
+  'FireResistive':      '4',   // Fire Resistive
+  'Fire Resistive':     '4',
+  'ModifiedFireResist': '5',   // Modified Fire Resistive
+  'MasonryVeneer':      '6',   // Masonry Veneer
+};
+
+// Payment method: frontend value -> CSIO MethodPaymentCd
+// (already stored with csio: prefix on frontend, e.g. 'csio:EF')
+const COMML_PAYMENT_METHOD_MAP = {
+  'csio:EF': 'EF',  // Electronic Funds Transfer
+  'csio:CD': 'CD',  // Credit Card
+  'csio:P':  'P',   // Direct Bill / Company Policy Billed
+};
+
+// Interest code: frontend -> CSIO InterestCd
+const COMML_INTEREST_MAP = {
+  Owner:  'OW',
+  Tenant: 'TN',
+};
+
+// Occupancy code: frontend -> CSIO OccupancyCd
+const COMML_OCCUPANCY_MAP = {
+  'Office':     '11',
+  'Retail':     '12',
+  'Warehouse':  '13',
+  'Industrial': '14',
+  'Restaurant': '15',
+};
+
 module.exports = {
   INSURER_CONFIG,
   BILLING_METHOD_MAP,
@@ -167,4 +211,9 @@ module.exports = {
   HAB_DWELL_USE_MAP,
   HAB_OCCUPANCY_TYPE_MAP,
   HAB_COVERAGE_CODE_MAP,
+  COMML_ALARM_MAP,
+  COMML_CONSTRUCTION_MAP,
+  COMML_PAYMENT_METHOD_MAP,
+  COMML_INTEREST_MAP,
+  COMML_OCCUPANCY_MAP,
 };

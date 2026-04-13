@@ -21,32 +21,62 @@ let tokenCache = {
 
 /**
  * Fetches a new access token from the OAuth provider.
+ * Uses HTTP Basic auth (base64-encoded client_id:client_secret)
+ * per the CSIO gateway specification.
  * @returns {Promise<{access_token: string, expires_in: number}>}
  */
 async function fetchNewToken() {
   const { tokenUrl, clientId, clientSecret, scope } = serverConfig.oauth;
 
+  // CSIO gateway expects Basic auth: base64(client_id:client_secret)
+  const basicCredentials = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+
   const params = new URLSearchParams();
   params.append('grant_type', 'client_credentials');
-  params.append('client_id', clientId);
-  params.append('client_secret', clientSecret);
   if (scope) params.append('scope', scope);
 
-  console.log('[Auth] Requesting new token from', tokenUrl);
+  console.log('');
+  console.log('[Auth] >>> TOKEN REQUEST');
+  console.log(`[Auth]     URL:       ${tokenUrl}`);
+  console.log(`[Auth]     Client ID: ${clientId}`);
+  console.log(`[Auth]     Scope:     ${scope || '(none)'}`);
+  console.log(`[Auth]     Body:      ${params.toString()}`);
+
+  const startTime = Date.now();
 
   const response = await fetch(tokenUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: `Basic ${basicCredentials}`,
+    },
     body: params.toString(),
   });
 
+  const elapsed = Date.now() - startTime;
+  const rawBody = await response.text();
+
+  console.log(`[Auth] <<< TOKEN RESPONSE`);
+  console.log(`[Auth]     Status:  ${response.status} ${response.statusText}`);
+  console.log(`[Auth]     Elapsed: ${elapsed}ms`);
+  console.log(`[Auth]     Headers:`);
+  response.headers.forEach((value, key) => {
+    console.log(`[Auth]       ${key}: ${value}`);
+  });
+
   if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`Token request failed (${response.status}): ${body}`);
+    console.log(`[Auth]     Body: ${rawBody}`);
+    throw new Error(`Token request failed (${response.status}): ${rawBody}`);
   }
 
-  const data = await response.json();
-  console.log('[Auth] Token acquired, expires in', data.expires_in, 'seconds');
+  const data = JSON.parse(rawBody);
+  const tokenPreview = data.access_token
+    ? `${data.access_token.substring(0, 20)}...${data.access_token.substring(data.access_token.length - 10)}`
+    : '(missing)';
+  console.log(`[Auth]     Token:      ${tokenPreview}`);
+  console.log(`[Auth]     Type:       ${data.token_type || '(none)'}`);
+  console.log(`[Auth]     Expires in: ${data.expires_in || '(unknown)'}s`);
+  console.log('');
   return data;
 }
 
@@ -60,8 +90,11 @@ async function getAccessToken() {
   const bufferMs = 60 * 1000;
 
   if (tokenCache.accessToken && tokenCache.expiresAt && now + bufferMs < tokenCache.expiresAt) {
+    const remainingSec = Math.round((tokenCache.expiresAt - now) / 1000);
+    console.log(`[Auth] Using cached token (expires in ${remainingSec}s)`);
     return tokenCache.accessToken;
   }
+  console.log('[Auth] Token cache miss or expired — fetching new token');
 
   const data = await fetchNewToken();
   tokenCache.accessToken = data.access_token;

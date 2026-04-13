@@ -69,8 +69,10 @@ export function CommlProvider({ children, onGoHome }) {
     try {
       const selectedResponse = commlResponses?.[selectedInsurerIndex ?? 0];
       const quoteNumber = selectedResponse?.referenceNumber || '';
+      const companysQuoteNumber = selectedResponse?.companysQuoteNumber || '';
       const payload = {
         quoteNumber,
+        companysQuoteNumber,
         insurerId: bindData.insurerId || 'aviva',
         quoteData: commlData,
         ...bindData,

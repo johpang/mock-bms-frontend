@@ -14,6 +14,7 @@ const VehicleDetailsPage = () => {
         year: '',
         make: '',
         model: '',
+        ownership: '',
         antiTheft: '',
         primaryUse: '',
         distanceDriven: {
@@ -53,6 +54,7 @@ const VehicleDetailsPage = () => {
       year: '',
       make: '',
       model: '',
+      ownership: '',
       antiTheft: '',
       primaryUse: '',
       distanceDriven: {
@@ -212,8 +214,19 @@ const VehicleDetailsPage = () => {
                   />
                 </div>
 
-                {/* Row 2: Anti-theft, Primary Use */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                {/* Row 2: Ownership, Anti-theft, Primary Use */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                  <SelectInput
+                    label="Ownership"
+                    value={vehicle.ownership || ''}
+                    onChange={handleVehicleChange(index, 'ownership')}
+                    options={[
+                      { label: 'Select an option', value: '' },
+                      { label: 'Owned', value: 'Owned' },
+                      { label: 'Leased', value: 'Leased' },
+                      { label: 'Financed', value: 'Financed' },
+                    ]}
+                  />
                   <SelectInput
                     label="Anti-theft Device Installed?"
                     value={vehicle.antiTheft || ''}

@@ -401,14 +401,6 @@ const HabQuoteFormPage1 = () => {
       {/* Navigation Buttons */}
       <div style={styles.buttonGroup}>
         <button
-          style={getButtonStyle('secondary')}
-          onClick={prevStep}
-          onMouseEnter={() => setHoveredButton('back')}
-          onMouseLeave={() => setHoveredButton(null)}
-        >
-          Back
-        </button>
-        <button
           style={getButtonStyle('primary')}
           onClick={handleNextClick}
           onMouseEnter={() => setHoveredButton('next')}

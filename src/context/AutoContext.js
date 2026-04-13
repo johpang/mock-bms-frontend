@@ -115,9 +115,11 @@ export function AutoProvider({ children, onGoHome }) {
     try {
       const selectedResponse = quoteResponses?.[selectedInsurerIndex ?? 0];
       const quoteNumber = selectedResponse?.referenceNumber || '';
+      const companysQuoteNumber = selectedResponse?.companysQuoteNumber || '';
 
       const payload = {
         quoteNumber,
+        companysQuoteNumber,
         insurerId: bindData.insurerId || 'aviva',
         quoteData,
         ...bindData,

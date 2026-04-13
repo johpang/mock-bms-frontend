@@ -1,3 +1,6 @@
+// Load .env from the app root (one level up from /server)
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -9,7 +12,7 @@ const MODE = serverConfig.mode; // "mock" or "proxy"
 
 // ── Middleware ───────────────────────────────────────────────
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true
 }));
 

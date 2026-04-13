@@ -36,6 +36,7 @@ export const initialQuoteData = {
       year: '',
       make: '',
       model: '',
+      ownership: '',
       antiTheft: false,
       primaryUse: '',
       distanceDriven: {
@@ -56,7 +57,7 @@ export const initialQuoteData = {
     city: '',
   },
 
-  // Drivers (array)
+  // Drivers (array — each entry includes licensing and cancellation history)
   drivers: [
     {
       firstName: '',
@@ -64,25 +65,21 @@ export const initialQuoteData = {
       relationship: '',
       gender: '',
       maritalStatus: '',
+      licensing: {
+        type: '',
+        g2Date: '',
+        gDate: '',
+        province: '',
+      },
+      cancellations: {
+        cancelled: '',
+        withoutCoverage: '',
+        suspended: '',
+        accidents: '',
+        tickets: '',
+      },
     },
   ],
-
-  // Licensing information
-  licensing: {
-    type: '',
-    g2Date: '',
-    gDate: '',
-    province: '',
-  },
-
-  // Cancellation/suspension history
-  cancellations: {
-    cancelled: '',
-    withoutCoverage: '',
-    suspended: '',
-    accidents: '',
-    tickets: '',
-  },
 
   // Selected insurers for quote
   selectedInsurers: [],

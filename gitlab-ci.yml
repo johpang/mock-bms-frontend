@@ -1,0 +1,53 @@
+image: node:20
+
+variables:
+  NODE_ENV: production
+  SERVER_MODE: mock
+  REACT_APP_API_BASE_URL: /api
+  REACT_APP_OAUTH_TOKEN_URL: /oauth/token
+  REACT_APP_OAUTH_CLIENT_ID: bms-demo-client
+  REACT_APP_OAUTH_CLIENT_SECRET: bms-demo-secret
+  REACT_APP_OAUTH_GRANT_TYPE: client_credentials
+  REACT_APP_OAUTH_SCOPE: quote:read quote:write
+  REACT_APP_MOCK_MODE: false
+
+cache:
+  paths:
+    - node_modules/
+    - server/node_modules/
+
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  script:
+    - npm ci
+    - npm run build
+    - cd server && npm ci
+  artifacts:
+    paths:
+      - build/
+      - server/
+      - package.json
+      - server/package.json
+    expire_in: 1 hour
+  only:
+   - main
+
+deploy:
+  stage: deploy
+  image: node:20
+  script:
+    - apt-get update -qq && apt-get install -y zip curl
+    - zip -r app.zip . -x "node_modules/*" ".git/*" "*.env*" "__MACOSX/*"
+    - |
+      curl -v --fail-with-body -u "$AZURE_PUBLISH_USER:$AZURE_PUBLISH_PASS" \
+        -H "Content-Type: application/zip" \
+        --data-binary @app.zip \
+        "https://$AZURE_APP_NAME.scm.canadacentral-01.azurewebsites.net/api/zipdeploy"
+  dependencies:
+    - build
+  only:
+    - main

@@ -24,6 +24,7 @@
       "year": "2025",
       "make": "Ford",
       "model": "Escape",
+      "ownership": "Owned",
       "antiTheft": false,
       "primaryUse": "Personal",
       "distanceDriven": {
@@ -47,21 +48,21 @@
       "lastName": "Thompson",
       "relationship": "Insured",
       "gender": "Male",
-      "maritalStatus": "Married"
+      "maritalStatus": "Married",
+      "licensing": {
+        "type": "G",
+        "g2Date": "",
+        "gDate": "1999-05-10",
+        "province": "ON"
+      },
+      "cancellations": {
+        "cancelled": "No",
+        "withoutCoverage": "No",
+        "suspended": "No",
+        "accidents": "Yes",
+        "tickets": "No"
+      }
     }
   ],
-  "licensing": {
-    "type": "G",
-    "g2Date": "",
-    "gDate": "1999-05-10",
-    "province": "ON"
-  },
-  "cancellations": {
-    "cancelled": "No",
-    "withoutCoverage": "No",
-    "suspended": "No",
-    "accidents": "Yes",
-    "tickets": "No"
-  },
   "selectedInsurers": []
 }

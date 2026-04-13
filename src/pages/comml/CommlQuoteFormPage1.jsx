@@ -427,16 +427,6 @@ const CommlQuoteFormPage1 = () => {
       {/* Navigation Buttons */}
       <div style={styles.buttonGroup}>
         <button
-          disabled
-          style={{
-            ...getButtonStyle('secondary'),
-            opacity: 0.5,
-            cursor: 'not-allowed',
-          }}
-        >
-          Back
-        </button>
-        <button
           style={getButtonStyle('primary')}
           onMouseEnter={() => setHoveredButton('next')}
           onMouseLeave={() => setHoveredButton(null)}
