@@ -1,5 +1,5 @@
-// Load .env from the app root (one level up from /server)
-require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+//.env for local testing only
+//require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 
 const express = require('express');
 const cors = require('cors');
