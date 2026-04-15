@@ -76,6 +76,9 @@ function buildCsioXml(data, insurerId, options = {}) {
   const type = options.type || 'quote';
   const isQuote = type === 'quote';
   const companysQuoteNumber = options.companysQuoteNumber || '';
+  if (!isQuote) {
+    console.log(`[csioTransformer] Bind mode — companysQuoteNumber: "${companysQuoteNumber}" (type: ${typeof companysQuoteNumber})`);
+  }
 
   const insurer = INSURER_CONFIG[insurerId] || INSURER_CONFIG.aviva;
   const rqUID = uuid();

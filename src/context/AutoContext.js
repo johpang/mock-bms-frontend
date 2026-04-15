@@ -82,26 +82,68 @@ export function AutoProvider({ children, onGoHome }) {
   const submitQuote = useCallback(async (overrides) => {
     setIsLoading(true);
     setError(null);
-    try {
-      const payload = overrides ? { ...quoteData, ...overrides } : quoteData;
-      const selectedIds = payload.selectedInsurers || [];
+    setSelectedInsurerIndex(null);
 
-      if (config.mockMode) {
-        await new Promise((r) => setTimeout(r, 800));
-        const results = selectedIds
-          .filter((id) => mockResponses[id])
-          .map((id) => ({ ...mockResponses[id] }));
-        setQuoteResponses(results);
-      } else {
-        const response = await submitQuoteRequest(payload);
-        setQuoteResponses(response.results || response);
+    const payload = overrides ? { ...quoteData, ...overrides } : quoteData;
+    const selectedIds = payload.selectedInsurers || [];
+    const insurerMeta = overrides?._insurerMeta || [];
+
+    // Build id -> display-name lookup
+    const nameMap = {};
+    insurerMeta.forEach(({ id, name }) => { nameMap[id] = name; });
+
+    // Seed quoteResponses with loading placeholders
+    const placeholders = selectedIds.map((id) => ({
+      _status: 'loading',
+      insurerId: id,
+      insurerName: nameMap[id] || id,
+    }));
+    setQuoteResponses(placeholders);
+
+    // Fire one request per insurer in parallel
+    const settled = await Promise.allSettled(
+      selectedIds.map(async (insurerId, index) => {
+        if (config.mockMode) {
+          await new Promise((r) => setTimeout(r, 400 + Math.random() * 1200));
+          const mock = mockResponses[insurerId];
+          if (!mock) throw new Error(`No mock data for ${insurerId}`);
+          setQuoteResponses((prev) => {
+            const next = [...prev];
+            next[index] = { ...mock, _status: 'done' };
+            return next;
+          });
+        } else {
+          const singlePayload = { ...payload, selectedInsurers: [insurerId] };
+          delete singlePayload._insurerMeta;
+          const response = await submitQuoteRequest(singlePayload);
+          const result = (response.results || response)?.[0] || response;
+          setQuoteResponses((prev) => {
+            const next = [...prev];
+            next[index] = { ...result, _status: 'done' };
+            return next;
+          });
+        }
+      })
+    );
+
+    // Mark any failures
+    settled.forEach((outcome, idx) => {
+      if (outcome.status === 'rejected') {
+        const errMsg = outcome.reason?.message || 'Quote request failed';
+        setQuoteResponses((prev) => {
+          const next = [...prev];
+          next[idx] = { ...next[idx], _status: 'error', errorMessage: errMsg };
+          return next;
+        });
       }
-    } catch (err) {
-      setError(err.message || 'Failed to submit quote');
-      console.error('Quote submission error:', err);
-    } finally {
-      setIsLoading(false);
+    });
+
+    const anySucceeded = settled.some((o) => o.status === 'fulfilled');
+    if (!anySucceeded) {
+      setError('All quote requests failed. Please try again.');
     }
+
+    setIsLoading(false);
   }, [quoteData]);
 
   /**
@@ -114,6 +156,8 @@ export function AutoProvider({ children, onGoHome }) {
     setBindError(null);
     try {
       const selectedResponse = quoteResponses?.[selectedInsurerIndex ?? 0];
+      console.log('[AutoContext/submitBind] selectedResponse keys:', selectedResponse ? Object.keys(selectedResponse) : 'null');
+      console.log('[AutoContext/submitBind] companysQuoteNumber on response:', selectedResponse?.companysQuoteNumber);
       const quoteNumber = selectedResponse?.referenceNumber || '';
       const companysQuoteNumber = selectedResponse?.companysQuoteNumber || '';
 

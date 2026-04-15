@@ -12,8 +12,8 @@ const UnderwritingMessages = ({ messages }) => {
   const colors = {
     navy: '#0a1e3d',
     accent: '#2a5298',
-    warning: '#d4a017',
-    warningBg: '#fffbf0',
+    warning: '#d32f2f',
+    warningBg: '#ffebee',
     text: '#1a1a1a',
   };
 

@@ -215,28 +215,19 @@ const HabQuoteFormPage2 = () => {
     if (!habData.replacementCost?.garageType) missingFields.push('Garage Type');
 
     // Upgrades
-    if (!habData.upgrades?.roofYear?.trim()) missingFields.push('Roof Year');
-    if (!habData.upgrades?.roofCoveringType) missingFields.push('Roof Covering Type');
-    if (!habData.upgrades?.electricalYear?.trim()) missingFields.push('Electrical Year');
-    if (!habData.upgrades?.electricalWiringType) missingFields.push('Electrical Wiring Type');
-    if (!habData.upgrades?.electricalPanelType) missingFields.push('Electrical Panel Type');
-    if (!habData.upgrades?.serviceAmperage) missingFields.push('Service Amperage');
+    // Building Improvements (YYYY format)
     if (!habData.upgrades?.heatingYear?.trim()) missingFields.push('Heating Year');
-    if (!habData.upgrades?.primaryHeatingType) missingFields.push('Primary Heating Type');
     if (!habData.upgrades?.plumbingYear?.trim()) missingFields.push('Plumbing Year');
-    if (!habData.upgrades?.auxiliaryHeating) missingFields.push('Auxiliary Heating');
-    if (!habData.upgrades?.oilTank) missingFields.push('Oil Tank');
+    if (!habData.upgrades?.electricalYear?.trim()) missingFields.push('Electrical Year');
+    if (!habData.upgrades?.roofYear?.trim()) missingFields.push('Roof Year');
 
     // Protection
-    if (!habData.protection?.mainWaterValveShutOff?.trim()) missingFields.push('Main Water Valve Shut Off');
+    if (!habData.protection?.mainWaterValveShutOff?.trim()) missingFields.push('Water Shut Off Valve');
     if (!habData.protection?.fireProtection?.trim()) missingFields.push('Fire Protection');
     if (!habData.protection?.securitySystem) missingFields.push('Security System');
     if (!habData.protection?.distanceToHydrant?.trim()) missingFields.push('Distance to Hydrant');
     if (!habData.protection?.numSmokeDetectors?.trim()) missingFields.push('Number of Smoke Detectors');
 
-    // Rooms
-    if (!habData.numBathrooms?.trim()) missingFields.push('Number of Bathrooms');
-    if (!habData.numKitchens?.trim()) missingFields.push('Number of Kitchens');
 
     // Detached Outbuildings
     if (!habData.detachedOutbuildings?.trim()) missingFields.push('Detached Outbuildings');
@@ -487,118 +478,52 @@ const HabQuoteFormPage2 = () => {
             required
           />
         </div>
+        <div style={{ ...styles.rowContainer, ...styles.threeColumnRow }}>
+          <TextInput
+            label="Estimated Replacement Cost"
+            name="estimatedReplacementCost"
+            value={habData.replacementCost?.estimatedReplacementCost || ''}
+            onChange={(e) => {
+              const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+              updateHabData('replacementCost', { estimatedReplacementCost: val });
+            }}
+            placeholder="e.g. 500000"
+          />
+        </div>
       </div>
 
-      {/* Upgrades Section */}
+      {/* Building Improvements Section */}
       <div style={styles.sectionContainer}>
-        <SectionHeader title="Upgrades" />
-        <div style={{ ...styles.rowContainer, ...styles.threeColumnRow }}>
+        <SectionHeader title="Building Improvements" />
+        <div style={{ ...styles.rowContainer, ...styles.fourColumnRow }}>
           <TextInput
-            label="Roof Year"
-            name="roofYear"
-            value={habData.upgrades?.roofYear || ''}
-            onChange={(e) => updateHabData('upgrades', { roofYear: e.target.value })}
-            placeholder="e.g. 2015"
-            required
-          />
-          <SelectInput
-            label="Roof Covering Type"
-            name="roofCoveringType"
-            value={habData.upgrades?.roofCoveringType || ''}
-            onChange={(e) => updateHabData('upgrades', { roofCoveringType: e.target.value })}
-            options={roofCoveringTypeOptions}
-            placeholder="Select roof type"
-            required
-          />
-          <div style={{ visibility: 'hidden' }} />
-        </div>
-        <div style={{ ...styles.rowContainer, ...styles.threeColumnRow }}>
-          <TextInput
-            label="Electrical Year"
-            name="electricalYear"
-            value={habData.upgrades?.electricalYear || ''}
-            onChange={(e) => updateHabData('upgrades', { electricalYear: e.target.value })}
-            placeholder="e.g. 2010"
-            required
-          />
-          <SelectInput
-            label="Electrical Wiring Type"
-            name="electricalWiringType"
-            value={habData.upgrades?.electricalWiringType || ''}
-            onChange={(e) => updateHabData('upgrades', { electricalWiringType: e.target.value })}
-            options={electricalWiringTypeOptions}
-            placeholder="Select wiring type"
-            required
-          />
-          <SelectInput
-            label="Electrical Panel Type"
-            name="electricalPanelType"
-            value={habData.upgrades?.electricalPanelType || ''}
-            onChange={(e) => updateHabData('upgrades', { electricalPanelType: e.target.value })}
-            options={electricalPanelTypeOptions}
-            placeholder="Select panel type"
-            required
-          />
-        </div>
-        <div style={{ ...styles.rowContainer, ...styles.threeColumnRow }}>
-          <SelectInput
-            label="Service Amperage"
-            name="serviceAmperage"
-            value={habData.upgrades?.serviceAmperage || ''}
-            onChange={(e) => updateHabData('upgrades', { serviceAmperage: e.target.value })}
-            options={serviceAmperageOptions}
-            placeholder="Select amperage"
-            required
-          />
-          <TextInput
-            label="Heating Year"
+            label="Heating"
             name="heatingYear"
             value={habData.upgrades?.heatingYear || ''}
             onChange={(e) => updateHabData('upgrades', { heatingYear: e.target.value })}
-            placeholder="e.g. 2018"
-            required
+            placeholder="YYYY"
           />
-          <SelectInput
-            label="Primary Heating Type"
-            name="primaryHeatingType"
-            value={habData.upgrades?.primaryHeatingType || ''}
-            onChange={(e) => updateHabData('upgrades', { primaryHeatingType: e.target.value })}
-            options={heatingTypeOptions}
-            placeholder="Select heating type"
-            required
-          />
-        </div>
-        <div style={{ ...styles.rowContainer, ...styles.threeColumnRow }}>
           <TextInput
-            label="Plumbing Year"
+            label="Plumbing"
             name="plumbingYear"
             value={habData.upgrades?.plumbingYear || ''}
             onChange={(e) => updateHabData('upgrades', { plumbingYear: e.target.value })}
-            placeholder="e.g. 2005"
-            required
+            placeholder="YYYY"
           />
-          <div style={{ marginBottom: '1rem' }}>
-            <RadioGroup
-              label="Auxiliary Heating"
-              name="auxiliaryHeating"
-              value={habData.upgrades?.auxiliaryHeating || ''}
-              onChange={(e) => updateHabData('upgrades', { auxiliaryHeating: e.target.value })}
-              options={yesNoOptions}
-              inline={true}
-              required
-            />
-          </div>
-          <div style={{ marginBottom: '1rem' }}>
-            <RadioGroup
-              label="Oil Tank"
-              name="oilTank"
-              value={habData.upgrades?.oilTank || ''}
-              onChange={(e) => updateHabData('upgrades', { oilTank: e.target.value })}
-              options={yesNoOptions}
-              inline={true}
-              required
-            />
-          </div>
+          <TextInput
+            label="Electrical"
+            name="electricalYear"
+            value={habData.upgrades?.electricalYear || ''}
+            onChange={(e) => updateHabData('upgrades', { electricalYear: e.target.value })}
+            placeholder="YYYY"
+          />
+          <TextInput
+            label="Roof"
+            name="roofYear"
+            value={habData.upgrades?.roofYear || ''}
+            onChange={(e) => updateHabData('upgrades', { roofYear: e.target.value })}
+            placeholder="YYYY"
+          />
         </div>
       </div>
 
@@ -606,21 +531,25 @@ const HabQuoteFormPage2 = () => {
       <div style={styles.sectionContainer}>
         <SectionHeader title="Protection" />
         <div style={{ ...styles.rowContainer, ...styles.twoColumnRow }}>
-          <TextInput
-            label="Main Water Valve Shut Off"
+          <RadioGroup
+            label="Water Shut Off Valve"
             name="mainWaterValveShutOff"
             value={habData.protection?.mainWaterValveShutOff || ''}
             onChange={(e) => updateHabData('protection', { mainWaterValveShutOff: e.target.value })}
-            placeholder="e.g. Accessible"
-            required
+            options={yesNoOptions}
+            inline={true}
           />
-          <TextInput
+          <RadioGroup
             label="Fire Protection"
             name="fireProtection"
             value={habData.protection?.fireProtection || ''}
             onChange={(e) => updateHabData('protection', { fireProtection: e.target.value })}
-            placeholder="e.g. Full sprinkler system"
-            required
+            options={[
+              { value: 'Unprotected', label: 'Unprotected' },
+              { value: 'Semi-protected', label: 'Semi-protected' },
+              { value: 'Protected', label: 'Protected' },
+            ]}
+            inline={true}
           />
         </div>
         <div style={{ ...styles.rowContainer, ...styles.twoColumnRow }}>
@@ -651,29 +580,6 @@ const HabQuoteFormPage2 = () => {
             value={habData.protection?.numSmokeDetectors || ''}
             onChange={(e) => updateHabData('protection', { numSmokeDetectors: e.target.value })}
             placeholder="e.g. 3"
-            required
-          />
-        </div>
-      </div>
-
-      {/* Rooms Section */}
-      <div style={styles.sectionContainer}>
-        <SectionHeader title="Rooms" />
-        <div style={{ ...styles.rowContainer, ...styles.twoColumnRow }}>
-          <TextInput
-            label="Number of Bathrooms"
-            name="numBathrooms"
-            value={habData.numBathrooms || ''}
-            onChange={(e) => updateHabData(null, { numBathrooms: e.target.value })}
-            placeholder="e.g. 2"
-            required
-          />
-          <TextInput
-            label="Number of Kitchens"
-            name="numKitchens"
-            value={habData.numKitchens || ''}
-            onChange={(e) => updateHabData(null, { numKitchens: e.target.value })}
-            placeholder="e.g. 1"
             required
           />
         </div>

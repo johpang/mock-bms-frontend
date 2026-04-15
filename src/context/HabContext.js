@@ -41,26 +41,63 @@ export function HabProvider({ children, onGoHome }) {
   const submitQuote = useCallback(async (overrides) => {
     setIsLoading(true);
     setError(null);
-    try {
-      const payload = overrides ? { ...habData, ...overrides } : habData;
-      const selectedIds = payload.selectedInsurers || [];
+    setSelectedInsurerIndex(null);
 
-      if (config.mockMode) {
-        await new Promise((r) => setTimeout(r, 800));
-        const results = selectedIds
-          .filter((id) => habMockResponses[id])
-          .map((id) => ({ ...habMockResponses[id] }));
-        setHabResponses(results);
-      } else {
-        const response = await submitHabQuoteRequest(payload);
-        setHabResponses(response.results || response);
+    const payload = overrides ? { ...habData, ...overrides } : habData;
+    const selectedIds = payload.selectedInsurers || [];
+    const insurerMeta = overrides?._insurerMeta || [];
+
+    const nameMap = {};
+    insurerMeta.forEach(({ id, name }) => { nameMap[id] = name; });
+
+    const placeholders = selectedIds.map((id) => ({
+      _status: 'loading',
+      insurerId: id,
+      insurerName: nameMap[id] || id,
+    }));
+    setHabResponses(placeholders);
+
+    const settled = await Promise.allSettled(
+      selectedIds.map(async (insurerId, index) => {
+        if (config.mockMode) {
+          await new Promise((r) => setTimeout(r, 400 + Math.random() * 1200));
+          const mock = habMockResponses[insurerId];
+          if (!mock) throw new Error(`No mock data for ${insurerId}`);
+          setHabResponses((prev) => {
+            const next = [...prev];
+            next[index] = { ...mock, _status: 'done' };
+            return next;
+          });
+        } else {
+          const singlePayload = { ...payload, selectedInsurers: [insurerId] };
+          delete singlePayload._insurerMeta;
+          const response = await submitHabQuoteRequest(singlePayload);
+          const result = (response.results || response)?.[0] || response;
+          setHabResponses((prev) => {
+            const next = [...prev];
+            next[index] = { ...result, _status: 'done' };
+            return next;
+          });
+        }
+      })
+    );
+
+    settled.forEach((outcome, idx) => {
+      if (outcome.status === 'rejected') {
+        const errMsg = outcome.reason?.message || 'Quote request failed';
+        setHabResponses((prev) => {
+          const next = [...prev];
+          next[idx] = { ...next[idx], _status: 'error', errorMessage: errMsg };
+          return next;
+        });
       }
-    } catch (err) {
-      setError(err.message || 'Failed to submit quote');
-      console.error('Hab quote submission error:', err);
-    } finally {
-      setIsLoading(false);
+    });
+
+    if (!settled.some((o) => o.status === 'fulfilled')) {
+      setError('All quote requests failed. Please try again.');
     }
+
+    setIsLoading(false);
   }, [habData]);
 
   const submitBind = useCallback(async (bindData = {}) => {
@@ -125,8 +162,8 @@ export function HabProvider({ children, onGoHome }) {
     setSelectedInsurerIndex(null);
     setBindResponse(null);
     setBindError(null);
-    // Quoted transactions skip to Select Insurers (step 5); drafts start at Quote Details
-    setCurrentStep(status === 'Quoted' ? 5 : 1);
+    // Quoted transactions skip to Select Insurers (step 4); drafts start at Quote Details
+    setCurrentStep(status === 'Quoted' ? 4 : 1);
   }, []);
 
   const resetQuote = useCallback(() => {

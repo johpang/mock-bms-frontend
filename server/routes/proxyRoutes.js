@@ -114,7 +114,6 @@ router.post('/quote', async (req, res) => {
     }
 
     const url = serverConfig.aws.baseUrl + serverConfig.aws.quotePath;
-    const hardcoded = getHardcodedXml(body, 'quote', TEMPLATES_DIR);
 
     const upstreamResults = [];
     for (const insurerId of selectedInsurers) {
@@ -122,6 +121,7 @@ router.post('/quote', async (req, res) => {
       const label = config ? config.name : insurerId;
 
       let csioXml;
+      const hardcoded = getHardcodedXml(body, 'quote', TEMPLATES_DIR, insurerId);
       if (hardcoded) {
         console.log(`[Proxy/QUOTE] Template match: ${hardcoded.label} -- using hardcoded XML for ${label}`);
         csioXml = hardcoded.xml;
@@ -187,13 +187,16 @@ router.post('/bind', async (req, res) => {
     const config = getInsurerConfig(insurerId);
     const insurerLabel = config ? config.name : insurerId;
 
-    const hardcoded = getHardcodedXml(body, 'bind', TEMPLATES_DIR);
+    console.log(`[Proxy/BIND] companysQuoteNumber from body: "${body.companysQuoteNumber}" (type: ${typeof body.companysQuoteNumber})`);
+
+    const hardcoded = getHardcodedXml(body, 'bind', TEMPLATES_DIR, insurerId);
     let csioXml;
 
     if (hardcoded) {
       console.log(`[Proxy/BIND] Template match: ${hardcoded.label} -- using hardcoded XML`);
       csioXml = hardcoded.xml;
     } else {
+      console.log(`[Proxy/BIND] No hardcoded template — using dynamic transformer`);
       csioXml = buildCsioXml(bindPayload, insurerId, { type: 'bind', companysQuoteNumber: body.companysQuoteNumber || '' });
     }
 
@@ -245,7 +248,6 @@ router.post('/hab/quote', async (req, res) => {
     }
 
     const url = serverConfig.aws.baseUrl + serverConfig.aws.habQuotePath;
-    const hardcoded = getHardcodedXml(body, 'habQuote', TEMPLATES_DIR);
 
     const upstreamResults = [];
     for (const insurerId of selectedInsurers) {
@@ -253,6 +255,7 @@ router.post('/hab/quote', async (req, res) => {
       const label = config ? config.name : insurerId;
 
       let csioXml;
+      const hardcoded = getHardcodedXml(body, 'habQuote', TEMPLATES_DIR, insurerId);
       if (hardcoded) {
         console.log(`[Proxy/HAB-QUOTE] Template match: ${hardcoded.label} -- using hardcoded XML for ${label}`);
         csioXml = hardcoded.xml;
@@ -308,7 +311,7 @@ router.post('/hab/bind', async (req, res) => {
     const config = getInsurerConfig(insurerId);
     const insurerLabel = config ? config.name : insurerId;
 
-    const hardcoded = getHardcodedXml(body, 'habBind', TEMPLATES_DIR);
+    const hardcoded = getHardcodedXml(body, 'habBind', TEMPLATES_DIR, insurerId);
     let csioXml;
 
     if (hardcoded) {

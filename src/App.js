@@ -28,7 +28,6 @@ import BindSuccessPage from './pages/BindSuccessPage';
 // Habitational page imports
 import HabQuoteFormPage1 from './pages/hab/HabQuoteFormPage1';
 import HabQuoteFormPage2 from './pages/hab/HabQuoteFormPage2';
-import HabQuoteFormPage3 from './pages/hab/HabQuoteFormPage3';
 import HabCoveragePage from './pages/hab/HabCoveragePage';
 import HabInsurerSelectionPage from './pages/hab/HabInsurerSelectionPage';
 import HabQuoteComparisonPage from './pages/hab/HabQuoteComparisonPage';
@@ -61,12 +60,12 @@ const AUTO_COMPONENTS = [
 
 // Hab steps (step 1 = Quote Details, no landing page)
 const HAB_LABELS = [
-  'Quote Details', 'Risk & Building', 'Pool & Liability',
+  'Quote Details', 'Risk & Building',
   'Coverages', 'Select Insurers', 'Compare Quotes', 'Premium Breakdown',
   'Bind Policy', 'Confirmation',
 ];
 const HAB_COMPONENTS = [
-  HabQuoteFormPage1, HabQuoteFormPage2, HabQuoteFormPage3,
+  HabQuoteFormPage1, HabQuoteFormPage2,
   HabCoveragePage, HabInsurerSelectionPage, HabQuoteComparisonPage,
   HabPremiumBreakdownPage, HabBindPage, HabBindSuccessPage,
 ];

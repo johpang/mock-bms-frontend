@@ -23,15 +23,6 @@ const QuoteFormPage1 = () => {
   const [hoveredButton, setHoveredButton] = React.useState(null);
 
   // Field options
-  const billingOptions = [
-    {
-      value: 'direct',
-      label: 'Direct Billing Account (Company Policy Billed)',
-    },
-    { value: 'broker', label: 'Broker Billed' },
-    { value: 'insured', label: 'Insured Billed' },
-  ];
-
   const genderOptions = [
     { value: 'Male', label: 'Male' },
     { value: 'Female', label: 'Female' },
@@ -124,8 +115,6 @@ const QuoteFormPage1 = () => {
     // Quote Information fields
     if (!quoteData.producerCode?.trim()) missingFields.push('Producer Code');
     if (!quoteData.bmsQuoteNumber?.trim()) missingFields.push('BMS Quote Number');
-    if (!quoteData.billingMethod?.trim()) missingFields.push('Billing Method');
-
     // Customer Details fields
     if (!quoteData.customer?.firstName?.trim()) missingFields.push('First Name');
     if (!quoteData.customer?.lastName?.trim()) missingFields.push('Last Name');
@@ -140,7 +129,16 @@ const QuoteFormPage1 = () => {
     if (!quoteData.customer?.phone?.trim()) missingFields.push('Phone Number');
 
     // Policy Effective Date field
-    if (!quoteData.policyEffectiveDate?.trim()) missingFields.push('Policy Effective Date');
+    if (!quoteData.policyEffectiveDate?.trim()) {
+      missingFields.push('Policy Effective Date');
+    } else {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const effectiveDate = new Date(quoteData.policyEffectiveDate + 'T00:00:00');
+      if (effectiveDate < today) {
+        missingFields.push('Policy Effective Date cannot be backdated');
+      }
+    }
 
     return missingFields;
   };
@@ -196,7 +194,7 @@ const QuoteFormPage1 = () => {
       {/* Quote Information Section */}
       <div style={styles.sectionContainer}>
         <SectionHeader title="Quote Information" />
-        <div style={{ ...styles.rowContainer, ...styles.threeColumnRow }}>
+        <div style={{ ...styles.rowContainer, ...styles.twoColumnRow }}>
           <TextInput
             label="Producer Code"
             name="producerCode"
@@ -211,15 +209,6 @@ const QuoteFormPage1 = () => {
             value={quoteData.bmsQuoteNumber || ''}
             onChange={(e) => updateQuoteData(null, { bmsQuoteNumber: e.target.value })}
             placeholder="e.g. SMT0B4176"
-            required
-          />
-          <SelectInput
-            label="Billing Method"
-            name="billingMethod"
-            value={quoteData.billingMethod || ''}
-            onChange={(e) => updateQuoteData(null, { billingMethod: e.target.value })}
-            options={billingOptions}
-            placeholder="Select billing method"
             required
           />
         </div>

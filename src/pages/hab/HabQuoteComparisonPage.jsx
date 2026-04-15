@@ -12,7 +12,7 @@ import MockDisclaimer from '../../components/MockDisclaimer';
  * @returns {React.ReactElement} The quote comparison page
  */
 const HabQuoteComparisonPage = () => {
-  const { habResponses, nextStep, prevStep, selectedInsurerIndex, setSelectedInsurerIndex } =
+  const { habResponses, nextStep, prevStep, selectedInsurerIndex, setSelectedInsurerIndex, isLoading } =
     useHab();
 
   const colors = {
@@ -68,7 +68,7 @@ const HabQuoteComparisonPage = () => {
       fontSize: '13px',
       fontWeight: 700,
       color: colors.navy,
-      textTransform: 'uppercase',
+      textTransform: 'none',
       letterSpacing: '0.3px',
     },
     dataRow: (isSelected) => ({
@@ -87,6 +87,7 @@ const HabQuoteComparisonPage = () => {
       display: 'flex',
       alignItems: 'center',
       gap: '12px',
+      marginRight: '12px',
     },
     radioInput: {
       width: '18px',
@@ -151,7 +152,10 @@ const HabQuoteComparisonPage = () => {
   };
 
   const handleSelectInsurer = (index) => {
-    setSelectedInsurerIndex(index);
+    const response = habResponses?.[index];
+    if (response && response._status !== 'loading' && response._status !== 'error') {
+      setSelectedInsurerIndex(index);
+    }
   };
 
   const handleViewDetails = () => {
@@ -160,7 +164,19 @@ const HabQuoteComparisonPage = () => {
     }
   };
 
-  const isViewDetailsDisabled = selectedInsurerIndex === null;
+  const selectedResponse = selectedInsurerIndex !== null ? habResponses?.[selectedInsurerIndex] : null;
+  const isSelectedReady = selectedResponse && selectedResponse._status !== 'loading' && selectedResponse._status !== 'error';
+  const isViewDetailsDisabled = !isSelectedReady;
+
+  const spinnerStyle = {
+    display: 'inline-block',
+    width: '14px',
+    height: '14px',
+    border: '2px solid #e0e0e0',
+    borderTop: `2px solid ${colors.accent}`,
+    borderRadius: '50%',
+    animation: 'spin 0.6s linear infinite',
+  };
 
   if (!habResponses || habResponses.length === 0) {
     return (
@@ -200,6 +216,7 @@ const HabQuoteComparisonPage = () => {
         tbody tr:hover {
           background-color: ${colors.lightAccent};
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
 
       <MockDisclaimer />
@@ -212,47 +229,70 @@ const HabQuoteComparisonPage = () => {
         <table style={styles.table}>
           <thead>
             <tr style={styles.headerRow}>
-              <th style={{ ...styles.headerCell, width: '10%' }}>Select</th>
-              <th style={{ ...styles.headerCell, width: '60%' }}>Insurer Name</th>
-              <th style={{ ...styles.headerCell, width: '30%', textAlign: 'right' }}>
+              <th style={{ ...styles.headerCell, width: '50%' }}>Select Insurers</th>
+              <th style={{ ...styles.headerCell, width: '50%', textAlign: 'right' }}>
                 Annual Premium
               </th>
             </tr>
           </thead>
           <tbody>
-            {habResponses.map((response, index) => (
-              <tr
-                key={index}
-                style={styles.dataRow(selectedInsurerIndex === index)}
-                onClick={() => handleSelectInsurer(index)}
-              >
-                <td style={styles.dataCell}>
-                  <div style={styles.radioCellContent}>
-                    <input
-                      type="radio"
-                      name="insurer-selection"
-                      checked={selectedInsurerIndex === index}
-                      onChange={() => handleSelectInsurer(index)}
-                      style={styles.radioInput}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                </td>
-                <td style={styles.dataCell}>
-                  <span style={styles.insurerName}>{response.insurerName}</span>
-                </td>
-                <td style={{ ...styles.dataCell, textAlign: 'right' }}>
-                  <span style={styles.premium}>{formatCurrency(response.premiums?.annual)}</span>
-                </td>
-              </tr>
-            ))}
+            {habResponses.map((response, index) => {
+              const rowLoading = response._status === 'loading';
+              const rowError = response._status === 'error';
+              const rowReady = !rowLoading && !rowError;
+
+              return (
+                <tr
+                  key={index}
+                  style={{
+                    ...styles.dataRow(selectedInsurerIndex === index && rowReady),
+                    cursor: rowReady ? 'pointer' : 'default',
+                    opacity: rowLoading ? 0.7 : 1,
+                  }}
+                  onClick={() => handleSelectInsurer(index)}
+                >
+                  <td style={{ ...styles.dataCell, display: 'flex', alignItems: 'center' }}>
+                    <div style={styles.radioCellContent}>
+                      <input
+                        type="radio"
+                        name="insurer-selection"
+                        checked={selectedInsurerIndex === index}
+                        onChange={() => handleSelectInsurer(index)}
+                        disabled={!rowReady}
+                        style={{ ...styles.radioInput, cursor: rowReady ? 'pointer' : 'not-allowed' }}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
+                    <span style={styles.insurerName}>{response.insurerName}</span>
+                  </td>
+                  <td style={{ ...styles.dataCell, textAlign: 'right' }}>
+                    {rowLoading && (
+                      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', color: '#666' }}>
+                        <span style={spinnerStyle} /> Quoting...
+                      </span>
+                    )}
+                    {rowError && (
+                      <span style={{ color: '#cf222e', fontWeight: 500 }}>Failed</span>
+                    )}
+                    {rowReady && (
+                      <span style={styles.premium}>{formatCurrency(response.premiums?.annual)}</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
-      {selectedInsurerIndex !== null && (
+      {isSelectedReady && (
         <div style={styles.selectionHint}>
           Selected: {habResponses[selectedInsurerIndex]?.insurerName}
+        </div>
+      )}
+      {isLoading && (
+        <div style={{ padding: '8px 16px', fontSize: '13px', color: '#666', marginTop: '8px' }}>
+          Fetching quotes... {habResponses.filter(r => r._status === 'done').length} of {habResponses.length} received
         </div>
       )}
 

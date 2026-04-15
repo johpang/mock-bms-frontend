@@ -12,7 +12,7 @@ import MockDisclaimer from '../components/MockDisclaimer';
  * @returns {React.ReactElement} The premium breakdown page
  */
 const PremiumBreakdownPage = () => {
-  const { quoteResponses, prevStep, nextStep, selectedInsurerIndex } = useAutoQuote();
+  const { quoteResponses, prevStep, nextStep, selectedInsurerIndex, quoteData } = useAutoQuote();
 
   const colors = {
     navy: '#0a1e3d',
@@ -282,13 +282,13 @@ const PremiumBreakdownPage = () => {
       <div style={styles.headerSection}>
         <div style={styles.insurerNameAndType}>
           <h1 style={styles.insurerName}>{selectedResponse.insurerName}</h1>
-          <span style={styles.typeLabel}>{selectedResponse.type}</span>
+          <span style={styles.typeLabel}>Quote</span>
         </div>
 
         <div style={styles.refAndPremiumRow}>
           <div style={styles.leftColumn}>
             <div style={styles.referenceInfo}>
-              <div style={styles.referenceLabel}>Reference Number</div>
+              <div style={styles.referenceLabel}>Insurer Quote Reference Number</div>
               <div style={styles.referenceValue}>{selectedResponse.referenceNumber}</div>
             </div>
           </div>
@@ -337,12 +337,27 @@ const PremiumBreakdownPage = () => {
       </div>
 
       <div style={styles.sectionsContainer}>
-        {selectedResponse.underwritingMessages &&
-          selectedResponse.underwritingMessages.length > 0 && (
+        {(() => {
+          const convictionMessages = (quoteData.drivers || [])
+            .map((driver, i) => {
+              if (driver.cancellations?.tickets === 'Yes' && driver.cancellations?.ticketsDate) {
+                return `Driver ${i + 1}: Conviction disclosed ${driver.cancellations.ticketsDate}`;
+              }
+              return null;
+            })
+            .filter(Boolean);
+
+          const allMessages = [
+            ...(selectedResponse.underwritingMessages || []),
+            ...convictionMessages,
+          ];
+
+          return allMessages.length > 0 ? (
             <div>
-              <UnderwritingMessages messages={selectedResponse.underwritingMessages} />
+              <UnderwritingMessages messages={allMessages} />
             </div>
-          )}
+          ) : null;
+        })()}
 
         {selectedResponse.coverages && selectedResponse.coverages.length > 0 && (
           <div>

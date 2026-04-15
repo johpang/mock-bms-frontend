@@ -17,16 +17,16 @@
     "province": "ON",
     "phone": "416-555-0456"
   },
-  "policyEffectiveDate": "2026-05-04",
-  "policyStartDate": "2026-05-04",
+  "policyEffectiveDate": "2026-07-01",
+  "policyStartDate": "2026-07-01",
   "vehicles": [
     {
       "year": "2024",
       "make": "Honda",
       "model": "Civic",
       "ownership": "Financed",
-      "antiTheft": false,
-      "primaryUse": "Personal",
+      "antiTheft": "no",
+      "primaryUse": "pleasure",
       "distanceDriven": {
         "inTrip": "50",
         "annually": "40000",

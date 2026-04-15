@@ -41,26 +41,63 @@ export function CommlProvider({ children, onGoHome }) {
   const submitQuote = useCallback(async (overrides) => {
     setIsLoading(true);
     setError(null);
-    try {
-      const payload = overrides ? { ...commlData, ...overrides } : commlData;
-      const selectedIds = payload.selectedInsurers || [];
+    setSelectedInsurerIndex(null);
 
-      if (config.mockMode) {
-        await new Promise((r) => setTimeout(r, 800));
-        const results = selectedIds
-          .filter((id) => commlMockResponses[id])
-          .map((id) => ({ ...commlMockResponses[id] }));
-        setCommlResponses(results);
-      } else {
-        const response = await submitCommlQuoteRequest(payload);
-        setCommlResponses(response.results || response);
+    const payload = overrides ? { ...commlData, ...overrides } : commlData;
+    const selectedIds = payload.selectedInsurers || [];
+    const insurerMeta = overrides?._insurerMeta || [];
+
+    const nameMap = {};
+    insurerMeta.forEach(({ id, name }) => { nameMap[id] = name; });
+
+    const placeholders = selectedIds.map((id) => ({
+      _status: 'loading',
+      insurerId: id,
+      insurerName: nameMap[id] || id,
+    }));
+    setCommlResponses(placeholders);
+
+    const settled = await Promise.allSettled(
+      selectedIds.map(async (insurerId, index) => {
+        if (config.mockMode) {
+          await new Promise((r) => setTimeout(r, 400 + Math.random() * 1200));
+          const mock = commlMockResponses[insurerId];
+          if (!mock) throw new Error(`No mock data for ${insurerId}`);
+          setCommlResponses((prev) => {
+            const next = [...prev];
+            next[index] = { ...mock, _status: 'done' };
+            return next;
+          });
+        } else {
+          const singlePayload = { ...payload, selectedInsurers: [insurerId] };
+          delete singlePayload._insurerMeta;
+          const response = await submitCommlQuoteRequest(singlePayload);
+          const result = (response.results || response)?.[0] || response;
+          setCommlResponses((prev) => {
+            const next = [...prev];
+            next[index] = { ...result, _status: 'done' };
+            return next;
+          });
+        }
+      })
+    );
+
+    settled.forEach((outcome, idx) => {
+      if (outcome.status === 'rejected') {
+        const errMsg = outcome.reason?.message || 'Quote request failed';
+        setCommlResponses((prev) => {
+          const next = [...prev];
+          next[idx] = { ...next[idx], _status: 'error', errorMessage: errMsg };
+          return next;
+        });
       }
-    } catch (err) {
-      setError(err.message || 'Failed to submit quote');
-      console.error('Commercial quote submission error:', err);
-    } finally {
-      setIsLoading(false);
+    });
+
+    if (!settled.some((o) => o.status === 'fulfilled')) {
+      setError('All quote requests failed. Please try again.');
     }
+
+    setIsLoading(false);
   }, [commlData]);
 
   const submitBind = useCallback(async (bindData = {}) => {

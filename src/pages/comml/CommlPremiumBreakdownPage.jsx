@@ -313,13 +313,13 @@ const CommlPremiumBreakdownPage = () => {
       <div style={styles.headerSection}>
         <div style={styles.insurerNameAndType}>
           <h1 style={styles.insurerName}>{selectedResponse.insurerName}</h1>
-          <span style={styles.typeLabel}>{selectedResponse.type}</span>
+          <span style={styles.typeLabel}>Quote</span>
         </div>
 
         <div style={styles.refAndPremiumRow}>
           <div style={styles.leftColumn}>
             <div style={styles.referenceInfo}>
-              <div style={styles.referenceLabel}>Reference Number</div>
+              <div style={styles.referenceLabel}>Insurer Quote Reference Number</div>
               <div style={styles.referenceValue}>{selectedResponse.referenceNumber}</div>
             </div>
           </div>

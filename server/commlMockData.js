@@ -5,7 +5,7 @@
 
 const commlMockData = {
   aviva: {
-    insurerName: "Aviva",
+    insurerName: "Alpha Insurance",
     insurerId: "aviva",
     referenceNumber: "C-804752",
     type: "New Business",
@@ -26,7 +26,7 @@ const commlMockData = {
     ]
   },
   intact: {
-    insurerName: "Intact",
+    insurerName: "Indigo Ins. Co.",
     insurerId: "intact",
     referenceNumber: "C-915386",
     type: "New Business",
@@ -47,7 +47,7 @@ const commlMockData = {
     ]
   },
   definity: {
-    insurerName: "Definity",
+    insurerName: "Delta Insurance",
     insurerId: "definity",
     referenceNumber: "C-726541",
     type: "New Business",
@@ -68,7 +68,7 @@ const commlMockData = {
     ]
   },
   wawanesa: {
-    insurerName: "Wawanesa",
+    insurerName: "Beta Insurance Inc.",
     insurerId: "wawanesa",
     referenceNumber: "C-637829",
     type: "New Business",
@@ -89,7 +89,7 @@ const commlMockData = {
     ]
   },
   caa: {
-    insurerName: "CAA Insurance",
+    insurerName: "Coach Insurance",
     insurerId: "caa",
     referenceNumber: "C-548971",
     type: "New Business",
@@ -110,7 +110,7 @@ const commlMockData = {
     ]
   },
   goreMutual: {
-    insurerName: "Gore Mutual",
+    insurerName: "Gamma Insurance",
     insurerId: "goreMutual",
     referenceNumber: "C-659284",
     type: "New Business",

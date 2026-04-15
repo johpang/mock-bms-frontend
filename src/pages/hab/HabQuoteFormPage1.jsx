@@ -141,9 +141,16 @@ const HabQuoteFormPage1 = () => {
     if (!habData.customer?.phone?.trim()) missingFields.push('Phone Number');
 
     // Policy Period fields
-    if (!habData.effectiveDate?.trim()) missingFields.push('Effective Date');
-    if (!habData.effectiveTime?.trim()) missingFields.push('Effective Time');
-    if (!habData.effectiveTimeAMPM?.trim()) missingFields.push('Effective Time AM/PM');
+    if (!habData.effectiveDate?.trim()) {
+      missingFields.push('Effective Date');
+    } else {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const effectiveDate = new Date(habData.effectiveDate + 'T00:00:00');
+      if (effectiveDate < today) {
+        missingFields.push('Effective Date cannot be backdated');
+      }
+    }
     if (!habData.expiryDate?.trim()) missingFields.push('Expiry Date');
 
     // Applicant fields
@@ -152,6 +159,7 @@ const HabQuoteFormPage1 = () => {
 
     // Loss History fields
     if (!habData.lossHistory?.hasLossesOrClaims) missingFields.push('Losses or Claims History');
+    if (habData.lossHistory?.hasLossesOrClaims === 'Yes' && !habData.lossHistory?.claimDate) missingFields.push('Date of Claim');
     if (!habData.lossHistory?.insuranceCancellationHistory) missingFields.push('Insurance Cancellation History');
 
     return missingFields;
@@ -262,7 +270,7 @@ const HabQuoteFormPage1 = () => {
 
       {/* Address Section */}
       <div style={styles.sectionContainer}>
-        <SectionHeader title="Address" />
+        <SectionHeader title="Risk 1" />
         <div style={{ ...styles.rowContainer, ...styles.fullWidthRow }}>
           <TextInput
             label="Address"
@@ -322,23 +330,6 @@ const HabQuoteFormPage1 = () => {
             onChange={(e) => updateHabData(null, { effectiveDate: e.target.value })}
             required
           />
-          <TextInput
-            label="Effective Time"
-            name="effectiveTime"
-            value={habData.effectiveTime || ''}
-            onChange={(e) => updateHabData(null, { effectiveTime: e.target.value })}
-            placeholder="e.g. 12:00"
-            required
-          />
-          <RadioGroup
-            label="AM/PM"
-            name="effectiveTimeAMPM"
-            value={habData.effectiveTimeAMPM || ''}
-            onChange={(e) => updateHabData(null, { effectiveTimeAMPM: e.target.value })}
-            options={amPmOptions}
-            inline={true}
-            required
-          />
           <DateInput
             label="Expiry Date"
             name="expiryDate"
@@ -384,6 +375,16 @@ const HabQuoteFormPage1 = () => {
             inline={true}
             required
           />
+          {habData.lossHistory?.hasLossesOrClaims === 'Yes' && (
+            <div style={{ marginTop: '0.5rem', marginLeft: '1rem' }}>
+              <DateInput
+                label="Date of Claim"
+                name="claimDate"
+                value={habData.lossHistory?.claimDate || ''}
+                onChange={(e) => updateHabData('lossHistory', { claimDate: e.target.value })}
+              />
+            </div>
+          )}
         </div>
         <div style={{ marginBottom: '1.5rem' }}>
           <RadioGroup

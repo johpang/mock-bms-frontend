@@ -12,7 +12,7 @@ import MockDisclaimer from '../../components/MockDisclaimer';
  * @returns {React.ReactElement} The premium breakdown page
  */
 const HabPremiumBreakdownPage = () => {
-  const { habResponses, prevStep, nextStep, selectedInsurerIndex } = useHab();
+  const { habResponses, prevStep, nextStep, selectedInsurerIndex, habData } = useHab();
 
   const colors = {
     navy: '#0a1e3d',
@@ -313,13 +313,13 @@ const HabPremiumBreakdownPage = () => {
       <div style={styles.headerSection}>
         <div style={styles.insurerNameAndType}>
           <h1 style={styles.insurerName}>{selectedResponse.insurerName}</h1>
-          <span style={styles.typeLabel}>{selectedResponse.type}</span>
+          <span style={styles.typeLabel}>Quote</span>
         </div>
 
         <div style={styles.refAndPremiumRow}>
           <div style={styles.leftColumn}>
             <div style={styles.referenceInfo}>
-              <div style={styles.referenceLabel}>Reference Number</div>
+              <div style={styles.referenceLabel}>Insurer Quote Reference Number</div>
               <div style={styles.referenceValue}>{selectedResponse.referenceNumber}</div>
             </div>
           </div>
@@ -346,17 +346,28 @@ const HabPremiumBreakdownPage = () => {
         </div>
         <div style={styles.summaryItemWide}>
           <div style={styles.summaryLabel}>Property Address</div>
-          <div style={styles.summaryValue}>{selectedResponse.propertyAddress}</div>
+          <div style={styles.summaryValue}>
+            {[habData.riskAddress?.address, habData.riskAddress?.city, habData.riskAddress?.province, habData.riskAddress?.postalCode].filter(Boolean).join(', ') || 'N/A'}
+          </div>
         </div>
       </div>
 
       <div style={styles.sectionsContainer}>
-        {selectedResponse.underwritingMessages &&
-          selectedResponse.underwritingMessages.length > 0 && (
+        {(() => {
+          const messages = [
+            'Risk is eligible for higher limit for Sewer Back Up',
+            'Mortgage Free Discount could not be added',
+          ];
+
+          if (habData.lossHistory?.hasLossesOrClaims === 'Yes' && habData.lossHistory?.claimDate) {
+            messages.push(`Risk 1: Claim disclosed ${habData.lossHistory.claimDate}`);
+          }
+
+          return (
             <div>
               <h2 style={styles.sectionTitle}>Underwriting Messages</h2>
               <div style={styles.underwritingContainer}>
-                {selectedResponse.underwritingMessages.map((message, index) => (
+                {messages.map((message, index) => (
                   <div key={index} style={styles.underwritingMessageItem}>
                     <span style={styles.underwritingMessageBullet} />
                     {message}
@@ -364,41 +375,85 @@ const HabPremiumBreakdownPage = () => {
                 ))}
               </div>
             </div>
-          )}
+          );
+        })()}
 
-        {selectedResponse.coverages && selectedResponse.coverages.length > 0 && (
-          <div>
-            <h2 style={styles.sectionTitle}>Coverage Breakdown</h2>
-            <div style={styles.tableContainer}>
-              <table style={styles.table}>
-                <thead>
-                  <tr style={styles.tableHeaderRow}>
-                    <th style={styles.tableHeaderCell}>Coverage</th>
-                    <th style={styles.tableHeaderCell}>Deductible</th>
-                    <th style={styles.tableHeaderCell}>Amount</th>
-                    <th style={{ ...styles.tableHeaderCell, textAlign: 'right' }}>Premium</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedResponse.coverages.map((coverage, index) => (
-                    <tr key={index} style={styles.tableDataRow}>
-                      <td style={styles.tableDataCell}>{coverage.name}</td>
-                      <td style={styles.tableDataCell}>
-                        {coverage.deductible ? formatCurrency(coverage.deductible) : '—'}
-                      </td>
-                      <td style={styles.tableDataCell}>
-                        {coverage.amount ? formatCurrency(coverage.amount) : '—'}
-                      </td>
-                      <td style={{ ...styles.tableDataCell, ...styles.tableDataCellRight }}>
-                        {coverage.premium ? formatCurrency(coverage.premium) : '—'}
-                      </td>
+        {(() => {
+          const coverageDefinitions = [
+            { key: 'dwellingBuilding', label: 'Dwelling Building' },
+            { key: 'detachedPrivateStructures', label: 'Detached Private Structures' },
+            { key: 'personalProperty', label: 'Personal Property' },
+            { key: 'additionalLivingExpenses', label: 'Additional Living Expenses' },
+            { key: 'legalLiability', label: 'Legal Liability' },
+            { key: 'voluntaryMedicalPayments', label: 'Voluntary Medical Payments' },
+            { key: 'voluntaryPropertyDamage', label: 'Voluntary Property Damage' },
+            { key: 'sewerBackup', label: 'Sewer Backup' },
+            { key: 'legalServices', label: 'Legal Services' },
+            { key: 'identityTheftProtection', label: 'Identity Theft Protection' },
+          ];
+
+          // Map response coverages by name for premium lookup
+          const responseCoverageMap = {};
+          (selectedResponse.coverages || []).forEach((c) => {
+            responseCoverageMap[c.name] = c;
+          });
+
+          // Label-to-response-name mapping for matching
+          const labelToResponseName = {
+            'Dwelling Building': 'Residence',
+            'Detached Private Structures': 'Outbuildings',
+            'Personal Property': 'Personal Property',
+            'Additional Living Expenses': 'Guaranteed Replacement Cost',
+            'Legal Liability': 'Legal Liability',
+            'Voluntary Medical Payments': 'Voluntary Medical Payments',
+            'Voluntary Property Damage': 'Voluntary Property Damage',
+            'Sewer Backup': 'Sewer Back-Up & Overland Water',
+          };
+
+          const selectedCoverages = habData.coverages || {};
+          const enabledCoverages = coverageDefinitions.filter(
+            (c) => selectedCoverages[c.key]?.enabled
+          );
+
+          if (enabledCoverages.length === 0) return null;
+
+          return (
+            <div>
+              <h2 style={styles.sectionTitle}>Coverage Breakdown</h2>
+              <div style={styles.tableContainer}>
+                <table style={styles.table}>
+                  <thead>
+                    <tr style={styles.tableHeaderRow}>
+                      <th style={styles.tableHeaderCell}>Coverage</th>
+                      <th style={styles.tableHeaderCell}>Deductible</th>
+                      <th style={styles.tableHeaderCell}>Amount</th>
+                      <th style={{ ...styles.tableHeaderCell, textAlign: 'right' }}>Premium</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {enabledCoverages.map((cov) => {
+                      const userCov = selectedCoverages[cov.key] || {};
+                      const responseName = labelToResponseName[cov.label] || cov.label;
+                      const responseCov = responseCoverageMap[responseName];
+                      const premium = responseCov?.premium;
+
+                      return (
+                        <tr key={cov.key} style={styles.tableDataRow}>
+                          <td style={styles.tableDataCell}>{cov.label}</td>
+                          <td style={styles.tableDataCell}>{userCov.deductible ? `$${parseInt(userCov.deductible, 10).toLocaleString()}` : '—'}</td>
+                          <td style={styles.tableDataCell}>{userCov.amount ? `$${parseInt(userCov.amount, 10).toLocaleString()}` : '—'}</td>
+                          <td style={{ ...styles.tableDataCell, ...styles.tableDataCellRight }}>
+                            {premium ? formatCurrency(premium) : 'Included'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       <div style={styles.buttonContainer}>

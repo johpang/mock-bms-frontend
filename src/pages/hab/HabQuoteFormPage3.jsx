@@ -1,4 +1,5 @@
 /**
+ * **DEPRECATED** - UNUSED PAGE
  * HabQuoteFormPage3 Component
  * Third page of the habitational insurance quote form wizard
  * Collects swimming pool and liability exposure details

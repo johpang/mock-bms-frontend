@@ -85,12 +85,20 @@ function randomNumericId(length = 35) {
  * For quote requests, body.id is checked directly.
  * For bind requests, body.quoteData.id is also checked.
  *
+ * If an insurerId is provided, the template's <csio:CompanyCd> value
+ * is replaced with the correct companyCd from INSURER_CONFIG.
+ *
+ * For bind requests, if body.companysQuoteNumber is present, a
+ * <QuoteInfo><CompanysQuoteNumber> block is injected into the
+ * policy element (<PersPolicy> or <CommlPolicy>).
+ *
  * @param {Object} body - The request body
  * @param {string} type - 'quote', 'bind', 'habQuote', or 'habBind'
  * @param {string} templatesDir - Absolute path to the templates directory
+ * @param {string} [insurerId] - Optional insurer key (e.g. 'aviva') to inject correct CompanyCd
  * @returns {{ xml: string, label: string } | null}
  */
-function getHardcodedXml(body, type, templatesDir) {
+function getHardcodedXml(body, type, templatesDir, insurerId) {
   const configPath = path.join(templatesDir, 'templateConfig.json');
   if (!fs.existsSync(configPath)) return null;
 
@@ -110,7 +118,31 @@ function getHardcodedXml(body, type, templatesDir) {
     return null;
   }
 
-  const xml = fs.readFileSync(templatePath, 'utf-8');
+  let xml = fs.readFileSync(templatePath, 'utf-8');
+
+  // Swap CompanyCd to match the selected insurer
+  if (insurerId) {
+    const { INSURER_CONFIG } = require('./csioTypecodes');
+    const insurer = INSURER_CONFIG[insurerId];
+    if (insurer && insurer.companyCd) {
+      xml = xml.replace(/<csio:CompanyCd>[^<]*<\/csio:CompanyCd>/, `<csio:CompanyCd>${insurer.companyCd}</csio:CompanyCd>`);
+      console.log(`[csioHelpers] Replaced CompanyCd with ${insurer.companyCd} for ${insurerId}`);
+    }
+  }
+
+  // Inject CompanysQuoteNumber for bind requests
+  const companysQuoteNumber = body.companysQuoteNumber || '';
+  if (companysQuoteNumber && type.toLowerCase().includes('bind')) {
+    const quoteInfoBlock = `\n        <QuoteInfo>\n          <CompanysQuoteNumber>${esc(companysQuoteNumber)}</CompanysQuoteNumber>\n        </QuoteInfo>`;
+    // Insert after <PersPolicy> or <CommlPolicy> opening tag
+    if (xml.includes('<CommlPolicy>')) {
+      xml = xml.replace('<CommlPolicy>', `<CommlPolicy>${quoteInfoBlock}`);
+    } else if (xml.includes('<PersPolicy>')) {
+      xml = xml.replace('<PersPolicy>', `<PersPolicy>${quoteInfoBlock}`);
+    }
+    console.log(`[csioHelpers] Injected CompanysQuoteNumber: ${companysQuoteNumber}`);
+  }
+
   return { xml, label: id };
 }
 

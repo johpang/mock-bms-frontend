@@ -44,10 +44,11 @@ const VehicleDetailsPage = () => {
     updateQuoteData(null, { [field]: e.target.checked });
   };
 
-  const handleCurrencyInput = (field) => (e) => {
-    const raw = e.target.value.replace(/[^0-9.]/g, '');
-    updateQuoteData(null, { [field]: raw });
-  };
+  const deductibleOptions = [
+    { value: '500', label: '$500' },
+    { value: '1000', label: '$1,000' },
+    { value: '2500', label: '$2,500' },
+  ];
 
   const addVehicle = () => {
     const newVehicle = {
@@ -105,6 +106,9 @@ const VehicleDetailsPage = () => {
     }
     if (quoteData.collisionCoverage && !quoteData.collisionDeductible) {
       newErrors.push('Collision deductible is required');
+    }
+    if (!quoteData.bipdLimit) {
+      newErrors.push('Bodily Injury Property Damage limit is required');
     }
 
     setErrors(newErrors);
@@ -228,7 +232,7 @@ const VehicleDetailsPage = () => {
                     ]}
                   />
                   <SelectInput
-                    label="Anti-theft Device Installed?"
+                    label="Anti-theft Device Installed"
                     value={vehicle.antiTheft || ''}
                     onChange={handleVehicleChange(index, 'antiTheft')}
                     options={[
@@ -238,7 +242,7 @@ const VehicleDetailsPage = () => {
                     ]}
                   />
                   <SelectInput
-                    label="Primary Use?"
+                    label="Primary Use"
                     value={vehicle.primaryUse || ''}
                     onChange={handleVehicleChange(index, 'primaryUse')}
                     options={[
@@ -256,7 +260,7 @@ const VehicleDetailsPage = () => {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                   <TextInput
-                    label="In-trip (km)"
+                    label="One Way (km)"
                     type="number"
                     value={vehicle.distanceDriven?.inTrip || ''}
                     onChange={handleDistanceChange(index, 'inTrip')}
@@ -270,7 +274,7 @@ const VehicleDetailsPage = () => {
                     placeholder="0"
                   />
                   <TextInput
-                    label="Business km"
+                    label="Business (km)"
                     type="number"
                     value={vehicle.distanceDriven?.businessKm || ''}
                     onChange={handleDistanceChange(index, 'businessKm')}
@@ -332,6 +336,24 @@ const VehicleDetailsPage = () => {
       {/* Coverage Section */}
       <SectionHeader title="Coverage" />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
+        {/* Bodily Injury Property Damage */}
+        <div style={{ border: '1px solid #e0e0e0', padding: '16px', borderRadius: '4px', gridColumn: '1 / -1' }}>
+          <div style={{ marginBottom: '12px', fontWeight: 'bold', fontSize: '14px', color: '#333' }}>
+            Bodily Injury Property Damage
+          </div>
+          <SelectInput
+            label="Limit"
+            name="bipdLimit"
+            value={quoteData.bipdLimit || ''}
+            onChange={(e) => updateQuoteData(null, { bipdLimit: e.target.value })}
+            options={[
+              { value: '1000000', label: '$1,000,000' },
+              { value: '2000000', label: '$2,000,000' },
+            ]}
+            placeholder="Please Select"
+          />
+        </div>
+
         {/* Comprehensive Coverage */}
         <div style={{ border: '1px solid #e0e0e0', padding: '16px', borderRadius: '4px' }}>
           <div style={{ marginBottom: '12px' }}>
@@ -342,28 +364,14 @@ const VehicleDetailsPage = () => {
             />
           </div>
           {quoteData.comprehensiveCoverage && (
-            <div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 'bold' }}>
-                Deductible
-              </label>
-              <div style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', left: '8px', top: '8px', fontSize: '16px' }}>$</span>
-                <input
-                  type="text"
-                  value={quoteData.comprehensiveDeductible || ''}
-                  onChange={handleCurrencyInput('comprehensiveDeductible')}
-                  placeholder="1000"
-                  style={{
-                    width: '100%',
-                    padding: '8px 8px 8px 24px',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-            </div>
+            <SelectInput
+              label="Deductible"
+              name="comprehensiveDeductible"
+              value={quoteData.comprehensiveDeductible || ''}
+              onChange={(e) => updateQuoteData(null, { comprehensiveDeductible: e.target.value })}
+              options={deductibleOptions}
+              placeholder="Please Select"
+            />
           )}
         </div>
 
@@ -377,28 +385,14 @@ const VehicleDetailsPage = () => {
             />
           </div>
           {quoteData.collisionCoverage && (
-            <div>
-              <label style={{ display: 'block', marginBottom: '4px', fontSize: '14px', fontWeight: 'bold' }}>
-                Deductible
-              </label>
-              <div style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', left: '8px', top: '8px', fontSize: '16px' }}>$</span>
-                <input
-                  type="text"
-                  value={quoteData.collisionDeductible || ''}
-                  onChange={handleCurrencyInput('collisionDeductible')}
-                  placeholder="1000"
-                  style={{
-                    width: '100%',
-                    padding: '8px 8px 8px 24px',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                    fontSize: '14px',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-            </div>
+            <SelectInput
+              label="Deductible"
+              name="collisionDeductible"
+              value={quoteData.collisionDeductible || ''}
+              onChange={(e) => updateQuoteData(null, { collisionDeductible: e.target.value })}
+              options={deductibleOptions}
+              placeholder="Please Select"
+            />
           )}
         </div>
       </div>

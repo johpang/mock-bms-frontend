@@ -134,6 +134,8 @@ export const initialHabQuoteData = {
     voluntaryMedicalPayments:  { enabled: false, amount: '', deductible: '' },
     voluntaryPropertyDamage:   { enabled: false, amount: '', deductible: '' },
     sewerBackup:               { enabled: false, amount: '', deductible: '' },
+    legalServices:             { enabled: true,  amount: '25000', deductible: '' },
+    identityTheftProtection:   { enabled: true,  amount: '25000', deductible: '' },
   },
 
   // Selected insurers for quote

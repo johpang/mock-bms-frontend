@@ -72,6 +72,7 @@ const InsurerComparisonTable = ({ responses, onSelectInsurer, selectedIndex }) =
       alignItems: 'center',
       justifyContent: 'center',
       paddingLeft: '8px',
+      marginRight: '12px',
     },
     radio: {
       width: '18px',
@@ -106,44 +107,78 @@ const InsurerComparisonTable = ({ responses, onSelectInsurer, selectedIndex }) =
     );
   }
 
+  const spinnerStyle = {
+    display: 'inline-block',
+    width: '14px',
+    height: '14px',
+    border: '2px solid #e0e0e0',
+    borderTop: `2px solid ${colors.accent}`,
+    borderRadius: '50%',
+    animation: 'spin 0.6s linear infinite',
+  };
+
   return (
-    <table style={styles.container}>
-      <thead>
-        <tr style={styles.headerRow}>
-          <th style={{ ...styles.headerCell, width: '50%' }}>Select Insurers</th>
-          <th style={{ ...styles.headerCell, ...styles.headerCellRight, width: '50%' }}>
-            12 months
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {responses.map((response, index) => (
-          <tr
-            key={index}
-            style={styles.dataRow(selectedIndex === index, index % 2 === 1)}
-            onClick={() => onSelectInsurer(index)}
-          >
-            <td style={{ ...styles.dataCell, display: 'flex', alignItems: 'center' }}>
-              <span style={styles.radioContainer}>
-                <input
-                  type="radio"
-                  name="insurer-select"
-                  checked={selectedIndex === index}
-                  onChange={() => onSelectInsurer(index)}
-                  style={styles.radio}
-                />
-              </span>
-              <span style={styles.insurerName}>{response.insurerName}</span>
-            </td>
-            <td style={{ ...styles.dataCell, ...styles.dataCellRight }}>
-              <span style={styles.premium}>
-                {formatCurrency(response.premiums.annual)}
-              </span>
-            </td>
+    <>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <table style={styles.container}>
+        <thead>
+          <tr style={styles.headerRow}>
+            <th style={{ ...styles.headerCell, width: '50%' }}>Select Insurers</th>
+            <th style={{ ...styles.headerCell, ...styles.headerCellRight, width: '50%' }}>
+              Annual Premium
+            </th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {responses.map((response, index) => {
+            const isLoading = response._status === 'loading';
+            const isError = response._status === 'error';
+            const isReady = !isLoading && !isError;
+
+            return (
+              <tr
+                key={index}
+                style={{
+                  ...styles.dataRow(selectedIndex === index && isReady, index % 2 === 1),
+                  cursor: isReady ? 'pointer' : 'default',
+                  opacity: isLoading ? 0.7 : 1,
+                }}
+                onClick={() => isReady && onSelectInsurer(index)}
+              >
+                <td style={{ ...styles.dataCell, display: 'flex', alignItems: 'center' }}>
+                  <span style={styles.radioContainer}>
+                    <input
+                      type="radio"
+                      name="insurer-select"
+                      checked={selectedIndex === index}
+                      onChange={() => isReady && onSelectInsurer(index)}
+                      disabled={!isReady}
+                      style={{ ...styles.radio, cursor: isReady ? 'pointer' : 'not-allowed' }}
+                    />
+                  </span>
+                  <span style={styles.insurerName}>{response.insurerName}</span>
+                </td>
+                <td style={{ ...styles.dataCell, ...styles.dataCellRight }}>
+                  {isLoading && (
+                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', color: '#666' }}>
+                      <span style={spinnerStyle} /> Quoting...
+                    </span>
+                  )}
+                  {isError && (
+                    <span style={{ color: '#cf222e', fontWeight: 500 }}>Failed</span>
+                  )}
+                  {isReady && (
+                    <span style={styles.premium}>
+                      {formatCurrency(response.premiums?.annual)}
+                    </span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </>
   );
 };
 

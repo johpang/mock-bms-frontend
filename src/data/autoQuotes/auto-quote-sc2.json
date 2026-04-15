@@ -3,7 +3,7 @@
   "name": "Personal Lines Bind — Direct Bill (EFT)",
   "status": "Quoted",
   "createdDate": "2026-03-27",
-  "producerCode": "LAN 257",
+  "producerCode": "PC112",
   "bmsQuoteNumber": "Q-2026-0002",
   "billingMethod": "direct",
   "customer": {
@@ -17,16 +17,16 @@
     "province": "ON",
     "phone": "705-555-0123"
   },
-  "policyEffectiveDate": "2026-05-04",
-  "policyStartDate": "2026-05-04",
+  "policyEffectiveDate": "2026-07-01",
+  "policyStartDate": "2026-07-01",
   "vehicles": [
     {
       "year": "2022",
       "make": "Toyota",
       "model": "Corolla",
       "ownership": "Owned",
-      "antiTheft": false,
-      "primaryUse": "Personal",
+      "antiTheft": "no",
+      "primaryUse": "pleasure",
       "distanceDriven": {
         "inTrip": "20",
         "annually": "12000",

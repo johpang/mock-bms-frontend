@@ -6,7 +6,7 @@
 
 const mockResponses = {
   aviva: {
-    insurerName: "Aviva",
+    insurerName: "Alpha Insurance",
     insurerId: "aviva",
     referenceNumber: "804752",
     type: "New Business",
@@ -26,7 +26,6 @@ const mockResponses = {
     vehicleSummary: "2024 Honda Civic",
     coverages: [
       { name: "Bodily Injury Property Damage", coverageAmount: "1,000,000", deductible: "", premium: 576 },
-      { name: "Property Damage", coverageAmount: "1,000,000", deductible: "", premium: 0 },
       { name: "Direct Compensation", coverageAmount: "", deductible: "", premium: 231 },
       { name: "Accident Benefits", coverageAmount: "", deductible: "", premium: 435 },
       { name: "Collision", coverageAmount: "", deductible: "$1,000", premium: 356 },
@@ -36,7 +35,7 @@ const mockResponses = {
     ]
   },
   intact: {
-    insurerName: "Intact",
+    insurerName: "Indigo Ins. Co.",
     insurerId: "intact",
     referenceNumber: "915386",
     type: "New Business",
@@ -56,7 +55,6 @@ const mockResponses = {
     vehicleSummary: "2024 Honda Civic",
     coverages: [
       { name: "Bodily Injury Property Damage", coverageAmount: "1,000,000", deductible: "", premium: 598 },
-      { name: "Property Damage", coverageAmount: "1,000,000", deductible: "", premium: 0 },
       { name: "Direct Compensation", coverageAmount: "", deductible: "", premium: 245 },
       { name: "Accident Benefits", coverageAmount: "", deductible: "", premium: 451 },
       { name: "Collision", coverageAmount: "", deductible: "$1,000", premium: 372 },
@@ -66,7 +64,7 @@ const mockResponses = {
     ]
   },
   definity: {
-    insurerName: "Definity",
+    insurerName: "Delta Insurance",
     insurerId: "definity",
     referenceNumber: "726541",
     type: "New Business",
@@ -86,7 +84,6 @@ const mockResponses = {
     vehicleSummary: "2024 Honda Civic",
     coverages: [
       { name: "Bodily Injury Property Damage", coverageAmount: "1,000,000", deductible: "", premium: 612 },
-      { name: "Property Damage", coverageAmount: "1,000,000", deductible: "", premium: 0 },
       { name: "Direct Compensation", coverageAmount: "", deductible: "", premium: 252 },
       { name: "Accident Benefits", coverageAmount: "", deductible: "", premium: 467 },
       { name: "Collision", coverageAmount: "", deductible: "$1,000", premium: 385 },
@@ -96,7 +93,7 @@ const mockResponses = {
     ]
   },
   wawanesa: {
-    insurerName: "Wawanesa",
+    insurerName: "Beta Insurance Inc.",
     insurerId: "wawanesa",
     referenceNumber: "637829",
     type: "New Business",
@@ -116,7 +113,6 @@ const mockResponses = {
     vehicleSummary: "2024 Honda Civic",
     coverages: [
       { name: "Bodily Injury Property Damage", coverageAmount: "1,000,000", deductible: "", premium: 625 },
-      { name: "Property Damage", coverageAmount: "1,000,000", deductible: "", premium: 0 },
       { name: "Direct Compensation", coverageAmount: "", deductible: "", premium: 261 },
       { name: "Accident Benefits", coverageAmount: "", deductible: "", premium: 483 },
       { name: "Collision", coverageAmount: "", deductible: "$1,000", premium: 401 },
@@ -126,7 +122,7 @@ const mockResponses = {
     ]
   },
   caa: {
-    insurerName: "CAA Insurance",
+    insurerName: "Coach Insurance",
     insurerId: "caa",
     referenceNumber: "548971",
     type: "New Business",
@@ -146,7 +142,6 @@ const mockResponses = {
     vehicleSummary: "2024 Honda Civic",
     coverages: [
       { name: "Bodily Injury Property Damage", coverageAmount: "1,000,000", deductible: "", premium: 561 },
-      { name: "Property Damage", coverageAmount: "1,000,000", deductible: "", premium: 0 },
       { name: "Direct Compensation", coverageAmount: "", deductible: "", premium: 225 },
       { name: "Accident Benefits", coverageAmount: "", deductible: "", premium: 421 },
       { name: "Collision", coverageAmount: "", deductible: "$1,000", premium: 343 },
@@ -156,7 +151,7 @@ const mockResponses = {
     ]
   },
   goreMutual: {
-    insurerName: "Gore Mutual",
+    insurerName: "Gamma Insurance",
     insurerId: "goreMutual",
     referenceNumber: "659284",
     type: "New Business",
@@ -176,7 +171,6 @@ const mockResponses = {
     vehicleSummary: "2024 Honda Civic",
     coverages: [
       { name: "Bodily Injury Property Damage", coverageAmount: "1,000,000", deductible: "", premium: 638 },
-      { name: "Property Damage", coverageAmount: "1,000,000", deductible: "", premium: 0 },
       { name: "Direct Compensation", coverageAmount: "", deductible: "", premium: 271 },
       { name: "Accident Benefits", coverageAmount: "", deductible: "", premium: 500 },
       { name: "Collision", coverageAmount: "", deductible: "$1,000", premium: 416 },

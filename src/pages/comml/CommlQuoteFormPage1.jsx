@@ -163,7 +163,16 @@ const CommlQuoteFormPage1 = () => {
     if (!commlData.account?.province?.trim()) missingFields.push('Province');
 
     // Policy Information fields
-    if (!commlData.policyEffectiveDate?.trim()) missingFields.push('Policy Effective Date');
+    if (!commlData.policyEffectiveDate?.trim()) {
+      missingFields.push('Policy Effective Date');
+    } else {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const effectiveDate = new Date(commlData.policyEffectiveDate + 'T00:00:00');
+      if (effectiveDate < today) {
+        missingFields.push('Policy Effective Date cannot be backdated');
+      }
+    }
     if (!commlData.policyExpiryDate?.trim()) missingFields.push('Policy Expiry Date');
 
     return missingFields;

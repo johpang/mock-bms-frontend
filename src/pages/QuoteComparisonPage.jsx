@@ -11,7 +11,7 @@ import MockDisclaimer from '../components/MockDisclaimer';
  * @returns {React.ReactElement} The quote comparison page
  */
 const QuoteComparisonPage = () => {
-  const { quoteResponses, nextStep, prevStep, selectedInsurerIndex, setSelectedInsurerIndex } = useAutoQuote();
+  const { quoteResponses, nextStep, prevStep, selectedInsurerIndex, setSelectedInsurerIndex, isLoading } = useAutoQuote();
 
   const colors = {
     navy: '#0a1e3d',
@@ -100,7 +100,9 @@ const QuoteComparisonPage = () => {
     }
   };
 
-  const isViewDetailsDisabled = selectedInsurerIndex === null;
+  const selectedResponse = selectedInsurerIndex !== null ? quoteResponses?.[selectedInsurerIndex] : null;
+  const isSelectedReady = selectedResponse && selectedResponse._status !== 'loading' && selectedResponse._status !== 'error';
+  const isViewDetailsDisabled = !isSelectedReady;
 
   if (!quoteResponses || quoteResponses.length === 0) {
     return (
@@ -148,9 +150,14 @@ const QuoteComparisonPage = () => {
           onSelectInsurer={setSelectedInsurerIndex}
           selectedIndex={selectedInsurerIndex}
         />
-        {selectedInsurerIndex !== null && (
+        {isSelectedReady && (
           <div style={styles.selectionHint}>
             Selected: {quoteResponses[selectedInsurerIndex]?.insurerName}
+          </div>
+        )}
+        {isLoading && (
+          <div style={{ padding: '8px 16px', fontSize: '13px', color: '#666', marginTop: '8px' }}>
+            Fetching quotes... {quoteResponses.filter(r => r._status === 'done').length} of {quoteResponses.length} received
           </div>
         )}
       </div>

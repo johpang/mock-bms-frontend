@@ -95,7 +95,6 @@ const DateInput = ({
       {label && (
         <label htmlFor={name} style={styles.label}>
           {label}
-          {required && <span style={styles.required}>*</span>}
         </label>
       )}
       <input

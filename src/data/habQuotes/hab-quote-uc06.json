@@ -15,17 +15,15 @@
     "province": "ON",
     "phone": "555-555-5555"
   },
-  "policyEffectiveDate": "2026-04-01",
-  "policyEffectiveTime": "12:01",
-  "policyEffectiveAmPm": "AM",
-  "policyExpiryDate": "2027-04-01",
+  "effectiveDate": "2026-07-01",
+  "expiryDate": "2027-07-01",
   "applicant": {
     "name": "John Smith",
     "dateOfBirth": "1983-08-02"
   },
   "lossHistory": {
     "hasLossesOrClaims": "No",
-    "hasBeenDeclined": "No"
+    "insuranceCancellationHistory": "No"
   },
   "riskType": "Homeowners",
   "riskAddress": {
@@ -48,9 +46,10 @@
     "occupancyType": "Owner Occupied",
     "structureType": "Detached",
     "foundationType": "Full Basement",
-    "finishedBasement": "50",
+    "finishedBasement": "0",
     "exteriorWallFinish": "Brick Veneer",
-    "garageType": "None"
+    "garageType": "None",
+    "estimatedReplacementCost": "500000"
   },
   "upgrades": {
     "roofYear": "2018",
@@ -74,7 +73,7 @@
   },
   "numBathrooms": "2",
   "numKitchens": "1",
-  "detachedOutbuildings": "",
+  "detachedOutbuildings": "none",
   "swimmingPool": {
     "year": "",
     "poolType": "",
@@ -94,14 +93,16 @@
     "ownWatercraft": "No"
   },
   "coverages": {
-    "dwellingBuilding":          { "enabled": true,  "amount": "695876",  "deductible": "1000" },
+    "dwellingBuilding":          { "enabled": true,  "amount": "500000",  "deductible": "1000" },
     "detachedPrivateStructures": { "enabled": true,  "amount": "22500",   "deductible": "1000" },
     "personalProperty":          { "enabled": true,  "amount": "120000",  "deductible": "1000" },
     "additionalLivingExpenses":  { "enabled": true,  "amount": "30000",   "deductible": "1000" },
     "legalLiability":            { "enabled": true,  "amount": "1000000", "deductible": "" },
     "voluntaryMedicalPayments":  { "enabled": true,  "amount": "5000",    "deductible": "" },
     "voluntaryPropertyDamage":   { "enabled": true,  "amount": "5000",    "deductible": "" },
-    "sewerBackup":               { "enabled": false, "amount": "",        "deductible": "" }
+    "sewerBackup":               { "enabled": false, "amount": "",        "deductible": "" },
+    "legalServices":             { "enabled": true,  "amount": "25000",   "deductible": "" },
+    "identityTheftProtection":   { "enabled": true,  "amount": "25000",   "deductible": "" }
   },
   "selectedInsurers": []
 }

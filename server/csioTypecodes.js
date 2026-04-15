@@ -7,12 +7,12 @@
 
 // Insurer CompanyCd lookup (verified from XSD)
 const INSURER_CONFIG = {
-  aviva:      { companyCd: 'CGUI', insurerId: 'CGUI00001', csioNetId: 'csioxml-aviva@broker.edi.csio.com',      name: 'Aviva' },
-  intact:     { companyCd: 'HAL',  insurerId: 'HAL00001',  csioNetId: 'csioxml-intact@broker.edi.csio.com',     name: 'Intact' },
-  definity:   { companyCd: 'ECON', insurerId: 'ECON00001', csioNetId: 'csioxml-definity@broker.edi.csio.com',   name: 'Definity' },
-  wawanesa:   { companyCd: 'WAWA', insurerId: 'WAWA00001', csioNetId: 'csioxml-wawanesa@broker.edi.csio.com',   name: 'Wawanesa' },
-  caa:        { companyCd: 'CAA',  insurerId: 'CAA00001',  csioNetId: 'csioxml-caa@broker.edi.csio.com',        name: 'CAA' },
-  goreMutual: { companyCd: 'GORE', insurerId: 'GORE00001', csioNetId: 'csioxml-goremutual@broker.edi.csio.com', name: 'Gore Mutual' },
+  aviva:      { companyCd: 'DEMO1', insurerId: 'CGUI00001', csioNetId: 'csioxml-aviva@broker.edi.csio.com',      name: 'Alpha Insurance' },
+  intact:     { companyCd: 'DEMO1',  insurerId: 'HAL00001',  csioNetId: 'csioxml-intact@broker.edi.csio.com',     name: 'Indigo Ins. Co.' },
+  definity:   { companyCd: 'DEMO2', insurerId: 'ECON00001', csioNetId: 'csioxml-definity@broker.edi.csio.com',   name: 'Delta Insurance' },
+  wawanesa:   { companyCd: 'DEMO2', insurerId: 'WAWA00001', csioNetId: 'csioxml-wawanesa@broker.edi.csio.com',   name: 'Beta Insurance Inc.' },
+  caa:        { companyCd: 'DEMO3',  insurerId: 'CAA00001',  csioNetId: 'csioxml-caa@broker.edi.csio.com',        name: 'Coach Insurance' },
+  goreMutual: { companyCd: 'DEMO3', insurerId: 'GORE00001', csioNetId: 'csioxml-goremutual@broker.edi.csio.com', name: 'Gamma Insurance' },
 };
 
 // BillingMethodCd: app value -> CSIO code

@@ -84,7 +84,6 @@ const RadioGroup = ({
       {label && (
         <label style={styles.label}>
           {label}
-          {required && <span style={styles.required}>*</span>}
         </label>
       )}
       <div style={styles.radioGroup}>

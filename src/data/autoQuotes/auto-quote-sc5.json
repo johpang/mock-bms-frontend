@@ -17,16 +17,16 @@
     "province": "ON",
     "phone": ""
   },
-  "policyEffectiveDate": "2026-04-05",
-  "policyStartDate": "2026-04-05",
+  "policyEffectiveDate": "2026-07-01",
+  "policyStartDate": "2026-07-01",
   "vehicles": [
     {
       "year": "2025",
       "make": "Ford",
       "model": "Escape",
       "ownership": "Owned",
-      "antiTheft": false,
-      "primaryUse": "Personal",
+      "antiTheft": "no",
+      "primaryUse": "pleasure",
       "distanceDriven": {
         "inTrip": "80",
         "annually": "25000",

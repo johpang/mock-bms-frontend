@@ -19,9 +19,10 @@ const HabCoveragePage = () => {
 
   // Initialize coverages if empty
   useEffect(() => {
+    const estCost = habData.replacementCost?.estimatedReplacementCost || '';
     if (!habData.coverages || Object.keys(habData.coverages).length === 0) {
       const initialCoverages = {
-        dwellingBuilding: { enabled: false, amount: '', deductible: '' },
+        dwellingBuilding: { enabled: false, amount: estCost, deductible: '' },
         detachedPrivateStructures: { enabled: false, amount: '', deductible: '' },
         personalProperty: { enabled: false, amount: '', deductible: '' },
         additionalLivingExpenses: { enabled: false, amount: '', deductible: '' },
@@ -29,13 +30,26 @@ const HabCoveragePage = () => {
         voluntaryMedicalPayments: { enabled: false, amount: '', deductible: '' },
         voluntaryPropertyDamage: { enabled: false, amount: '', deductible: '' },
         sewerBackup: { enabled: false, amount: '', deductible: '' },
+        legalServices: { enabled: true, amount: '25000', deductible: '' },
+        identityTheftProtection: { enabled: true, amount: '25000', deductible: '' },
       };
       setCoverages(initialCoverages);
       updateHabData('coverages', initialCoverages);
     } else {
-      setCoverages(habData.coverages);
+      // Sync dwelling building amount with estimated replacement cost if it changed
+      const currentDwelling = habData.coverages.dwellingBuilding;
+      if (estCost && currentDwelling && currentDwelling.amount !== estCost) {
+        const updatedCoverages = {
+          ...habData.coverages,
+          dwellingBuilding: { ...currentDwelling, amount: estCost },
+        };
+        setCoverages(updatedCoverages);
+        updateHabData('coverages', updatedCoverages);
+      } else {
+        setCoverages(habData.coverages);
+      }
     }
-  }, [habData.coverages, updateHabData]);
+  }, [habData.coverages, habData.replacementCost?.estimatedReplacementCost, updateHabData]);
 
   const colors = {
     navy: '#0a1e3d',
@@ -159,6 +173,8 @@ const HabCoveragePage = () => {
     { key: 'voluntaryMedicalPayments', label: 'Voluntary Medical Payments' },
     { key: 'voluntaryPropertyDamage', label: 'Voluntary Property Damage' },
     { key: 'sewerBackup', label: 'Sewer Backup' },
+    { key: 'legalServices', label: 'Legal Services', locked: true },
+    { key: 'identityTheftProtection', label: 'Identity Theft Protection', locked: true },
   ];
 
   const handleToggleCoverage = (coverageKey) => {
@@ -239,6 +255,7 @@ const HabCoveragePage = () => {
                 amount: '',
                 deductible: '',
               };
+              const isLocked = coverage.locked;
 
               return (
                 <tr key={coverage.key} style={styles.dataRow}>
@@ -246,20 +263,24 @@ const HabCoveragePage = () => {
                     {coverage.label}
                   </td>
                   <td style={{ ...styles.dataCell, textAlign: 'center' }}>
-                    <RadioGroup
-                      label=""
-                      name={`coverage-${coverage.key}`}
-                      value={coverageData.enabled ? 'Yes' : 'No'}
-                      onChange={(e) => {
-                        const isEnabled = e.target.value === 'Yes';
-                        const updatedCoverage = { ...coverages[coverage.key], enabled: isEnabled };
-                        const updatedCoverages = { ...coverages, [coverage.key]: updatedCoverage };
-                        setCoverages(updatedCoverages);
-                        updateHabData('coverages', updatedCoverages);
-                      }}
-                      options={[{ value: 'Yes', label: 'Yes' }, { value: 'No', label: 'No' }]}
-                      inline={true}
-                    />
+                    {isLocked ? (
+                      <span style={{ fontSize: '14px', fontWeight: 500, color: colors.text }}>Yes</span>
+                    ) : (
+                      <RadioGroup
+                        label=""
+                        name={`coverage-${coverage.key}`}
+                        value={coverageData.enabled ? 'Yes' : 'No'}
+                        onChange={(e) => {
+                          const isEnabled = e.target.value === 'Yes';
+                          const updatedCoverage = { ...coverages[coverage.key], enabled: isEnabled };
+                          const updatedCoverages = { ...coverages, [coverage.key]: updatedCoverage };
+                          setCoverages(updatedCoverages);
+                          updateHabData('coverages', updatedCoverages);
+                        }}
+                        options={[{ value: 'Yes', label: 'Yes' }, { value: 'No', label: 'No' }]}
+                        inline={true}
+                      />
+                    )}
                   </td>
                   <td style={styles.dataCell}>
                     <input
@@ -267,10 +288,10 @@ const HabCoveragePage = () => {
                       placeholder="$0"
                       value={coverageData.amount}
                       onChange={(e) => handleAmountChange(coverage.key, e.target.value)}
-                      disabled={!coverageData.enabled}
+                      disabled={!coverageData.enabled || isLocked}
                       style={{
                         ...styles.textInput,
-                        ...((!coverageData.enabled) ? styles.textInputDisabled : {}),
+                        ...((!coverageData.enabled || isLocked) ? styles.textInputDisabled : {}),
                       }}
                     />
                   </td>
@@ -280,10 +301,10 @@ const HabCoveragePage = () => {
                       placeholder="$0"
                       value={coverageData.deductible}
                       onChange={(e) => handleDeductibleChange(coverage.key, e.target.value)}
-                      disabled={!coverageData.enabled}
+                      disabled={!coverageData.enabled || isLocked}
                       style={{
                         ...styles.textInput,
-                        ...((!coverageData.enabled) ? styles.textInputDisabled : {}),
+                        ...((!coverageData.enabled || isLocked) ? styles.textInputDisabled : {}),
                       }}
                     />
                   </td>

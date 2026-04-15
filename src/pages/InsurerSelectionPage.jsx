@@ -16,12 +16,12 @@ const InsurerSelectionPage = () => {
 
   /** Insurer list — id must match the keys in server/mockData.js */
   const AVAILABLE_INSURERS = [
-    { id: 'aviva', name: 'Aviva' },
-    { id: 'intact', name: 'Intact' },
-    { id: 'definity', name: 'Definity' },
-    { id: 'wawanesa', name: 'Wawanesa' },
-    { id: 'caa', name: 'CAA' },
-    { id: 'goreMutual', name: 'Gore Mutual' },
+    { id: 'aviva', name: 'Alpha Insurance' },
+    { id: 'intact', name: 'Indigo Ins. Co.' },
+    { id: 'definity', name: 'Delta Insurance' },
+    { id: 'wawanesa', name: 'Beta Insurance Inc.' },
+    { id: 'caa', name: 'Coach Insurance' },
+    { id: 'goreMutual', name: 'Gamma Insurance' },
   ];
 
   const [localSelectedInsurers, setLocalSelectedInsurers] = useState(
@@ -142,14 +142,23 @@ const InsurerSelectionPage = () => {
     });
   };
 
-  const handleSubmitQuotes = async () => {
+  const handleSubmitQuotes = () => {
     setSelectedInsurers(localSelectedInsurers);
-    // Pass insurers directly to avoid React setState race condition
-    await submitQuote({ selectedInsurers: localSelectedInsurers });
+
+    // Build insurer metadata for display names in placeholders
+    const insurerMeta = AVAILABLE_INSURERS
+      .filter((ins) => localSelectedInsurers.includes(ins.id));
+
+    // Fire-and-forget: quotes will stream in on the next page
+    submitQuote({
+      selectedInsurers: localSelectedInsurers,
+      _insurerMeta: insurerMeta,
+    });
+
     nextStep();
   };
 
-  const isSubmitDisabled = localSelectedInsurers.length === 0 || isLoading;
+  const isSubmitDisabled = localSelectedInsurers.length === 0;
 
   return (
     <div style={styles.pageContainer}>

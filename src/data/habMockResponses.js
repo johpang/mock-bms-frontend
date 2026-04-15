@@ -5,7 +5,7 @@
 
 const habMockResponses = {
   aviva: {
-    insurerName: "Aviva",
+    insurerName: "Alpha Insurance",
     insurerId: "aviva",
     referenceNumber: "H-804752",
     type: "New Business",
@@ -29,7 +29,7 @@ const habMockResponses = {
     ],
   },
   intact: {
-    insurerName: "Intact",
+    insurerName: "Indigo Ins. Co.",
     insurerId: "intact",
     referenceNumber: "H-915386",
     type: "New Business",
@@ -53,7 +53,7 @@ const habMockResponses = {
     ],
   },
   definity: {
-    insurerName: "Definity",
+    insurerName: "Delta Insurance",
     insurerId: "definity",
     referenceNumber: "H-726541",
     type: "New Business",
@@ -77,7 +77,7 @@ const habMockResponses = {
     ],
   },
   wawanesa: {
-    insurerName: "Wawanesa",
+    insurerName: "Beta Insurance Inc.",
     insurerId: "wawanesa",
     referenceNumber: "H-637829",
     type: "New Business",
@@ -101,7 +101,7 @@ const habMockResponses = {
     ],
   },
   caa: {
-    insurerName: "CAA Insurance",
+    insurerName: "Coach Insurance",
     insurerId: "caa",
     referenceNumber: "H-548971",
     type: "New Business",
@@ -125,7 +125,7 @@ const habMockResponses = {
     ],
   },
   goreMutual: {
-    insurerName: "Gore Mutual",
+    insurerName: "Gamma Insurance",
     insurerId: "goreMutual",
     referenceNumber: "H-659284",
     type: "New Business",

@@ -50,9 +50,17 @@ function parseCsioXml(xmlString) {
   }
 
   const parser = new XMLParser(parserOptions);
-  const parsed = parser.parse(xmlString);
+  let parsed = parser.parse(xmlString);
 
   console.log('[ResponseParser] Parsed XML root keys:', Object.keys(parsed));
+
+  // Handle double-wrapped ACORD responses (outer transport envelope)
+  // Some upstream APIs return: <ACORD><InsuranceSvcRs><ACORD>...actual content...</ACORD></InsuranceSvcRs></ACORD>
+  const innerAcord = parsed?.ACORD?.InsuranceSvcRs?.ACORD;
+  if (innerAcord) {
+    console.log('[ResponseParser] Detected double-wrapped ACORD envelope — unwrapping');
+    parsed = { ACORD: innerAcord };
+  }
 
   return { parsed, raw: xmlString };
 }
@@ -162,10 +170,16 @@ function parseAutoQuoteResponse(xmlString, ctx = {}) {
   const effectiveDt = get(contractTerm, 'EffectiveDt') || '';
 
   // CompanysQuoteNumber — saved from quote response to forward into bind request
-  const companysQuoteNumber = get(persPolicy, 'QuoteInfo.CompanysQuoteNumber') || '';
+  // Try multiple paths as XML structure varies between insurers
+  const companysQuoteNumber = get(persPolicy, 'QuoteInfo.CompanysQuoteNumber')
+    || get(persPolicy, 'CompanysQuoteNumber')
+    || get(rs, 'QuoteInfo.CompanysQuoteNumber')
+    || get(rs, 'CompanysQuoteNumber')
+    || '';
 
-  // Reference number: try PolicyNumber, then RqUID, then generate
-  const referenceNumber = policyNumber
+  // Reference number: prefer CompanysQuoteNumber, then PolicyNumber, RqUID, fallback
+  const referenceNumber = companysQuoteNumber
+    || policyNumber
     || get(rs, 'RqUID')
     || String(Math.floor(Math.random() * 900000 + 100000));
 
@@ -241,9 +255,11 @@ function parseAutoQuoteResponse(xmlString, ctx = {}) {
     'Endorsement #26 not supported',
   ];
 
+  const bipdLimit = ctx.requestData?.bipdLimit || '';
+  const bipdDisplay = bipdLimit ? Number(bipdLimit).toLocaleString() : '1,000,000';
+
   const hardcodedCoverages = [
-    { name: 'Bodily Injury Property Damage', coverageAmount: '1,000,000', deductible: '', premium: 576 },
-    { name: 'Property Damage', coverageAmount: '1,000,000', deductible: '', premium: 0 },
+    { name: 'Bodily Injury Property Damage', coverageAmount: bipdDisplay, deductible: '', premium: 576 },
     { name: 'Direct Compensation', coverageAmount: '', deductible: '', premium: 231 },
     { name: 'Accident Benefits', coverageAmount: '', deductible: '', premium: 435 },
     { name: 'Collision', coverageAmount: '', deductible: '$1,000', premium: 356 },
@@ -323,9 +339,115 @@ function parseAutoBindResponse(xmlString, ctx = {}) {
 // ── Hab / Commercial stubs (future) ────────────────────────────
 
 function parseHabQuoteResponse(xmlString, ctx = {}) {
-  // Reuse the same auto parser structure for now
-  // Hab response element: HomeOwnerPolicyQuoteInqRs
-  return parseAutoQuoteResponse(xmlString, ctx);
+  const { parsed } = parseCsioXml(xmlString);
+
+  const acord = parsed?.ACORD || parsed;
+  const svcRs = acord?.InsuranceSvcRs || acord;
+  const rs = svcRs?.HomeOwnerPolicyQuoteInqRs
+    || svcRs?.HomePolicyQuoteInqRs
+    || svcRs?.HomeOwnerPolicyAddRs
+    || svcRs?.HomePolicyAddRs
+    || svcRs;
+
+  // ── Status / messages ──
+  const msgStatus = get(rs, 'MsgStatus') || {};
+  const msgStatusCd = get(msgStatus, 'MsgStatusCd') || '';
+  const extendedStatuses = toArray(get(msgStatus, 'ExtendedStatus'));
+  const messages = extendedStatuses
+    .map((es) => get(es, 'ExtendedStatusDesc') || get(es, 'ExtendedStatusCd') || '')
+    .filter(Boolean);
+  const messageNodes = toArray(get(rs, 'Message'));
+  messageNodes.forEach((m) => {
+    const desc = get(m, 'MessageText') || get(m, 'Description') || '';
+    if (desc) messages.push(desc);
+  });
+
+  // ── Policy-level data ──
+  const persPolicy = get(rs, 'PersPolicy') || {};
+  const policyNumber = get(persPolicy, 'PolicyNumber') || '';
+  const contractTerm = get(persPolicy, 'ContractTerm') || {};
+  const effectiveDt = get(contractTerm, 'EffectiveDt') || '';
+  // Try multiple paths — hab responses may nest under HomeLineBusiness or PersPolicy
+  const companysQuoteNumber = get(persPolicy, 'QuoteInfo.CompanysQuoteNumber')
+    || get(persPolicy, 'CompanysQuoteNumber')
+    || get(rs, 'QuoteInfo.CompanysQuoteNumber')
+    || get(rs, 'CompanysQuoteNumber')
+    || '';
+  console.log('[ResponseParser/Hab] CompanysQuoteNumber extracted:', companysQuoteNumber || '(none)');
+
+  const referenceNumber = companysQuoteNumber
+    || policyNumber
+    || get(rs, 'RqUID')
+    || String(Math.floor(Math.random() * 900000 + 100000));
+
+  // ── Premium ──
+  const allCoverages = collectAllCoverages(rs);
+  let annualPremium = Math.round(
+    allCoverages.reduce((sum, cov) => sum + currencyAmt(get(cov, 'CurrentTermAmt')), 0) * 100
+  ) / 100;
+
+  if (!annualPremium) {
+    annualPremium = 1800 + Math.round(Math.random() * 400);
+    console.log(`[ResponseParser/Hab] No premium found in XML — using generated demo value: $${annualPremium}`);
+  }
+  const monthlyPremium = Math.round((annualPremium / 12) * 100) / 100;
+
+  // ── Format effective date ──
+  let formattedDate = '';
+  if (effectiveDt) {
+    try {
+      const d = new Date(effectiveDt);
+      formattedDate = `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
+    } catch {
+      formattedDate = effectiveDt;
+    }
+  }
+
+  // ── Hab-specific hardcoded coverages ──
+  const hardcodedCoverages = [
+    { name: 'Residence', deductible: '', amount: '', premium: annualPremium },
+    { name: 'Guaranteed Replacement Cost', deductible: '', amount: 'Included', premium: 0 },
+    { name: 'Outbuildings', deductible: '', amount: 'Included', premium: 0 },
+    { name: 'Personal Property', deductible: '$1,000', amount: '$75,000', premium: 0 },
+    { name: 'Legal Liability', deductible: '', amount: 'Included', premium: 0 },
+    { name: 'Voluntary Medical Payments', deductible: '', amount: 'Included', premium: 0 },
+    { name: 'Voluntary Property Damage', deductible: '', amount: 'Included', premium: 0 },
+    { name: 'Sewer Back-Up & Overland Water', deductible: '$1,000', amount: '$25,000', premium: 320 },
+  ];
+
+  const hardcodedUnderwritingMessages = [
+    'Ground Water -- Rates not available',
+    'Loyalty Discount -- Rates not available',
+  ];
+
+  const result = {
+    insurerName: ctx.insurerName || ctx.insurerId || 'Insurer',
+    insurerId: ctx.insurerId || '',
+    referenceNumber,
+    companysQuoteNumber,
+    type: 'New Business',
+    premiums: {
+      annual: Math.round(annualPremium * 100) / 100,
+      monthly: monthlyPremium,
+    },
+    effectiveDate: formattedDate || get(ctx, 'requestData.policyEffectiveDate') || '',
+    propertyAddress: get(ctx, 'requestData.property.address') || '',
+    riskType: 'Primary -- Homeowners',
+    underwritingMessages: messages.length > 0 ? messages : hardcodedUnderwritingMessages,
+    coverages: hardcodedCoverages,
+    _xmlStatus: msgStatusCd,
+    _xmlRaw: xmlString,
+  };
+
+  console.log('[ResponseParser/Hab] Parsed hab quote result:', {
+    insurer: result.insurerName,
+    refNo: result.referenceNumber,
+    companysQuoteNumber: result.companysQuoteNumber || '(none)',
+    annual: result.premiums.annual,
+    xmlStatus: msgStatusCd,
+  });
+
+  return result;
 }
 
 function parseHabBindResponse(xmlString, ctx = {}) {
@@ -343,11 +465,24 @@ function parseCommlQuoteResponse(xmlString, ctx = {}) {
     const svcRs = acord?.InsuranceSvcRs || acord;
     const rs = svcRs?.CommlPkgPolicyQuoteInqRs || svcRs?.CommlPkgPolicyAddRs || svcRs;
     const commlPolicy = get(rs, 'CommlPolicy') || {};
-    const commlQuoteNum = get(commlPolicy, 'QuoteInfo.CompanysQuoteNumber') || '';
+    const commlQuoteNum = get(commlPolicy, 'QuoteInfo.CompanysQuoteNumber')
+      || get(commlPolicy, 'CompanysQuoteNumber')
+      || get(rs, 'QuoteInfo.CompanysQuoteNumber')
+      || get(rs, 'CompanysQuoteNumber')
+      || '';
+    console.log('[ResponseParser/Comml] CompanysQuoteNumber extracted:', commlQuoteNum || '(none)');
     if (commlQuoteNum) {
       result.companysQuoteNumber = commlQuoteNum;
+      result.referenceNumber = commlQuoteNum;
     }
   }
+
+  console.log('[ResponseParser/Comml] Final comml quote result:', {
+    insurer: result.insurerName,
+    refNo: result.referenceNumber,
+    companysQuoteNumber: result.companysQuoteNumber || '(none)',
+    annual: result.premiums.annual,
+  });
 
   return result;
 }
