@@ -237,7 +237,7 @@ const CommlQuoteFormPage1 = () => {
             name="producerCode"
             value={commlData.producerCode || ''}
             onChange={(e) => updateCommlData(null, { producerCode: e.target.value })}
-            placeholder="e.g. CM04"
+            placeholder=""
             required
           />
           <TextInput
@@ -380,7 +380,7 @@ const CommlQuoteFormPage1 = () => {
         <SectionHeader title="Business Information" />
         <div style={{ ...styles.rowContainer, ...styles.twoColumnRow }}>
           <DateInput
-            label="Business Start Date"
+            label="Business Inception Date"
             name="startDate"
             value={commlData.business?.startDate || ''}
             onChange={(e) => updateCommlData('business', { startDate: e.target.value })}
@@ -413,7 +413,7 @@ const CommlQuoteFormPage1 = () => {
 
       {/* Business Operations Section */}
       <div style={styles.sectionContainer}>
-        <SectionHeader title="Business Operations" />
+        <SectionHeader title={`Business Location 1: ${[commlData.account?.address, commlData.account?.city, commlData.account?.province, commlData.account?.postalCode].filter(Boolean).join(', ') || 'Address'}`} />
         <div style={{ ...styles.rowContainer, ...styles.twoColumnRow }}>
           <SelectInput
             label="Business Type (IBC Industry Code)"
@@ -429,6 +429,24 @@ const CommlQuoteFormPage1 = () => {
             value={commlData.business?.operations?.[0]?.revenuePct || '100'}
             onChange={handleRevenuePctChange}
             placeholder="e.g. 100"
+          />
+        </div>
+      </div>
+
+      {/* Building Details Section */}
+      <div style={styles.sectionContainer}>
+        <SectionHeader title="Building Details" />
+        <div style={{ ...styles.rowContainer, ...styles.fullWidthRow }}>
+          <RadioGroup
+            label="Occupancy"
+            name="occupancy"
+            value={commlData.building?.occupancy || ''}
+            onChange={(e) => updateCommlData('building', { ...commlData.building, occupancy: e.target.value })}
+            options={[
+              { value: 'Tenant', label: 'Tenant' },
+              { value: 'Owner', label: 'Owner' },
+            ]}
+            inline={true}
           />
         </div>
       </div>

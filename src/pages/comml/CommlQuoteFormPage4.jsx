@@ -196,6 +196,10 @@ const CommlQuoteFormPage4 = () => {
 
   // Location coverage rows configuration
   const locationCoverageRows = [
+    { key: 'cgl', label: 'Commercial General Liability', hasLimit: true, limitKey: 'cglLimit', limitOptions: [
+      { value: '1000000', label: '$1,000,000' },
+      { value: '2000000', label: '$2,000,000' },
+    ]},
     { key: 'buildingCov', label: 'Building', hasLimit: true, limitKey: 'buildingLimit' },
     { key: 'equipmentCov', label: 'Equipment', hasLimit: true, limitKey: 'equipmentLimit' },
     { key: 'stockCov', label: 'Stock', hasLimit: false },
@@ -224,56 +228,9 @@ const CommlQuoteFormPage4 = () => {
         Commercial Lines — Coverages Requested
       </h1>
 
-      {/* Policy Level Coverages Section */}
-      <div style={styles.sectionContainer}>
-        <SectionHeader title="Policy Level Coverages" />
-        <div style={{ ...styles.rowContainer, ...styles.twoColumnRow }}>
-          <RadioGroup
-            label="Commercial General Liability"
-            name="cgl"
-            value={getCoverageRadioValue('cgl')}
-            onChange={(e) => handleCoverageRadioChange('cgl', e)}
-            options={yesNoOptions}
-            inline={true}
-          />
-          {isCoverageSelected('cgl') && (
-            <TextInput
-              label="CGL Limit"
-              name="cglLimit"
-              value={commlData.building?.coverages?.cglLimit || ''}
-              onChange={(e) => updateCoverages('cglLimit', e.target.value)}
-              placeholder="e.g. $1,000,000"
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Additional Coverages Section */}
-      <div style={styles.sectionContainer}>
-        <SectionHeader title="Additional Coverages" />
-        <div style={{ ...styles.rowContainer, ...styles.twoColumnRow }}>
-          <RadioGroup
-            label="Contractor Equipment"
-            name="contractorEquipment"
-            value={getCoverageRadioValue('contractorEquipment')}
-            onChange={(e) => handleCoverageRadioChange('contractorEquipment', e)}
-            options={yesNoOptions}
-            inline={true}
-          />
-          <RadioGroup
-            label="Tool Floater"
-            name="toolFloater"
-            value={getCoverageRadioValue('toolFloater')}
-            onChange={(e) => handleCoverageRadioChange('toolFloater', e)}
-            options={yesNoOptions}
-            inline={true}
-          />
-        </div>
-      </div>
-
       {/* Location Coverages Section */}
       <div style={styles.sectionContainer}>
-        <SectionHeader title="Location 1 Coverages" />
+        <SectionHeader title="Location 1 Coverage Selection" />
 
         <div style={styles.coverageRowContainer}>
           {/* Header Row */}
@@ -285,12 +242,11 @@ const CommlQuoteFormPage4 = () => {
               fontWeight: '600',
               fontSize: '0.85rem',
               color: '#666',
-              textTransform: 'uppercase',
               letterSpacing: '0.5px',
             }}
           >
             <div>Coverage</div>
-            <div style={{ textAlign: 'center' }}>Include?</div>
+            <div style={{ textAlign: 'center' }}>Included</div>
             <div>Limit</div>
           </div>
 
@@ -321,13 +277,26 @@ const CommlQuoteFormPage4 = () => {
               {/* Limit Input (Right, only if applicable and selected) */}
               <div style={styles.limitCell}>
                 {coverage.hasLimit && isCoverageSelected(coverage.key) && (
-                  <input
-                    type="text"
-                    placeholder="Limit"
-                    value={commlData.building?.coverages?.[coverage.limitKey] || ''}
-                    onChange={(e) => updateCoverages(coverage.limitKey, e.target.value)}
-                    style={styles.limitInput}
-                  />
+                  coverage.limitOptions ? (
+                    <select
+                      value={commlData.building?.coverages?.[coverage.limitKey] || ''}
+                      onChange={(e) => updateCoverages(coverage.limitKey, e.target.value)}
+                      style={{ ...styles.limitInput, cursor: 'pointer' }}
+                    >
+                      <option value="" disabled>Please Select</option>
+                      {coverage.limitOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="Limit"
+                      value={commlData.building?.coverages?.[coverage.limitKey] || ''}
+                      onChange={(e) => updateCoverages(coverage.limitKey, e.target.value)}
+                      style={styles.limitInput}
+                    />
+                  )
                 )}
               </div>
             </div>

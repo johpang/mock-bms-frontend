@@ -200,7 +200,7 @@ const QuoteFormPage1 = () => {
             name="producerCode"
             value={quoteData.producerCode || ''}
             onChange={(e) => updateQuoteData(null, { producerCode: e.target.value })}
-            placeholder="e.g. CM04"
+            placeholder=""
             required
           />
           <TextInput

@@ -12,7 +12,7 @@ import MockDisclaimer from '../../components/MockDisclaimer';
  * @returns {React.ReactElement} The premium breakdown page
  */
 const CommlPremiumBreakdownPage = () => {
-  const { commlResponses, prevStep, nextStep, selectedInsurerIndex } = useComml();
+  const { commlResponses, prevStep, nextStep, selectedInsurerIndex, commlData } = useComml();
 
   const colors = {
     navy: '#0a1e3d',
@@ -154,8 +154,8 @@ const CommlPremiumBreakdownPage = () => {
       gap: '32px',
     },
     underwritingContainer: {
-      backgroundColor: colors.lightAccent,
-      border: `1px solid ${colors.accent}30`,
+      backgroundColor: '#ffebee',
+      border: `1px solid #d32f2f`,
       borderRadius: '4px',
       padding: '20px',
       marginTop: '16px',
@@ -170,7 +170,7 @@ const CommlPremiumBreakdownPage = () => {
       display: 'inline-block',
       width: '6px',
       height: '6px',
-      backgroundColor: colors.accent,
+      backgroundColor: '#d32f2f',
       borderRadius: '50%',
       marginRight: '12px',
       marginBottom: '2px',
@@ -351,12 +351,16 @@ const CommlPremiumBreakdownPage = () => {
       </div>
 
       <div style={styles.sectionsContainer}>
-        {selectedResponse.underwritingMessages &&
-          selectedResponse.underwritingMessages.length > 0 && (
+        {(() => {
+          const messages = [...(selectedResponse.underwritingMessages || [])];
+          if (commlData.building?.occupancy === 'Tenant') {
+            messages.push('Lease information is missing');
+          }
+          return messages.length > 0 ? (
             <div>
               <h2 style={styles.sectionTitle}>Underwriting Messages</h2>
               <div style={styles.underwritingContainer}>
-                {selectedResponse.underwritingMessages.map((message, index) => (
+                {messages.map((message, index) => (
                   <div key={index} style={styles.underwritingMessageItem}>
                     <span style={styles.underwritingMessageBullet} />
                     {message}
@@ -364,41 +368,66 @@ const CommlPremiumBreakdownPage = () => {
                 ))}
               </div>
             </div>
-          )}
+          ) : null;
+        })()}
 
-        {selectedResponse.coverages && selectedResponse.coverages.length > 0 && (
-          <div>
-            <h2 style={styles.sectionTitle}>Coverage Breakdown</h2>
-            <div style={styles.tableContainer}>
-              <table style={styles.table}>
-                <thead>
-                  <tr style={styles.tableHeaderRow}>
-                    <th style={styles.tableHeaderCell}>Coverage</th>
-                    <th style={styles.tableHeaderCell}>Deductible</th>
-                    <th style={styles.tableHeaderCell}>Amount</th>
-                    <th style={{ ...styles.tableHeaderCell, textAlign: 'right' }}>Premium</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedResponse.coverages.map((coverage, index) => (
-                    <tr key={index} style={styles.tableDataRow}>
-                      <td style={styles.tableDataCell}>{coverage.name}</td>
-                      <td style={styles.tableDataCell}>
-                        {coverage.deductible ? formatCurrency(coverage.deductible) : '—'}
-                      </td>
-                      <td style={styles.tableDataCell}>
-                        {coverage.amount ? formatCurrency(coverage.amount) : '—'}
-                      </td>
-                      <td style={{ ...styles.tableDataCell, ...styles.tableDataCellRight }}>
-                        {coverage.premium ? formatCurrency(coverage.premium) : '—'}
-                      </td>
+        {(() => {
+          const coverageDefinitions = [
+            { key: 'cgl', label: 'Commercial General Liability', limitKey: 'cglLimit' },
+            { key: 'buildingCov', label: 'Building', limitKey: 'buildingLimit' },
+            { key: 'equipmentCov', label: 'Equipment', limitKey: 'equipmentLimit' },
+            { key: 'stockCov', label: 'Stock' },
+            { key: 'contentsCov', label: 'Contents' },
+            { key: 'sewerBackup', label: 'Sewer Backup', limitKey: 'sewerBackupLimit' },
+            { key: 'flood', label: 'Flood' },
+            { key: 'earthquake', label: 'Earthquake' },
+          ];
+
+          const coverages = commlData.building?.coverages || {};
+          const enabledCoverages = coverageDefinitions.filter(
+            (c) => coverages[c.key] === true || coverages[c.key] === 'Yes'
+          );
+
+          if (enabledCoverages.length === 0) return null;
+
+          return (
+            <div>
+              <h2 style={styles.sectionTitle}>Coverage Breakdown</h2>
+              <div style={styles.tableContainer}>
+                <table style={styles.table}>
+                  <thead>
+                    <tr style={styles.tableHeaderRow}>
+                      <th style={styles.tableHeaderCell}>Coverage</th>
+                      <th style={styles.tableHeaderCell}>Limit</th>
+                      <th style={{ ...styles.tableHeaderCell, textAlign: 'right' }}>Premium</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {enabledCoverages.map((cov) => {
+                      const limit = cov.limitKey ? coverages[cov.limitKey] : '';
+                      const responseCov = (selectedResponse.coverages || []).find(
+                        (rc) => rc.name === cov.label
+                      );
+                      const premium = responseCov?.premium;
+
+                      return (
+                        <tr key={cov.key} style={styles.tableDataRow}>
+                          <td style={styles.tableDataCell}>{cov.label}</td>
+                          <td style={styles.tableDataCell}>
+                            {limit ? `$${Number(limit).toLocaleString()}` : '—'}
+                          </td>
+                          <td style={{ ...styles.tableDataCell, ...styles.tableDataCellRight }}>
+                            {premium ? formatCurrency(premium) : 'Included'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       <div style={styles.buttonContainer}>

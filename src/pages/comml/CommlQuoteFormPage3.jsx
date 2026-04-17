@@ -121,7 +121,7 @@ const CommlQuoteFormPage3 = () => {
       missingFields.push('Fire Protection');
     }
     if (commlData.building?.protection?.sprinklered === undefined || commlData.building?.protection?.sprinklered === '') {
-      missingFields.push('Fully Sprinklered');
+      missingFields.push('Sprinkler System');
     }
 
     // Building Improvements (YYYY format)
@@ -222,10 +222,10 @@ const CommlQuoteFormPage3 = () => {
           />
         </div>
 
-        {/* Row 3: Fully Sprinklered */}
+        {/* Row 3: Sprinkler System */}
         <div style={{ ...styles.rowContainer, ...styles.fullWidthRow }}>
           <RadioGroup
-            label="Fully Sprinklered"
+            label="Sprinkler System"
             name="sprinklered"
             value={commlData.building?.protection?.sprinklered?.toString() || ''}
             onChange={(e) => updateProtection('sprinklered', e.target.value)}

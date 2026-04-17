@@ -222,7 +222,7 @@ const HabQuoteFormPage1 = () => {
             name="producerCode"
             value={habData.producerCode || ''}
             onChange={(e) => updateHabData(null, { producerCode: e.target.value })}
-            placeholder="e.g. CM04"
+            placeholder=""
             required
           />
           <TextInput
