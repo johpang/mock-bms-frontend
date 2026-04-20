@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useComml } from '../../context/CommlContext';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency, formatDate } from '../../utils/formatters';
 import MockDisclaimer from '../../components/MockDisclaimer';
 
 const CommlBindPage = () => {
@@ -66,6 +66,7 @@ const CommlBindPage = () => {
     nextStep();
   };
   const namedInsured = commlData.account?.commercialName || 'N/A';
+  const businessAddress = [commlData.account?.address, commlData.account?.city, commlData.account?.province, commlData.account?.postalCode].filter(Boolean).join(', ') || 'N/A';
 
   if (!selectedResponse) {
     return (
@@ -100,7 +101,8 @@ const CommlBindPage = () => {
           <div><span style={styles.summaryLabel}>Insurer</span><div style={styles.summaryValue}>{selectedResponse.insurerName}</div></div>
           <div><span style={styles.summaryLabel}>Quote Number</span><div style={styles.summaryValue}>{selectedResponse.referenceNumber}</div></div>
           <div><span style={styles.summaryLabel}>Named Insured</span><div style={styles.summaryValue}>{namedInsured}</div></div>
-          <div><span style={styles.summaryLabel}>Business Address</span><div style={styles.summaryValue}>{selectedResponse.businessAddress || 'N/A'}</div></div>
+          <div><span style={styles.summaryLabel}>Business Address</span><div style={styles.summaryValue}>{businessAddress}</div></div>
+          <div><span style={styles.summaryLabel}>Effective Date</span><div style={styles.summaryValue}>{formatDate(commlData.policyEffectiveDate) || selectedResponse.effectiveDate || 'N/A'}</div></div>
           <div><span style={styles.summaryLabel}>Annual Premium</span><div style={styles.premiumHighlight}>{formatCurrency(selectedResponse.premiums?.annual)}</div></div>
           <div><span style={styles.summaryLabel}>Monthly Premium</span><div style={styles.summaryValue}>{formatCurrency(selectedResponse.premiums?.monthly)}/month</div></div>
         </div>

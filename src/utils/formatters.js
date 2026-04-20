@@ -3,6 +3,8 @@
  * Provides display formatting functions for various data types
  */
 
+import React from 'react';
+
 /**
  * Formats a value as currency (CAD).
  * Accepts numbers, numeric strings, or pre-formatted strings like "$1,000".
@@ -48,6 +50,53 @@ export function formatCurrency(amount, options = {}) {
     minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
   }).format(numeric);
+}
+
+/**
+ * Splits a string into plain text + <a> elements for any http(s) URLs found.
+ * Used to render bind-message links as clickable anchors.
+ *
+ * @param {string} text
+ * @returns {Array<string|React.ReactElement>}
+ */
+export function linkifyText(text) {
+  if (!text) return [text];
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+  let key = 0;
+  while ((match = urlRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index));
+    const url = match[0];
+    parts.push(
+      React.createElement(
+        'a',
+        { key: key++, href: url, rel: 'noopener noreferrer', style: { color: '#2a5298', textDecoration: 'underline' } },
+        url,
+      ),
+    );
+    lastIndex = match.index + url.length;
+  }
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+  return parts;
+}
+
+/**
+ * Formats a user-typed monetary amount (limits, deductibles) for display.
+ * Strips "$" and "," so inputs like "$25,000" or "25,000" still render cleanly.
+ * Falls back to the raw string prefixed with "$" if the value can't be parsed,
+ * instead of rendering "$NaN".
+ *
+ * @param {string|number} value
+ * @returns {string} e.g. "$25,000", or "" for empty input
+ */
+export function formatAmountInput(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const cleaned = String(value).replace(/[$,\s]/g, '');
+  const n = Number(cleaned);
+  if (Number.isFinite(n)) return `$${n.toLocaleString()}`;
+  return `$${value}`;
 }
 
 /**

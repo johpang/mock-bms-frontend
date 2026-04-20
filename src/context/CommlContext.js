@@ -115,13 +115,11 @@ export function CommlProvider({ children, onGoHome }) {
         ...bindData,
       };
 
-      // Client-side bind messages based on quote ID
+      // Client-side bind messages when Credit Card is selected on the bind page.
       const bindMessages = [];
-      if (commlData.id === 'UC-014') {
+      if (bindData.payment?.method === 'creditCard') {
         bindMessages.push(
-          'Credit card payment selected. Insurer will contact the insured directly to collect credit card details.',
-          'First payment must be processed within 30 days of the policy effective date to avoid cancellation.',
-          'A confirmation of payment will be sent to the broker once the insurer has successfully collected payment.',
+          'Policy has been successfully bound. Please use the provided link https://www.google.com to complete your credit card payment.',
         );
       }
 

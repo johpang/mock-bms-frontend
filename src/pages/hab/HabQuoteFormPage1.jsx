@@ -15,23 +15,12 @@ import {
   SectionHeader,
   RadioGroup,
 } from '../../components/FormControls';
-// Note: SelectInput still used for Billing Method and Province
 import { useHab } from '../../context/HabContext';
 
 const HabQuoteFormPage1 = () => {
   const { habData, updateHabData, nextStep, prevStep } = useHab();
   const [errors, setErrors] = React.useState([]);
   const [hoveredButton, setHoveredButton] = React.useState(null);
-
-  // Field options
-  const billingOptions = [
-    {
-      value: 'directBilling',
-      label: 'Direct Billing Account',
-    },
-    { value: 'brokerBilled', label: 'Broker Billed' },
-    { value: 'insuredBilled', label: 'Insured Billed' },
-  ];
 
   const provinceOptions = [
     { value: 'ON', label: 'ON' },
@@ -129,7 +118,6 @@ const HabQuoteFormPage1 = () => {
     // Quote Information fields
     if (!habData.producerCode?.trim()) missingFields.push('Producer Code');
     if (!habData.bmsQuoteNumber?.trim()) missingFields.push('BMS Quote Number');
-    if (!habData.billingMethod?.trim()) missingFields.push('Billing Method');
 
     // Customer Details fields
     if (!habData.customer?.firstName?.trim()) missingFields.push('Customer First Name');
@@ -216,7 +204,7 @@ const HabQuoteFormPage1 = () => {
       {/* Quote Information Section */}
       <div style={styles.sectionContainer}>
         <SectionHeader title="Quote Information" />
-        <div style={{ ...styles.rowContainer, ...styles.threeColumnRow }}>
+        <div style={{ ...styles.rowContainer, ...styles.twoColumnRow }}>
           <TextInput
             label="Producer Code"
             name="producerCode"
@@ -231,15 +219,6 @@ const HabQuoteFormPage1 = () => {
             value={habData.bmsQuoteNumber || ''}
             onChange={(e) => updateHabData(null, { bmsQuoteNumber: e.target.value })}
             placeholder="e.g. SMT0B4176"
-            required
-          />
-          <SelectInput
-            label="Billing Method"
-            name="billingMethod"
-            value={habData.billingMethod || ''}
-            onChange={(e) => updateHabData(null, { billingMethod: e.target.value })}
-            options={billingOptions}
-            placeholder="Select billing method"
             required
           />
         </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAutoQuote } from '../context/AutoContext';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency, formatDate, linkifyText } from '../utils/formatters';
 import MockDisclaimer from '../components/MockDisclaimer';
 
 /**
@@ -192,7 +192,7 @@ const BindSuccessPage = () => {
           </div>
           <div>
             <div style={styles.detailLabel}>Effective Date</div>
-            <div style={styles.detailValue}>{selectedResponse?.effectiveDate || 'N/A'}</div>
+            <div style={styles.detailValue}>{formatDate(quoteData.policyEffectiveDate) || selectedResponse?.effectiveDate || 'N/A'}</div>
           </div>
         </div>
       </div>
@@ -222,7 +222,7 @@ const BindSuccessPage = () => {
                 borderLeftWidth: '4px',
               }}>
                 <span style={{ color: '#d4a017', fontWeight: 700, fontSize: '16px', lineHeight: '20px', minWidth: '12px', flexShrink: 0 }}>!</span>
-                <span style={{ fontSize: '14px', color: colors.text, fontWeight: 500, lineHeight: '1.5' }}>{msg}</span>
+                <span style={{ fontSize: '14px', color: colors.text, fontWeight: 500, lineHeight: '1.5' }}>{linkifyText(msg)}</span>
               </div>
             ))}
           </div>

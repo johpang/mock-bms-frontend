@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHab } from '../../context/HabContext';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency, formatDate } from '../../utils/formatters';
 import MockDisclaimer from '../../components/MockDisclaimer';
 
 const HabBindPage = () => {
@@ -101,6 +101,7 @@ const HabBindPage = () => {
           <div><span style={styles.summaryLabel}>Quote Number</span><div style={styles.summaryValue}>{selectedResponse.referenceNumber}</div></div>
           <div><span style={styles.summaryLabel}>Named Insured</span><div style={styles.summaryValue}>{customerName.trim() || 'N/A'}</div></div>
           <div><span style={styles.summaryLabel}>Property</span><div style={styles.summaryValue}>{selectedResponse.propertyAddress || 'N/A'}</div></div>
+          <div><span style={styles.summaryLabel}>Effective Date</span><div style={styles.summaryValue}>{formatDate(habData.effectiveDate) || selectedResponse.effectiveDate || 'N/A'}</div></div>
           <div><span style={styles.summaryLabel}>Annual Premium</span><div style={styles.premiumHighlight}>{formatCurrency(selectedResponse.premiums?.annual)}</div></div>
           <div><span style={styles.summaryLabel}>Monthly Premium</span><div style={styles.summaryValue}>{formatCurrency(selectedResponse.premiums?.monthly)}/month</div></div>
         </div>

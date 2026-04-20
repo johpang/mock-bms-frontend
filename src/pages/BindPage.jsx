@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAutoQuote } from '../context/AutoContext';
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency, formatDate } from '../utils/formatters';
 import MockDisclaimer from '../components/MockDisclaimer';
 
 /**
@@ -256,7 +256,7 @@ const BindPage = () => {
           </div>
           <div style={styles.summaryItem}>
             <span style={styles.summaryLabel}>Effective Date</span>
-            <span style={styles.summaryValue}>{selectedResponse.effectiveDate}</span>
+            <span style={styles.summaryValue}>{formatDate(quoteData.policyEffectiveDate) || selectedResponse.effectiveDate}</span>
           </div>
           <div style={styles.summaryItem}>
             <span style={styles.summaryLabel}>Annual Premium</span>

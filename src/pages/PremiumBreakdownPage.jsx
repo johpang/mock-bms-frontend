@@ -4,6 +4,26 @@ import { CoverageBreakdownTable, UnderwritingMessages } from '../components/Quot
 import { formatCurrency, formatDate } from '../utils/formatters';
 import MockDisclaimer from '../components/MockDisclaimer';
 
+// Overlay user-selected BIPD limit + collision/comprehensive deductibles onto
+// the response coverages so the breakdown reflects what the user picked.
+function overlayUserSelections(coverages, quoteData) {
+  const bipd = quoteData?.bipdLimit;
+  const coll = quoteData?.collisionDeductible;
+  const comp = quoteData?.comprehensiveDeductible;
+  return coverages.map((cov) => {
+    if (cov.name === 'Bodily Injury Property Damage' && bipd) {
+      return { ...cov, coverageAmount: Number(bipd).toLocaleString() };
+    }
+    if (cov.name === 'Collision' && coll) {
+      return { ...cov, deductible: `$${Number(coll).toLocaleString()}` };
+    }
+    if (cov.name === 'Comprehensive' && comp) {
+      return { ...cov, deductible: `$${Number(comp).toLocaleString()}` };
+    }
+    return cov;
+  });
+}
+
 /**
  * PremiumBreakdownPage Component
  * Screen 4 - Displays detailed premium and coverage information for a selected insurer
@@ -309,7 +329,7 @@ const PremiumBreakdownPage = () => {
       <div style={styles.infoRow}>
         <div style={styles.infoItem}>
           <div style={styles.infoLabel}>Effective Date</div>
-          <div style={styles.infoValue}>{formatDate(selectedResponse.effectiveDate)}</div>
+          <div style={styles.infoValue}>{formatDate(quoteData.policyEffectiveDate) || formatDate(selectedResponse.effectiveDate)}</div>
         </div>
         <div style={styles.infoItem}>
           <div style={styles.infoLabel}>Territory</div>
@@ -362,7 +382,7 @@ const PremiumBreakdownPage = () => {
         {selectedResponse.coverages && selectedResponse.coverages.length > 0 && (
           <div>
             <CoverageBreakdownTable
-              coverages={selectedResponse.coverages}
+              coverages={overlayUserSelections(selectedResponse.coverages, quoteData)}
               vehicleSummary={vehicleSummary}
             />
           </div>

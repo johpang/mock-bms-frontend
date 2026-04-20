@@ -1,6 +1,6 @@
 import React from 'react';
 import { useComml } from '../../context/CommlContext';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency, formatDate, linkifyText } from '../../utils/formatters';
 import MockDisclaimer from '../../components/MockDisclaimer';
 
 const CommlBindSuccessPage = () => {
@@ -25,6 +25,7 @@ const CommlBindSuccessPage = () => {
   };
 
   const namedInsured = commlData.account?.commercialName || 'N/A';
+  const businessAddress = [commlData.account?.address, commlData.account?.city, commlData.account?.province, commlData.account?.postalCode].filter(Boolean).join(', ') || 'N/A';
 
   return (
     <div style={styles.pageContainer}>
@@ -49,7 +50,8 @@ const CommlBindSuccessPage = () => {
           <div><div style={styles.detailLabel}>Annual Premium</div><div style={styles.detailValue}>{formatCurrency(selectedResponse?.premiums?.annual)}</div></div>
           <div><div style={styles.detailLabel}>Bind Date</div><div style={styles.detailValue}>{bindResponse?.bindTimestamp ? new Date(bindResponse.bindTimestamp).toLocaleDateString('en-CA') : new Date().toLocaleDateString('en-CA')}</div></div>
           <div><div style={styles.detailLabel}>Status</div><div style={{ ...styles.detailValue, color: colors.success }}>{bindResponse?.status || 'BOUND'}</div></div>
-          <div><div style={styles.detailLabel}>Business Address</div><div style={styles.detailValue}>{selectedResponse?.businessAddress || 'N/A'}</div></div>
+          <div><div style={styles.detailLabel}>Effective Date</div><div style={styles.detailValue}>{formatDate(commlData.policyEffectiveDate) || selectedResponse?.effectiveDate || 'N/A'}</div></div>
+          <div><div style={styles.detailLabel}>Business Address</div><div style={styles.detailValue}>{businessAddress}</div></div>
         </div>
       </div>
 
@@ -73,7 +75,7 @@ const CommlBindSuccessPage = () => {
                 borderRadius: '2px', border: '1px solid #d4a017', borderLeftWidth: '4px',
               }}>
                 <span style={{ color: '#d4a017', fontWeight: 700, fontSize: '16px', lineHeight: '20px', minWidth: '12px', flexShrink: 0 }}>!</span>
-                <span style={{ fontSize: '14px', color: colors.text, fontWeight: 500, lineHeight: '1.5' }}>{msg}</span>
+                <span style={{ fontSize: '14px', color: colors.text, fontWeight: 500, lineHeight: '1.5' }}>{linkifyText(msg)}</span>
               </div>
             ))}
           </div>

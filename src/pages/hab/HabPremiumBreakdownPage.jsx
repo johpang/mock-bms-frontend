@@ -1,6 +1,6 @@
 import React from 'react';
 import { useHab } from '../../context/HabContext';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency, formatDate, formatAmountInput } from '../../utils/formatters';
 import MockDisclaimer from '../../components/MockDisclaimer';
 
 /**
@@ -154,8 +154,8 @@ const HabPremiumBreakdownPage = () => {
       gap: '32px',
     },
     underwritingContainer: {
-      backgroundColor: colors.lightAccent,
-      border: `1px solid ${colors.accent}30`,
+      backgroundColor: '#ffebee',
+      border: '1px solid #d32f2f',
       borderRadius: '4px',
       padding: '20px',
       marginTop: '16px',
@@ -170,7 +170,7 @@ const HabPremiumBreakdownPage = () => {
       display: 'inline-block',
       width: '6px',
       height: '6px',
-      backgroundColor: colors.accent,
+      backgroundColor: '#d32f2f',
       borderRadius: '50%',
       marginRight: '12px',
       marginBottom: '2px',
@@ -341,7 +341,7 @@ const HabPremiumBreakdownPage = () => {
         <div style={styles.summaryItem}>
           <div style={styles.summaryLabel}>Effective Date</div>
           <div style={styles.summaryValue}>
-            {formatDate(selectedResponse.effectiveDate)}
+            {formatDate(habData.effectiveDate) || formatDate(selectedResponse.effectiveDate)}
           </div>
         </div>
         <div style={styles.summaryItemWide}>
@@ -392,21 +392,25 @@ const HabPremiumBreakdownPage = () => {
             { key: 'identityTheftProtection', label: 'Identity Theft Protection' },
           ];
 
-          // Map response coverages by name for premium lookup
+          // Hardcoded premiums per coverage key. 0 => rendered as "Included".
+          // Dwelling Building and Sewer Backup fall through to the response for now.
+          const hardcodedPremiums = {
+            detachedPrivateStructures: 389,
+            personalProperty: 269,
+            additionalLivingExpenses: 234,
+            legalLiability: 539,
+            voluntaryMedicalPayments: 0,
+            voluntaryPropertyDamage: 0,
+            legalServices: 0,
+            identityTheftProtection: 25,
+          };
+
           const responseCoverageMap = {};
           (selectedResponse.coverages || []).forEach((c) => {
             responseCoverageMap[c.name] = c;
           });
-
-          // Label-to-response-name mapping for matching
           const labelToResponseName = {
             'Dwelling Building': 'Residence',
-            'Detached Private Structures': 'Outbuildings',
-            'Personal Property': 'Personal Property',
-            'Additional Living Expenses': 'Guaranteed Replacement Cost',
-            'Legal Liability': 'Legal Liability',
-            'Voluntary Medical Payments': 'Voluntary Medical Payments',
-            'Voluntary Property Damage': 'Voluntary Property Damage',
             'Sewer Backup': 'Sewer Back-Up & Overland Water',
           };
 
@@ -433,15 +437,15 @@ const HabPremiumBreakdownPage = () => {
                   <tbody>
                     {enabledCoverages.map((cov) => {
                       const userCov = selectedCoverages[cov.key] || {};
-                      const responseName = labelToResponseName[cov.label] || cov.label;
-                      const responseCov = responseCoverageMap[responseName];
-                      const premium = responseCov?.premium;
+                      const premium = cov.key in hardcodedPremiums
+                        ? hardcodedPremiums[cov.key]
+                        : responseCoverageMap[labelToResponseName[cov.label] || cov.label]?.premium;
 
                       return (
                         <tr key={cov.key} style={styles.tableDataRow}>
                           <td style={styles.tableDataCell}>{cov.label}</td>
-                          <td style={styles.tableDataCell}>{userCov.deductible ? `$${parseInt(userCov.deductible, 10).toLocaleString()}` : '—'}</td>
-                          <td style={styles.tableDataCell}>{userCov.amount ? `$${parseInt(userCov.amount, 10).toLocaleString()}` : '—'}</td>
+                          <td style={styles.tableDataCell}>{formatAmountInput(userCov.deductible) || '—'}</td>
+                          <td style={styles.tableDataCell}>{formatAmountInput(userCov.amount) || '—'}</td>
                           <td style={{ ...styles.tableDataCell, ...styles.tableDataCellRight }}>
                             {premium ? formatCurrency(premium) : 'Included'}
                           </td>

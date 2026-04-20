@@ -592,7 +592,7 @@ const QuoteFormPage2 = () => {
                 </div>
 
                 {/* Insurance Cancellations Subsection (per driver) */}
-                <div style={styles.subsectionTitle}>Insurance History</div>
+                <div style={styles.subsectionTitle}>Insurance and Driver Information</div>
                 <p
                   style={{
                     fontSize: '0.95rem',
@@ -616,7 +616,7 @@ const QuoteFormPage2 = () => {
                 </div>
                 <div style={{ marginBottom: '1rem' }}>
                   <RadioGroup
-                    label="•	Have you ever had a gap of insurance coverage?"
+                    label="Have you ever had a gap of insurance coverage?"
                     name={`withoutCoverage${index}`}
                     value={driver.cancellations?.withoutCoverage || ''}
                     onChange={handleDriverCancellationsChange(index, 'withoutCoverage')}

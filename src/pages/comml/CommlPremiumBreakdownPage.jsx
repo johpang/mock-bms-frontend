@@ -1,6 +1,6 @@
 import React from 'react';
 import { useComml } from '../../context/CommlContext';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency, formatDate, formatAmountInput } from '../../utils/formatters';
 import MockDisclaimer from '../../components/MockDisclaimer';
 
 /**
@@ -341,12 +341,14 @@ const CommlPremiumBreakdownPage = () => {
         <div style={styles.summaryItem}>
           <div style={styles.summaryLabel}>Effective Date</div>
           <div style={styles.summaryValue}>
-            {formatDate(selectedResponse.effectiveDate)}
+            {formatDate(commlData.policyEffectiveDate) || formatDate(selectedResponse.effectiveDate)}
           </div>
         </div>
         <div style={styles.summaryItemWide}>
           <div style={styles.summaryLabel}>Business Address</div>
-          <div style={styles.summaryValue}>{selectedResponse.businessAddress}</div>
+          <div style={styles.summaryValue}>
+            {[commlData.account?.address, commlData.account?.city, commlData.account?.province, commlData.account?.postalCode].filter(Boolean).join(', ') || 'N/A'}
+          </div>
         </div>
       </div>
 
@@ -383,6 +385,13 @@ const CommlPremiumBreakdownPage = () => {
             { key: 'earthquake', label: 'Earthquake' },
           ];
 
+          // Hardcoded premiums per coverage key. Other coverages fall through to "Included".
+          const hardcodedPremiums = {
+            cgl: 357,
+            equipmentCov: 235,
+            sewerBackup: 125,
+          };
+
           const coverages = commlData.building?.coverages || {};
           const enabledCoverages = coverageDefinitions.filter(
             (c) => coverages[c.key] === true || coverages[c.key] === 'Yes'
@@ -405,16 +414,13 @@ const CommlPremiumBreakdownPage = () => {
                   <tbody>
                     {enabledCoverages.map((cov) => {
                       const limit = cov.limitKey ? coverages[cov.limitKey] : '';
-                      const responseCov = (selectedResponse.coverages || []).find(
-                        (rc) => rc.name === cov.label
-                      );
-                      const premium = responseCov?.premium;
+                      const premium = hardcodedPremiums[cov.key];
 
                       return (
                         <tr key={cov.key} style={styles.tableDataRow}>
                           <td style={styles.tableDataCell}>{cov.label}</td>
                           <td style={styles.tableDataCell}>
-                            {limit ? `$${Number(limit).toLocaleString()}` : '—'}
+                            {formatAmountInput(limit) || '—'}
                           </td>
                           <td style={{ ...styles.tableDataCell, ...styles.tableDataCellRight }}>
                             {premium ? formatCurrency(premium) : 'Included'}
