@@ -233,7 +233,9 @@ function parseAutoQuoteResponse(xmlString, ctx = {}) {
   let formattedDate = '';
   if (effectiveDt) {
     try {
-      const d = new Date(effectiveDt);
+      const [datePart] = String(effectiveDt).split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const d = new Date(year, month - 1, day);
       formattedDate = `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
     } catch {
       formattedDate = effectiveDt;
@@ -396,7 +398,9 @@ function parseHabQuoteResponse(xmlString, ctx = {}) {
   let formattedDate = '';
   if (effectiveDt) {
     try {
-      const d = new Date(effectiveDt);
+      const [datePart] = String(effectiveDt).split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const d = new Date(year, month - 1, day);
       formattedDate = `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
     } catch {
       formattedDate = effectiveDt;

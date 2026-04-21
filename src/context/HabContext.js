@@ -119,7 +119,7 @@ export function HabProvider({ children, onGoHome }) {
       const bindMessages = [];
       if (bindData.payment?.method === 'creditCard') {
         bindMessages.push(
-          'Policy has been successfully bound. Please use the provided link https://www.google.com to complete your credit card payment.',
+          'Policy has been successfully bound. Please use the provided link https://www.moneris.com to complete your credit card payment.',
         );
       }
 

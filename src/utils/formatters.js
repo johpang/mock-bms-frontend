@@ -159,7 +159,10 @@ export function formatDate(dateString) {
   }
 
   try {
-    const date = new Date(dateString);
+    const iso = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateString);
+    const date = iso
+      ? new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]))
+      : new Date(dateString);
     if (isNaN(date.getTime())) {
       return dateString;
     }
