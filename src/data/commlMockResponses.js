@@ -14,8 +14,7 @@ const commlMockResponses = {
     businessName: "2435268 Ontario Inc. O/A ABC Landscaping",
     businessAddress: "400 Applewood Crescent, Unit 200, Concord, ON L4K 0C3",
     underwritingMessages: [
-      "Commercial property rate includes standard deductible",
-      "General liability — contractors classification applied",
+      "Coverages have been amended based on availability. Please review.",
     ],
     coverages: [
       { name: "Commercial Property (CPROP)", deductible: "$1,000", amount: "$250,000", premium: 2100.00 },
@@ -35,8 +34,7 @@ const commlMockResponses = {
     businessName: "2435268 Ontario Inc. O/A ABC Landscaping",
     businessAddress: "400 Applewood Crescent, Unit 200, Concord, ON L4K 0C3",
     underwritingMessages: [
-      "New business rate applied",
-      "Equipment breakdown coverage bundled",
+      "Coverages have been amended based on availability. Please review.",
     ],
     coverages: [
       { name: "Commercial Property (CPROP)", deductible: "$1,000", amount: "$250,000", premium: 2250.00 },
@@ -56,8 +54,7 @@ const commlMockResponses = {
     businessName: "2435268 Ontario Inc. O/A ABC Landscaping",
     businessAddress: "400 Applewood Crescent, Unit 200, Concord, ON L4K 0C3",
     underwritingMessages: [
-      "Small business discount applied",
-      "Multi-year policy eligible",
+      "Coverages have been amended based on availability. Please review.",
     ],
     coverages: [
       { name: "Commercial Property (CPROP)", deductible: "$1,000", amount: "$250,000", premium: 1980.00 },
@@ -77,8 +74,7 @@ const commlMockResponses = {
     businessName: "2435268 Ontario Inc. O/A ABC Landscaping",
     businessAddress: "400 Applewood Crescent, Unit 200, Concord, ON L4K 0C3",
     underwritingMessages: [
-      "Standard commercial package rate",
-      "Annual billing discount available",
+      "Coverages have been amended based on availability. Please review.",
     ],
     coverages: [
       { name: "Commercial Property (CPROP)", deductible: "$1,000", amount: "$250,000", premium: 2380.00 },
@@ -98,8 +94,7 @@ const commlMockResponses = {
     businessName: "2435268 Ontario Inc. O/A ABC Landscaping",
     businessAddress: "400 Applewood Crescent, Unit 200, Concord, ON L4K 0C3",
     underwritingMessages: [
-      "CAA member discount applied",
-      "Preferred commercial rate",
+      "Coverages have been amended based on availability. Please review.",
     ],
     coverages: [
       { name: "Commercial Property (CPROP)", deductible: "$1,000", amount: "$250,000", premium: 1900.00 },
@@ -119,8 +114,7 @@ const commlMockResponses = {
     businessName: "2435268 Ontario Inc. O/A ABC Landscaping",
     businessAddress: "400 Applewood Crescent, Unit 200, Concord, ON L4K 0C3",
     underwritingMessages: [
-      "Ontario mutual commercial rate",
-      "Loyalty discount eligible after first term",
+      "Coverages have been amended based on availability. Please review.",
     ],
     coverages: [
       { name: "Commercial Property (CPROP)", deductible: "$1,000", amount: "$250,000", premium: 2200.00 },

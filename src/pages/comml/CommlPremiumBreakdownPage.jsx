@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { useComml } from '../../context/CommlContext';
 import { formatCurrency, formatDate, formatAmountInput } from '../../utils/formatters';
 import MockDisclaimer from '../../components/MockDisclaimer';
+import { ADDITIONAL_INFO_PRODUCER_CODE, ADDITIONAL_INFO_BIND_MESSAGE } from '../../config/index.js';
 
 /**
  * CommlPremiumBreakdownPage Component
@@ -14,6 +15,20 @@ import MockDisclaimer from '../../components/MockDisclaimer';
 const CommlPremiumBreakdownPage = () => {
   const { commlResponses, prevStep, nextStep, selectedInsurerIndex, commlData } = useComml();
 
+  const [bindBlocked, setBindBlocked] = useState(false);
+  const bindBlockerRef = useRef(null);
+
+  const handleProceedToBind = () => {
+    if (commlData.producerCode === ADDITIONAL_INFO_PRODUCER_CODE) {
+      setBindBlocked(true);
+      setTimeout(() => {
+        bindBlockerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
+      return;
+    }
+    nextStep();
+  };
+
   const colors = {
     navy: '#0a1e3d',
     accent: '#2a5298',
@@ -23,6 +38,7 @@ const CommlPremiumBreakdownPage = () => {
     border: '#d0d0d0',
     lightAccent: '#e8f5ff',
     warning: '#d4a574',
+    error: '#cf222e',
   };
 
   const styles = {
@@ -245,6 +261,19 @@ const CommlPremiumBreakdownPage = () => {
       border: isPrimary ? 'none' : `2px solid ${colors.navy}`,
       opacity: isDisabled ? 0.6 : 1,
     }),
+    errorBanner: {
+      backgroundColor: '#fce8e6',
+      border: `1px solid ${colors.error}`,
+      color: colors.error,
+      padding: '12px 16px',
+      borderRadius: '4px',
+      marginBottom: '24px',
+      fontSize: '14px',
+      fontWeight: 500,
+      // Offset for the fixed top bar + sticky step indicator so scrollIntoView
+      // doesn't park the banner behind them.
+      scrollMarginTop: '140px',
+    },
   };
 
   if (!commlResponses || commlResponses.length === 0) {
@@ -310,6 +339,11 @@ const CommlPremiumBreakdownPage = () => {
       `}</style>
 
       <MockDisclaimer />
+      {bindBlocked && (
+        <div ref={bindBlockerRef} style={styles.errorBanner}>
+          {ADDITIONAL_INFO_BIND_MESSAGE}
+        </div>
+      )}
       <div style={styles.headerSection}>
         <div style={styles.insurerNameAndType}>
           <h1 style={styles.insurerName}>{selectedResponse.insurerName}</h1>
@@ -356,7 +390,9 @@ const CommlPremiumBreakdownPage = () => {
         {(() => {
           const messages = [...(selectedResponse.underwritingMessages || [])];
           if (commlData.building?.occupancy === 'Tenant') {
-            messages.push('Lease information is missing');
+            messages.push(
+              'Additional Information: Leasehold Interest Information required.  Please validate quote information before proceeding to bind, or contact BrokerHelp for assistance.'
+            );
           }
           return messages.length > 0 ? (
             <div>
@@ -450,7 +486,7 @@ const CommlPremiumBreakdownPage = () => {
           Back
         </button>
         <button
-          onClick={nextStep}
+          onClick={handleProceedToBind}
           style={styles.button(true, false)}
           onMouseEnter={(e) => {
             e.target.style.boxShadow = '0 4px 12px rgba(42, 82, 152, 0.25)';

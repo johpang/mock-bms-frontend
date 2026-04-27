@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { useHab } from '../../context/HabContext';
 import { formatCurrency, formatDate, formatAmountInput } from '../../utils/formatters';
 import MockDisclaimer from '../../components/MockDisclaimer';
+import { ADDITIONAL_INFO_PRODUCER_CODE, ADDITIONAL_INFO_BIND_MESSAGE } from '../../config/index.js';
 
 /**
  * HabPremiumBreakdownPage Component
@@ -14,6 +15,20 @@ import MockDisclaimer from '../../components/MockDisclaimer';
 const HabPremiumBreakdownPage = () => {
   const { habResponses, prevStep, nextStep, selectedInsurerIndex, habData } = useHab();
 
+  const [bindBlocked, setBindBlocked] = useState(false);
+  const bindBlockerRef = useRef(null);
+
+  const handleProceedToBind = () => {
+    if (habData.producerCode === ADDITIONAL_INFO_PRODUCER_CODE) {
+      setBindBlocked(true);
+      setTimeout(() => {
+        bindBlockerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
+      return;
+    }
+    nextStep();
+  };
+
   const colors = {
     navy: '#0a1e3d',
     accent: '#2a5298',
@@ -23,6 +38,7 @@ const HabPremiumBreakdownPage = () => {
     border: '#d0d0d0',
     lightAccent: '#e8f5ff',
     warning: '#d4a574',
+    error: '#cf222e',
   };
 
   const styles = {
@@ -245,6 +261,19 @@ const HabPremiumBreakdownPage = () => {
       border: isPrimary ? 'none' : `2px solid ${colors.navy}`,
       opacity: isDisabled ? 0.6 : 1,
     }),
+    errorBanner: {
+      backgroundColor: '#fce8e6',
+      border: `1px solid ${colors.error}`,
+      color: colors.error,
+      padding: '12px 16px',
+      borderRadius: '4px',
+      marginBottom: '24px',
+      fontSize: '14px',
+      fontWeight: 500,
+      // Offset for the fixed top bar + sticky step indicator so scrollIntoView
+      // doesn't park the banner behind them.
+      scrollMarginTop: '140px',
+    },
   };
 
   if (!habResponses || habResponses.length === 0) {
@@ -310,6 +339,11 @@ const HabPremiumBreakdownPage = () => {
       `}</style>
 
       <MockDisclaimer />
+      {bindBlocked && (
+        <div ref={bindBlockerRef} style={styles.errorBanner}>
+          {ADDITIONAL_INFO_BIND_MESSAGE}
+        </div>
+      )}
       <div style={styles.headerSection}>
         <div style={styles.insurerNameAndType}>
           <h1 style={styles.insurerName}>{selectedResponse.insurerName}</h1>
@@ -354,14 +388,16 @@ const HabPremiumBreakdownPage = () => {
 
       <div style={styles.sectionsContainer}>
         {(() => {
-          const messages = [
-            'Risk is eligible for higher limit for Sewer Back Up',
-            'Mortgage Free Discount could not be added',
-          ];
+          const messages = [...(selectedResponse.underwritingMessages || [])];
 
           if (habData.lossHistory?.hasLossesOrClaims === 'Yes' && habData.lossHistory?.claimDate) {
-            messages.push(`Risk 1: Claim disclosed ${habData.lossHistory.claimDate}`);
+            const claimDate = formatDate(habData.lossHistory.claimDate);
+            messages.push(
+              `Location # 1: Claim date has been disclosed as ${claimDate}. Please confirm the actual Claim date before binding the policy.`
+            );
           }
+
+          if (messages.length === 0) return null;
 
           return (
             <div>
@@ -474,7 +510,7 @@ const HabPremiumBreakdownPage = () => {
           Back
         </button>
         <button
-          onClick={nextStep}
+          onClick={handleProceedToBind}
           style={styles.button(true, false)}
           onMouseEnter={(e) => {
             e.target.style.boxShadow = '0 4px 12px rgba(42, 82, 152, 0.25)';

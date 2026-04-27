@@ -124,7 +124,7 @@ const HabBindPage = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px', borderRadius: '4px', cursor: 'pointer', border: `1px solid ${paymentMethod === 'eft' ? colors.accent : colors.border}`, backgroundColor: paymentMethod === 'eft' ? '#f0f4ff' : colors.white, transition: 'all 0.15s ease' }}>
             <input type="radio" name="paymentMethod" value="eft" checked={paymentMethod === 'eft'} onChange={(e) => setPaymentMethod(e.target.value)} style={{ accentColor: colors.navy }} />
-            <span style={{ fontSize: '14px', fontWeight: 600, color: colors.text }}>Pre-Authorized Debit (EFT)</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: colors.text }}>Pre-Authorized (EFT)</span>
           </label>
           {paymentMethod === 'eft' && (
             <div style={{ marginLeft: '28px', marginBottom: '4px' }}>

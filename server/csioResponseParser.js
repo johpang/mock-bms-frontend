@@ -253,8 +253,8 @@ function parseAutoQuoteResponse(xmlString, ctx = {}) {
   ];
 
   const hardcodedUnderwritingMessages = [
-    'Claims Free Discount cannot be added',
-    'Endorsement #26 not supported',
+    'Vehicle: Vehicle # 1: The purchase date of the winter tires has been defaulted to the effective date of the policy.',
+    'Coverages have been amended based on availability. Please review.',
   ];
 
   const bipdLimit = ctx.requestData?.bipdLimit || '';
@@ -420,8 +420,9 @@ function parseHabQuoteResponse(xmlString, ctx = {}) {
   ];
 
   const hardcodedUnderwritingMessages = [
-    'Ground Water -- Rates not available',
-    'Loyalty Discount -- Rates not available',
+    'Dwelling: The minimum threshold premiums have been met.',
+    'Credit factor applied to the quote.',
+    'Coverages have been amended based on availability. Please review.',
   ];
 
   const result = {
@@ -478,6 +479,23 @@ function parseCommlQuoteResponse(xmlString, ctx = {}) {
     if (commlQuoteNum) {
       result.companysQuoteNumber = commlQuoteNum;
       result.referenceNumber = commlQuoteNum;
+    }
+
+    // Re-extract real upstream messages so we can apply the comml-specific
+    // fallback list when the response carried no <ExtendedStatus> / <Message>
+    // elements (parseAutoQuoteResponse would otherwise leave the auto fallback).
+    const msgStatus = get(rs, 'MsgStatus') || {};
+    const realMessages = toArray(get(msgStatus, 'ExtendedStatus'))
+      .map((es) => get(es, 'ExtendedStatusDesc') || get(es, 'ExtendedStatusCd') || '')
+      .filter(Boolean);
+    toArray(get(rs, 'Message')).forEach((m) => {
+      const desc = get(m, 'MessageText') || get(m, 'Description') || '';
+      if (desc) realMessages.push(desc);
+    });
+    if (realMessages.length === 0) {
+      result.underwritingMessages = [
+        'Coverages have been amended based on availability. Please review.',
+      ];
     }
   }
 

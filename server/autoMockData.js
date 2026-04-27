@@ -14,8 +14,8 @@ const mockData = {
       { code: 45, label: "Comp" }
     ],
     underwritingMessages: [
-      "Claims Free Discount cannot be added",
-      "Endorsement #26 not supported"
+      "Vehicle: Vehicle # 1: The purchase date of the winter tires has been defaulted to the effective date of the policy.",
+      "Coverages have been amended based on availability. Please review."
     ],
     vehicleSummary: "2024 Honda Civic",
     coverages: [
@@ -43,8 +43,8 @@ const mockData = {
       { code: 45, label: "Comp" }
     ],
     underwritingMessages: [
-      "Early renewal discount applied",
-      "Good driving record noted"
+      "Vehicle: Vehicle # 1: The purchase date of the winter tires has been defaulted to the effective date of the policy.",
+      "Coverages have been amended based on availability. Please review."
     ],
     vehicleSummary: "2024 Honda Civic",
     coverages: [
@@ -72,8 +72,8 @@ const mockData = {
       { code: 45, label: "Comp" }
     ],
     underwritingMessages: [
-      "Bundling discount eligible",
-      "Safe driver premium reduction"
+      "Vehicle: Vehicle # 1: The purchase date of the winter tires has been defaulted to the effective date of the policy.",
+      "Coverages have been amended based on availability. Please review."
     ],
     vehicleSummary: "2024 Honda Civic",
     coverages: [
@@ -101,8 +101,8 @@ const mockData = {
       { code: 45, label: "Comp" }
     ],
     underwritingMessages: [
-      "Multi-policy discount available",
-      "Annual billing discount applied"
+      "Vehicle: Vehicle # 1: The purchase date of the winter tires has been defaulted to the effective date of the policy.",
+      "Coverages have been amended based on availability. Please review."
     ],
     vehicleSummary: "2024 Honda Civic",
     coverages: [
@@ -130,8 +130,8 @@ const mockData = {
       { code: 45, label: "Comp" }
     ],
     underwritingMessages: [
-      "CAA member discount applied",
-      "Preferred customer rate"
+      "Vehicle: Vehicle # 1: The purchase date of the winter tires has been defaulted to the effective date of the policy.",
+      "Coverages have been amended based on availability. Please review."
     ],
     vehicleSummary: "2024 Honda Civic",
     coverages: [
@@ -159,8 +159,8 @@ const mockData = {
       { code: 45, label: "Comp" }
     ],
     underwritingMessages: [
-      "Ontario mutual insurance rate",
-      "Loyalty discount eligible"
+      "Vehicle: Vehicle # 1: The purchase date of the winter tires has been defaulted to the effective date of the policy.",
+      "Coverages have been amended based on availability. Please review."
     ],
     vehicleSummary: "2024 Honda Civic",
     coverages: [

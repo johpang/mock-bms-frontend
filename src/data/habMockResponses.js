@@ -14,8 +14,9 @@ const habMockResponses = {
     propertyAddress: "52 Marshall Street, Barrie, L4N 3S7",
     riskType: "Primary -- Homeowners",
     underwritingMessages: [
-      "Ground Water -- Rates not available",
-      "Loyalty Discount -- Rates not available",
+      "Dwelling: The minimum threshold premiums have been met.",
+      "Credit factor applied to the quote.",
+      "Coverages have been amended based on availability. Please review.",
     ],
     coverages: [
       { name: "Residence", deductible: "", amount: "", premium: 1956.08 },
@@ -38,8 +39,9 @@ const habMockResponses = {
     propertyAddress: "52 Marshall Street, Barrie, L4N 3S7",
     riskType: "Primary -- Homeowners",
     underwritingMessages: [
-      "Mature home discount applied",
-      "Claims-free credit noted",
+      "Dwelling: The minimum threshold premiums have been met.",
+      "Credit factor applied to the quote.",
+      "Coverages have been amended based on availability. Please review.",
     ],
     coverages: [
       { name: "Residence", deductible: "", amount: "", premium: 2012.45 },
@@ -62,8 +64,9 @@ const habMockResponses = {
     propertyAddress: "52 Marshall Street, Barrie, L4N 3S7",
     riskType: "Primary -- Homeowners",
     underwritingMessages: [
-      "Bundling discount eligible",
-      "New customer rate",
+      "Dwelling: The minimum threshold premiums have been met.",
+      "Credit factor applied to the quote.",
+      "Coverages have been amended based on availability. Please review.",
     ],
     coverages: [
       { name: "Residence", deductible: "", amount: "", premium: 1889.50 },
@@ -86,8 +89,9 @@ const habMockResponses = {
     propertyAddress: "52 Marshall Street, Barrie, L4N 3S7",
     riskType: "Primary -- Homeowners",
     underwritingMessages: [
-      "Multi-policy discount available",
-      "Annual billing discount applied",
+      "Dwelling: The minimum threshold premiums have been met.",
+      "Credit factor applied to the quote.",
+      "Coverages have been amended based on availability. Please review.",
     ],
     coverages: [
       { name: "Residence", deductible: "", amount: "", premium: 2105.75 },
@@ -110,8 +114,9 @@ const habMockResponses = {
     propertyAddress: "52 Marshall Street, Barrie, L4N 3S7",
     riskType: "Primary -- Homeowners",
     underwritingMessages: [
-      "CAA member discount applied",
-      "Preferred customer rate",
+      "Dwelling: The minimum threshold premiums have been met.",
+      "Credit factor applied to the quote.",
+      "Coverages have been amended based on availability. Please review.",
     ],
     coverages: [
       { name: "Residence", deductible: "", amount: "", premium: 1845.00 },
@@ -134,8 +139,9 @@ const habMockResponses = {
     propertyAddress: "52 Marshall Street, Barrie, L4N 3S7",
     riskType: "Primary -- Homeowners",
     underwritingMessages: [
-      "Ontario mutual insurance rate",
-      "Loyalty discount eligible",
+      "Dwelling: The minimum threshold premiums have been met.",
+      "Credit factor applied to the quote.",
+      "Coverages have been amended based on availability. Please review.",
     ],
     coverages: [
       { name: "Residence", deductible: "", amount: "", premium: 2078.30 },

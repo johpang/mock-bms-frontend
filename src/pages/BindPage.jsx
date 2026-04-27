@@ -297,7 +297,7 @@ const BindPage = () => {
             transition: 'all 0.15s ease',
           }}>
             <input type="radio" name="paymentMethod" value="eft" checked={paymentMethod === 'eft'} onChange={(e) => setPaymentMethod(e.target.value)} style={{ accentColor: colors.navy }} />
-            <span style={{ fontSize: '14px', fontWeight: 600, color: colors.text }}>Pre-Authorized Debit (EFT)</span>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: colors.text }}>Pre-Authorized (EFT)</span>
           </label>
           {paymentMethod === 'eft' && (
             <div style={{ marginLeft: '28px', marginBottom: '4px' }}>

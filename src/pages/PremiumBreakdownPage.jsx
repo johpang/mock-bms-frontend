@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { useAutoQuote } from '../context/AutoContext';
 import { CoverageBreakdownTable, UnderwritingMessages } from '../components/QuoteResponse';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import MockDisclaimer from '../components/MockDisclaimer';
+import { ADDITIONAL_INFO_PRODUCER_CODE, ADDITIONAL_INFO_BIND_MESSAGE } from '../config/index.js';
 
 // Overlay user-selected BIPD limit + collision/comprehensive deductibles onto
 // the response coverages so the breakdown reflects what the user picked.
@@ -34,6 +35,21 @@ function overlayUserSelections(coverages, quoteData) {
 const PremiumBreakdownPage = () => {
   const { quoteResponses, prevStep, nextStep, selectedInsurerIndex, quoteData } = useAutoQuote();
 
+  const [bindBlocked, setBindBlocked] = useState(false);
+  const bindBlockerRef = useRef(null);
+
+  const handleProceedToBind = () => {
+    if (quoteData.producerCode === ADDITIONAL_INFO_PRODUCER_CODE) {
+      setBindBlocked(true);
+      // Defer scroll so the banner is in the DOM (also re-scrolls on repeat clicks).
+      setTimeout(() => {
+        bindBlockerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 0);
+      return;
+    }
+    nextStep();
+  };
+
   const colors = {
     navy: '#0a1e3d',
     accent: '#2a5298',
@@ -41,6 +57,7 @@ const PremiumBreakdownPage = () => {
     text: '#1a1a1a',
     lightGray: '#f5f5f5',
     border: '#d0d0d0',
+    error: '#cf222e',
   };
 
   const styles = {
@@ -222,6 +239,19 @@ const PremiumBreakdownPage = () => {
       justifyContent: 'flex-start',
       marginTop: '40px',
     },
+    errorBanner: {
+      backgroundColor: '#fce8e6',
+      border: `1px solid ${colors.error}`,
+      color: colors.error,
+      padding: '12px 16px',
+      borderRadius: '4px',
+      marginBottom: '24px',
+      fontSize: '14px',
+      fontWeight: 500,
+      // Offset for the fixed top bar + sticky step indicator so scrollIntoView
+      // doesn't park the banner behind them.
+      scrollMarginTop: '140px',
+    },
     button: (isPrimary) => ({
       padding: '12px 32px',
       fontSize: '15px',
@@ -299,6 +329,11 @@ const PremiumBreakdownPage = () => {
   return (
     <div style={styles.pageContainer}>
       <MockDisclaimer />
+      {bindBlocked && (
+        <div ref={bindBlockerRef} style={styles.errorBanner}>
+          {ADDITIONAL_INFO_BIND_MESSAGE}
+        </div>
+      )}
       <div style={styles.headerSection}>
         <div style={styles.insurerNameAndType}>
           <h1 style={styles.insurerName}>{selectedResponse.insurerName}</h1>
@@ -361,7 +396,8 @@ const PremiumBreakdownPage = () => {
           const convictionMessages = (quoteData.drivers || [])
             .map((driver, i) => {
               if (driver.cancellations?.tickets === 'Yes' && driver.cancellations?.ticketsDate) {
-                return `Driver ${i + 1}: Conviction disclosed ${driver.cancellations.ticketsDate}`;
+                const convictionDate = formatDate(driver.cancellations.ticketsDate);
+                return `Driver # ${i + 1}: Conviction date has been disclosed as ${convictionDate}. Please confirm the actual Conviction date before binding the policy.`;
               }
               return null;
             })
@@ -403,7 +439,7 @@ const PremiumBreakdownPage = () => {
           Back to Comparison
         </button>
         <button
-          onClick={nextStep}
+          onClick={handleProceedToBind}
           style={styles.button(true)}
           onMouseEnter={(e) => {
             e.target.style.boxShadow = '0 4px 12px rgba(42, 82, 152, 0.25)';
