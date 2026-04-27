@@ -133,7 +133,8 @@ const InsurerComparisonTable = ({ responses, onSelectInsurer, selectedIndex }) =
           {responses.map((response, index) => {
             const isLoading = response._status === 'loading';
             const isError = response._status === 'error';
-            const isReady = !isLoading && !isError;
+            const isFailedProducer = response._status === 'failed-producer';
+            const isReady = !isLoading && !isError && !isFailedProducer;
 
             return (
               <tr
@@ -166,6 +167,9 @@ const InsurerComparisonTable = ({ responses, onSelectInsurer, selectedIndex }) =
                   )}
                   {isError && (
                     <span style={{ color: '#cf222e', fontWeight: 500 }}>Failed</span>
+                  )}
+                  {isFailedProducer && (
+                    <span style={{ color: '#666', fontWeight: 500 }}>—</span>
                   )}
                   {isReady && (
                     <span style={styles.premium}>

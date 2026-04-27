@@ -3,6 +3,12 @@
  * Reads from environment variables
  */
 
+// Producer code that triggers a hardcoded "quote failed" response across all
+// lines of business. When the user enters this exact value on the quote form,
+// no requests are sent and the comparison page shows a failure banner.
+export const INVALID_PRODUCER_CODE = '000-000';
+export const INVALID_PRODUCER_CODE_MESSAGE = 'Quote failed. The producer code entered is invalid.';
+
 const config = Object.freeze({
   /** When true, the app skips all API calls and uses hardcoded mock responses */
   mockMode: process.env.REACT_APP_MOCK_MODE === 'true',

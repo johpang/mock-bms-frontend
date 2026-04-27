@@ -11,7 +11,7 @@ import MockDisclaimer from '../components/MockDisclaimer';
  * @returns {React.ReactElement} The quote comparison page
  */
 const QuoteComparisonPage = () => {
-  const { quoteResponses, nextStep, prevStep, selectedInsurerIndex, setSelectedInsurerIndex, isLoading } = useAutoQuote();
+  const { quoteResponses, nextStep, prevStep, selectedInsurerIndex, setSelectedInsurerIndex, isLoading, quoteFailureReason } = useAutoQuote();
 
   const colors = {
     navy: '#0a1e3d',
@@ -21,6 +21,7 @@ const QuoteComparisonPage = () => {
     lightGray: '#f5f5f5',
     border: '#d0d0d0',
     success: '#1a7f37',
+    error: '#cf222e',
   };
 
   const styles = {
@@ -63,6 +64,16 @@ const QuoteComparisonPage = () => {
     emptyStateText: {
       fontSize: '14px',
       color: '#666',
+    },
+    errorBanner: {
+      backgroundColor: '#fce8e6',
+      border: `1px solid ${colors.error}`,
+      color: colors.error,
+      padding: '12px 16px',
+      borderRadius: '4px',
+      marginBottom: '24px',
+      fontSize: '14px',
+      fontWeight: 500,
     },
     selectionHint: {
       padding: '12px 16px',
@@ -143,6 +154,10 @@ const QuoteComparisonPage = () => {
       <p style={styles.subtitle}>
         Select an insurer to view detailed coverage breakdown and premium information
       </p>
+
+      {quoteFailureReason && (
+        <div style={styles.errorBanner}>{quoteFailureReason}</div>
+      )}
 
       <div style={styles.tableWrapper}>
         <InsurerComparisonTable

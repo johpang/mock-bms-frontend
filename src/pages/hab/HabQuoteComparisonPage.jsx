@@ -12,7 +12,7 @@ import MockDisclaimer from '../../components/MockDisclaimer';
  * @returns {React.ReactElement} The quote comparison page
  */
 const HabQuoteComparisonPage = () => {
-  const { habResponses, nextStep, prevStep, selectedInsurerIndex, setSelectedInsurerIndex, isLoading } =
+  const { habResponses, nextStep, prevStep, selectedInsurerIndex, setSelectedInsurerIndex, isLoading, quoteFailureReason } =
     useHab();
 
   const colors = {
@@ -24,6 +24,7 @@ const HabQuoteComparisonPage = () => {
     border: '#d0d0d0',
     success: '#1a7f37',
     lightAccent: '#e8f5ff',
+    error: '#cf222e',
   };
 
   const styles = {
@@ -131,6 +132,16 @@ const HabQuoteComparisonPage = () => {
       marginTop: '16px',
       fontWeight: 500,
     },
+    errorBanner: {
+      backgroundColor: '#fce8e6',
+      border: `1px solid ${colors.error}`,
+      color: colors.error,
+      padding: '12px 16px',
+      borderRadius: '4px',
+      marginBottom: '24px',
+      fontSize: '14px',
+      fontWeight: 500,
+    },
     buttonContainer: {
       display: 'flex',
       gap: '12px',
@@ -153,7 +164,7 @@ const HabQuoteComparisonPage = () => {
 
   const handleSelectInsurer = (index) => {
     const response = habResponses?.[index];
-    if (response && response._status !== 'loading' && response._status !== 'error') {
+    if (response && response._status !== 'loading' && response._status !== 'error' && response._status !== 'failed-producer') {
       setSelectedInsurerIndex(index);
     }
   };
@@ -165,7 +176,7 @@ const HabQuoteComparisonPage = () => {
   };
 
   const selectedResponse = selectedInsurerIndex !== null ? habResponses?.[selectedInsurerIndex] : null;
-  const isSelectedReady = selectedResponse && selectedResponse._status !== 'loading' && selectedResponse._status !== 'error';
+  const isSelectedReady = selectedResponse && selectedResponse._status !== 'loading' && selectedResponse._status !== 'error' && selectedResponse._status !== 'failed-producer';
   const isViewDetailsDisabled = !isSelectedReady;
 
   const spinnerStyle = {
@@ -225,6 +236,10 @@ const HabQuoteComparisonPage = () => {
         Select an insurer to view detailed coverage breakdown and premium information
       </p>
 
+      {quoteFailureReason && (
+        <div style={styles.errorBanner}>{quoteFailureReason}</div>
+      )}
+
       <div style={styles.tableWrapper}>
         <table style={styles.table}>
           <thead>
@@ -239,7 +254,8 @@ const HabQuoteComparisonPage = () => {
             {habResponses.map((response, index) => {
               const rowLoading = response._status === 'loading';
               const rowError = response._status === 'error';
-              const rowReady = !rowLoading && !rowError;
+              const rowFailedProducer = response._status === 'failed-producer';
+              const rowReady = !rowLoading && !rowError && !rowFailedProducer;
 
               return (
                 <tr
@@ -273,6 +289,9 @@ const HabQuoteComparisonPage = () => {
                     )}
                     {rowError && (
                       <span style={{ color: '#cf222e', fontWeight: 500 }}>Failed</span>
+                    )}
+                    {rowFailedProducer && (
+                      <span style={{ color: '#666', fontWeight: 500 }}>—</span>
                     )}
                     {rowReady && (
                       <span style={styles.premium}>{formatCurrency(response.premiums?.annual)}</span>

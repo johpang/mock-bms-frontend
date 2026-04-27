@@ -7,7 +7,7 @@ import { createContext, useContext, useState, useCallback } from 'react';
 import { initialQuoteData } from '../models/autoRequestSchema.js';
 import { submitQuoteRequest } from '../services/autoQuoteService.js';
 import { submitBindRequest } from '../services/bindService.js';
-import config from '../config/index.js';
+import config, { INVALID_PRODUCER_CODE, INVALID_PRODUCER_CODE_MESSAGE } from '../config/index.js';
 import mockResponses from '../data/autoMockResponses.js';
 
 /**
@@ -32,6 +32,7 @@ export function AutoProvider({ children, onGoHome }) {
   const [selectedInsurerIndex, setSelectedInsurerIndex] = useState(null);
   const [bindResponse, setBindResponse] = useState(null);
   const [bindError, setBindError] = useState(null);
+  const [quoteFailureReason, setQuoteFailureReason] = useState(null);
 
   /**
    * Updates quote data for a specific section
@@ -82,6 +83,7 @@ export function AutoProvider({ children, onGoHome }) {
   const submitQuote = useCallback(async (overrides) => {
     setIsLoading(true);
     setError(null);
+    setQuoteFailureReason(null);
     setSelectedInsurerIndex(null);
 
     const payload = overrides ? { ...quoteData, ...overrides } : quoteData;
@@ -91,6 +93,21 @@ export function AutoProvider({ children, onGoHome }) {
     // Build id -> display-name lookup
     const nameMap = {};
     insurerMeta.forEach(({ id, name }) => { nameMap[id] = name; });
+
+    // Hardcoded failure: producer code matches the invalid sentinel.
+    // Skip all backend requests, seed placeholders so the comparison page
+    // can render insurer rows with dashes and show the failure banner.
+    if (payload.producerCode === INVALID_PRODUCER_CODE) {
+      const failedPlaceholders = selectedIds.map((id) => ({
+        _status: 'failed-producer',
+        insurerId: id,
+        insurerName: nameMap[id] || id,
+      }));
+      setQuoteResponses(failedPlaceholders);
+      setQuoteFailureReason(INVALID_PRODUCER_CODE_MESSAGE);
+      setIsLoading(false);
+      return;
+    }
 
     // Seed quoteResponses with loading placeholders
     const placeholders = selectedIds.map((id) => ({
@@ -236,6 +253,7 @@ export function AutoProvider({ children, onGoHome }) {
     setQuoteData({ ...initialQuoteData, ...formData });
     setQuoteResponses(null);
     setError(null);
+    setQuoteFailureReason(null);
     setSelectedInsurerIndex(null);
     setCurrentStep(status === 'Quoted' ? 4 : 1);
   }, []);
@@ -249,6 +267,7 @@ export function AutoProvider({ children, onGoHome }) {
     setQuoteResponses(null);
     setCurrentStep(0);
     setError(null);
+    setQuoteFailureReason(null);
     setSelectedInsurerIndex(null);
     setBindResponse(null);
     setBindError(null);
@@ -274,6 +293,7 @@ export function AutoProvider({ children, onGoHome }) {
     bindResponse,
     bindError,
     submitBind,
+    quoteFailureReason,
     goHome: onGoHome,
   };
 

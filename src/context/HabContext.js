@@ -8,7 +8,7 @@ import { createContext, useContext, useState, useCallback } from 'react';
 import { initialHabQuoteData } from '../models/habRequestSchema.js';
 import { submitHabQuoteRequest } from '../services/habQuoteService.js';
 import { submitHabBindRequest } from '../services/habBindService.js';
-import config from '../config/index.js';
+import config, { INVALID_PRODUCER_CODE, INVALID_PRODUCER_CODE_MESSAGE } from '../config/index.js';
 import habMockResponses from '../data/habMockResponses.js';
 
 export const HabContext = createContext();
@@ -22,6 +22,7 @@ export function HabProvider({ children, onGoHome }) {
   const [selectedInsurerIndex, setSelectedInsurerIndex] = useState(null);
   const [bindResponse, setBindResponse] = useState(null);
   const [bindError, setBindError] = useState(null);
+  const [quoteFailureReason, setQuoteFailureReason] = useState(null);
 
   const updateHabData = useCallback((section, data) => {
     setHabData((prev) => {
@@ -41,6 +42,7 @@ export function HabProvider({ children, onGoHome }) {
   const submitQuote = useCallback(async (overrides) => {
     setIsLoading(true);
     setError(null);
+    setQuoteFailureReason(null);
     setSelectedInsurerIndex(null);
 
     const payload = overrides ? { ...habData, ...overrides } : habData;
@@ -49,6 +51,21 @@ export function HabProvider({ children, onGoHome }) {
 
     const nameMap = {};
     insurerMeta.forEach(({ id, name }) => { nameMap[id] = name; });
+
+    // Hardcoded failure: producer code matches the invalid sentinel.
+    // Skip all backend requests, seed placeholders so the comparison page
+    // can render insurer rows with dashes and show the failure banner.
+    if (payload.producerCode === INVALID_PRODUCER_CODE) {
+      const failedPlaceholders = selectedIds.map((id) => ({
+        _status: 'failed-producer',
+        insurerId: id,
+        insurerName: nameMap[id] || id,
+      }));
+      setHabResponses(failedPlaceholders);
+      setQuoteFailureReason(INVALID_PRODUCER_CODE_MESSAGE);
+      setIsLoading(false);
+      return;
+    }
 
     const placeholders = selectedIds.map((id) => ({
       _status: 'loading',
@@ -157,6 +174,7 @@ export function HabProvider({ children, onGoHome }) {
     setHabData({ ...initialHabQuoteData, ...formData });
     setHabResponses(null);
     setError(null);
+    setQuoteFailureReason(null);
     setSelectedInsurerIndex(null);
     setBindResponse(null);
     setBindError(null);
@@ -169,6 +187,7 @@ export function HabProvider({ children, onGoHome }) {
     setHabResponses(null);
     setCurrentStep(0);
     setError(null);
+    setQuoteFailureReason(null);
     setSelectedInsurerIndex(null);
     setBindResponse(null);
     setBindError(null);
@@ -194,6 +213,7 @@ export function HabProvider({ children, onGoHome }) {
     setSelectedInsurerIndex,
     bindResponse,
     bindError,
+    quoteFailureReason,
     goHome: onGoHome,
   };
 
